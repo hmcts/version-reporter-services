@@ -1,5 +1,9 @@
+name: Version Reporter Service Jobs
 trigger:
-  - master
+  batch: true
+  branches:
+    include:
+      - master
 
 pool:
   vmImage: ubuntu-latest
