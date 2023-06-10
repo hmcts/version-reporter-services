@@ -1,2 +1,2 @@
-# version-reporter-services
+# Palo Alto Reports Microservice
 The Version Reporter Service MicroServices Project
