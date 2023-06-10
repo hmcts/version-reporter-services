@@ -1,0 +1,28 @@
+# Build output will be a container image pushed to ARC on merged to master
+# Branches will only test code, install necessary libraries etc
+name: Helm Cluster Reports
+
+variables:
+  - name: working-dir
+    value: 'reports/helm/'
+
+trigger:
+  branches:
+    include:
+      - master
+
+  paths:
+    include:
+      - 'reports/helm/*'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - script: |
+      echo "Hello from 'Helm Reports'"
+      echo "My working directory is $(working-dir)"
+  - script: |
+      echo Add other tasks to build, test, and deploy your project.
+      echo See https://aka.ms/yaml
+    displayName: 'Run a multi-line script - HELM'

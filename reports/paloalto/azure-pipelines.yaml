@@ -1,0 +1,28 @@
+# Build output will be a container image pushed to ARC on merged to master
+# Branches will only test code, install necessary libraries etc
+name: Palo Alto Reports
+
+variables:
+  - name: working-dir
+    value: 'reports/paloalto/'
+
+trigger:
+  branches:
+    include:
+      - master
+
+  paths:
+    include:
+      - 'reports/paloalto/*'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - script: |
+      echo "Hello from 'Palo Alto Reports'"
+      echo "My working directory is $(working-dir)"
+  - script: npm install
+    workingDirectory: $(working-dir)
+  - script: npm run chalk
+    workingDirectory: $(working-dir)
