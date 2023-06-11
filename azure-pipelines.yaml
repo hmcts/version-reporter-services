@@ -143,5 +143,9 @@ stages:
               buildContext: "reports/${{report.name}}/dist"
               buildID: $(Build.BuildID)
               prImage: ${{ variables.prImage }}
-              majorMinorVersion: ${{ variables.majorMinorVersion }}
-              patchVersion: ${{ variables.patchVersion }}
+              ${{ if eq(variables['isMain'], true) }}:
+                containerTag: "${{ variables.majorMinorVersion }}.$(patchVersion)"
+              ${{ if and(eq(variables['prImage'], true), eq(variables['Build.Reason'], 'PullRequest'), eq(variables['isMain'], false) ) }}:
+                containerTag: "pr-$(System.PullRequest.PullRequestNumber)"
+              ${{ if and(eq(variables['prImage'], true), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['isMain'], false) ) }}:
+                containerTag: "pr-$(Build.BuildID)"

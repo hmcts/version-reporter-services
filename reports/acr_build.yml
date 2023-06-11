@@ -1,16 +1,9 @@
 parameters:
-  spACR: ''
+  spACR: ""
   prImage: false
-  buildContext: ''
-  containerACRRepo: ''
-  majorMinorVersion: ''
-  patchVersion: ''
-  ${{ if eq(variables['isMain'], true) }}:
-    containerTag: "${{ variables.majorMinorVersion }}.$(patchVersion)"
-  ${{ if and(eq(variables['prImage'], true), eq(variables['Build.Reason'], 'PullRequest'), eq(variables['isMain'], false) ) }}:
-    containerTag: "pr-$(System.PullRequest.PullRequestNumber)"
-  ${{ if and(eq(variables['prImage'], true), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['isMain'], false) ) }}:
-    containerTag: "pr-$(Build.BuildID)"
+  buildContext: ""
+  containerACRRepo: ""
+  containerTag: ""
 
 steps:
   - task: Docker@2
