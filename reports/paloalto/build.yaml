@@ -2,8 +2,7 @@
 # Branches will only test code, install necessary libraries etc
 
 parameters:
-  - name: working-dir
-    value: 'reports/paloalto/'
+  working-dir: "reports/paloalto/"
 
 steps:
   - script: |

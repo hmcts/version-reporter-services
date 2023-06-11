@@ -89,7 +89,7 @@ stages:
             - script: echo Hello, Version Reporter DB!
               displayName: 'Executing ${{environment.name}} db'
 
-    - stage: "Report_${{ environment.name }}"
+    - stage: "Reports_${{ environment.name }}"
       displayName: "Microservice Reports ${{ environment.name }}"
       jobs:
       - ${{ each report in parameters.reports }}:

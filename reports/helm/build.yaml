@@ -2,8 +2,7 @@
 # Branches will only test code, install necessary libraries etc
 
 parameters:
-  - name: working-dir
-    value: 'reports/helm/'
+  working-dir: "reports/helm/"
 
 steps:
   - script: |
