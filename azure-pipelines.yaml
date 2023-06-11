@@ -106,18 +106,8 @@ stages:
     displayName: "Report"
     jobs:
     - ${{ each report in parameters.reports }}:
-      - job: check_${{report.name}}
-        displayName: Check changed files
-        steps:
-          - task: ChangedFiles@1
-            name: CheckChanges
-            inputs:
-              rules: reports/${{report.name}}/**
-              variable: HasChanged
 
       - job: BuildArtifact_${{report.name}}
-        dependsOn: check_${{report.name}}
-        condition: eq(dependencies['check_${{report.name}}'].outputs['CheckChanges.HasChanged'], 'true')
         steps:
           - template: "reports/${{report.name}}/build.yaml"
 
