@@ -81,20 +81,19 @@ stages:
               overrideAction: ${{ parameters.overrideAction }}
 
   - ${{ each environment in parameters.env }}:
-  - stage: "DB Infrastructure ${{ environment.name }}"
-    displayName: "DB Infrastructure ${{ environment.name }}"
-    jobs:
-      - job:
-        steps:
-          - script: echo Hello, Version Reporter DB!
-            displayName: 'Executing ${{environment.name}} db'
-
-  - ${{ each environment in parameters.env }}:
-  - stage:
+    - stage: "DB Infrastructure ${{ environment.name }}"
+      displayName: "DB Infrastructure ${{ environment.name }}"
       jobs:
         - job:
-            - ${{ each report in parameters.reports }}:
-              steps:
-                - template: "reports/${{report.name}}/build.yaml"
-                - script: echo Hello, Version Reporter!
-                  displayName: 'Executing ${{environment.name}} report ${{report.name}}'
+          steps:
+            - script: echo Hello, Version Reporter DB!
+              displayName: 'Executing ${{environment.name}} db'
+
+    - stage:
+        jobs:
+          - job:
+              - ${{ each report in parameters.reports }}:
+                steps:
+                  - template: "reports/${{report.name}}/build.yaml"
+                  - script: echo Hello, Version Reporter!
+                    displayName: 'Executing ${{environment.name}} report ${{report.name}}'
