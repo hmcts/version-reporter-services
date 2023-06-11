@@ -119,7 +119,7 @@ stages:
             and(succeeded(),
              eq(variables['isMain'], true)),
             and(succeeded(),
-              eq(parameters['prImage'], true))
+             eq(parameters.prImage, true))
           )
         steps:
           - template: "reports/acr_build.yml"
@@ -131,7 +131,7 @@ stages:
               prImage: ${{ parameters.prImage }}
               ${{ if eq(variables['isMain'], true) }}:
                 containerTag: "${{ variables.majorMinorVersion }}.$(patchVersion)"
-              ${{ if and(eq(variables['prImage'], true), eq(variables['Build.Reason'], 'PullRequest'), eq(variables['isMain'], false) ) }}:
+              ${{ if and(eq(parameters.prImage, true), eq(variables['Build.Reason'], 'PullRequest'), eq(variables['isMain'], false) ) }}:
                 containerTag: "pr-$(System.PullRequest.PullRequestNumber)"
-              ${{ if and(eq(variables['prImage'], true), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['isMain'], false) ) }}:
+              ${{ if and(eq(parameters.prImage, true), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['isMain'], false) ) }}:
                 containerTag: "pr-$(Build.BuildID)"

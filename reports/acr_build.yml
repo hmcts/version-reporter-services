@@ -11,11 +11,11 @@ steps:
     condition: |
       or(
         and(succeeded(),
-          eq(variables.isMain, true),
+          eq(variables['isMain'], true),
           eq(variables['isAutoTriggered'], true)),
         and(succeeded(),
-          eq(parameters['prImage'], true),
-          eq(variables.isMain, false),
+          eq(parameters.prImage, true),
+          eq(variables['isMain'], false),
           eq(variables['Build.Reason'], 'Manual'))
       )
     inputs:
@@ -30,7 +30,7 @@ steps:
           eq(variables['isMain'], true),
           eq(variables['isAutoTriggered'], true)),
         and(succeeded(),
-          eq(parameters['prImage']', true),
+          eq(parameters.prImage, true),
           eq(variables['isMain'], false),
           eq(variables['Build.Reason'], 'Manual'))
       )
