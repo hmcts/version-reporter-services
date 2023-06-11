@@ -93,9 +93,9 @@ stages:
   - ${{ each environment in parameters.env }}:
     - stage:
         jobs:
-          - ${{ each report in parameters.reports }}:
-            - job:
+        - job:
+            - ${{ each report in parameters.reports }}:
               steps:
-                - template: reports/${{report.name}}/build.yaml
+                - template: "reports/${{report.name}}/build.yaml"
                 - script: echo Hello, Version Reporter!
                   displayName: 'Executing ${{environment.name}} report ${{report.name}}'
