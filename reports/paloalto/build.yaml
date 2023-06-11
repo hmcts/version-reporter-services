@@ -2,13 +2,13 @@
 # Branches will only test code, install necessary libraries etc
 
 parameters:
-  working-dir: "reports/paloalto/"
+  dir: "reports/paloalto/"
 
 steps:
   - script: |
       echo "Hello from 'Palo Alto Reports'"
-      echo "My working directory is ${{parameters.working-dir}}"
+      echo "My working directory is ${{ parameters.dir }}"
   - script: npm install
-    workingDirectory: ${{parameters.working-dir}}
+    workingDirectory: ${{ parameters.dir }}
   - script: npm run chalk
-    workingDirectory: ${{parameters.working-dir}}
+    workingDirectory: ${{ parameters.dir }}
