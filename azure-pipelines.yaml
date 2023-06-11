@@ -112,18 +112,14 @@ stages:
           - template: "reports/${{report.name}}/build.yaml"
 
       - job: PushContainer_${{report.name}}
-        dependsOn: BuildReportArtifact
+        dependsOn: BuildReportArtifact_${{report.name}}
         displayName: Build and Push Container
         condition: |
          or( 
-            and(
-             succeeded(),
-             eq(variables.isMain, true)
-            ),
-             and(
-              succeeded(),
-              eq(variables.prImage, true)
-            )
+            and(succeeded(),
+             eq(variables['isMain'], true)),
+            and(succeeded(),
+              eq(parameters['prImage'], true))
           )
         steps:
           - template: "reports/acr_build.yml"
@@ -132,7 +128,7 @@ stages:
               containerACRRepo: 'version-reporter-service/jobs'
               buildContext: "reports/${{report.name}}/dist"
               buildID: $(Build.BuildID)
-              prImage: ${{ variables.prImage }}
+              prImage: ${{ parameters.prImage }}
               ${{ if eq(variables['isMain'], true) }}:
                 containerTag: "${{ variables.majorMinorVersion }}.$(patchVersion)"
               ${{ if and(eq(variables['prImage'], true), eq(variables['Build.Reason'], 'PullRequest'), eq(variables['isMain'], false) ) }}:
