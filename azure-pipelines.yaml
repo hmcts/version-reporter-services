@@ -22,9 +22,8 @@ variables:
     value: ${{ parameters.action }}
   - name: majorMinorVersion
     value: "v0.1"
-${{ if eq(variables['isMain'], true) }}:
-  - name:  patchVersion
-    value: $[counter(variables['majorMinorVersion'],0)]
+    ${{ if eq(variables['isMain'], true) }}:
+     patchVersion:  $[counter(variables['majorMinorVersion'],0)]
 
 resources:
   repositories:
