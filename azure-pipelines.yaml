@@ -112,7 +112,7 @@ stages:
           - template: "reports/${{report.name}}/build.yaml"
 
       - job: PushContainer_${{report.name}}
-        dependsOn: BuildReportArtifact_${{report.name}}
+        dependsOn: BuildArtifact_${{report.name}}
         displayName: Build and Push Container
         condition: |
          or( 
