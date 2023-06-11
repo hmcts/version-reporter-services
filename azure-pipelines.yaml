@@ -116,10 +116,8 @@ stages:
         displayName: Build and Push Container
         condition: |
          or( 
-            and(succeeded(),
-             eq(variables['isMain'], true)),
-            and(succeeded(),
-             eq(parameters.prImage, true))
+            and(succeeded(), eq(variables['isMain'], true)),
+            and(succeeded(), eq('${{ parameters.prImage }}', true))
           )
         steps:
           - template: "reports/acr_build.yml"
