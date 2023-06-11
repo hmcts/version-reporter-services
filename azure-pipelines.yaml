@@ -108,12 +108,13 @@ stages:
     - ${{ each report in parameters.reports }}:
 
       - job: BuildArtifact_${{report.name}}
+        displayName: Build ${{report.name}} Artifact
         steps:
           - template: "reports/${{report.name}}/build.yaml"
 
       - job: PushContainer_${{report.name}}
         dependsOn: BuildArtifact_${{report.name}}
-        displayName: Build and Push Container
+        displayName: Push ${{report.name}} Container
         condition: |
          or( 
             and(succeeded(), eq(variables['isMain'], true)),
