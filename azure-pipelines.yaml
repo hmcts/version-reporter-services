@@ -89,13 +89,12 @@ stages:
             - script: echo Hello, Version Reporter DB!
               displayName: 'Executing ${{environment.name}} db'
 
-
   - ${{ each environment in parameters.env }}:
     - stage:
         jobs:
-        - job:
-            - ${{ each report in parameters.reports }}:
-              steps:
-                - template: "reports/${{report.name}}/build.yaml"
-                - script: echo Hello, Version Reporter!
-                  displayName: 'Executing ${{environment.name}} report ${{report.name}}'
+          - job:
+              - ${{ each report in parameters.reports }}:
+                steps:
+                  - template: "reports/${{report.name}}/build.yaml"
+                  - script: echo Hello, Version Reporter!
+                    displayName: 'Executing ${{environment.name}} report ${{report.name}}'
