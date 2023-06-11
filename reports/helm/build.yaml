@@ -4,7 +4,7 @@ name: Helm Cluster Reports
 
 variables:
   - name: working-dir
-    value: 'helm/'
+    value: 'reports/helm/'
 
 trigger:
   branches:
@@ -13,10 +13,7 @@ trigger:
 
   paths:
     include:
-      - 'helm/*'
-
-pool:
-  vmImage: 'ubuntu-latest'
+      - 'reports/helm/*'
 
 steps:
   - script: |
