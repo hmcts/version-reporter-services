@@ -115,13 +115,13 @@ stages:
               rules: reports/${{report.name}}/**
               variable: HasChanged
 
-      - job: BuildReportArtifact_${{report.name}}
+      - job: BuildArtifact_${{report.name}}
         dependsOn: check_${{report.name}}
-        condition: eq(dependencies.['check_${{report.name}}'].outputs['CheckChanges.HasChanged'], 'true')
+        condition: eq(dependencies['check_${{report.name}}'].outputs['CheckChanges.HasChanged'], 'true')
         steps:
           - template: "reports/${{report.name}}/build.yaml"
 
-      - job: PushReportContainer_${{report.name}}
+      - job: PushContainer_${{report.name}}
         dependsOn: BuildReportArtifact
         displayName: Build and Push Container
         condition: |
