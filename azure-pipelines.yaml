@@ -90,9 +90,9 @@ stages:
               displayName: 'Executing ${{environment.name}} db'
 
     - stage:
+    - ${{ each report in parameters.reports }}:
         jobs:
           - job:
-          - ${{ each report in parameters.reports }}:
             steps:
               - template: "reports/${{report.name}}/build.yaml"
               - script: echo Hello, Version Reporter!
