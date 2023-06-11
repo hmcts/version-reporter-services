@@ -57,8 +57,8 @@ parameters:
     displayName: Environment
     type: object
     default:
-      - name: stg
-      - name: prod
+      - name: "stg"
+      - name: "prod"
 
   - name: reports
     displayName: Report to build
@@ -80,7 +80,7 @@ stages:
               serviceConnection: 'DCD-CFT-Sandbox'
               overrideAction: ${{ parameters.overrideAction }}
 
-- ${{ each environment in parameters.env }}:
+  - ${{ each environment in parameters.env }}:
   - stage: "DB Infrastructure ${{ environment.name }}"
     displayName: "DB Infrastructure ${{ environment.name }}"
     jobs:
@@ -89,7 +89,7 @@ stages:
           - script: echo Hello, Version Reporter DB!
             displayName: 'Executing ${{environment.name}} db'
 
-- ${{ each environment in parameters.env }}:
+  - ${{ each environment in parameters.env }}:
   - stage:
       jobs:
         - job:
