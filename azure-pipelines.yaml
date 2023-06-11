@@ -1,6 +1,7 @@
 name: Version Reporter Service Jobs
 
 trigger:
+  batch: true
   branches:
     include:
       - master
@@ -95,7 +96,7 @@ stages:
 
   - ${{ each environment in parameters.env }}:
     - stage: "Infrastructure_${{ environment.name }}"
-      displayName: "Cosmos  ${{ environment.name }}"
+      displayName: "CosmosDB ${{ environment.name }}"
       jobs:
         - job:
           steps:
@@ -103,7 +104,7 @@ stages:
               displayName: 'Executing ${{environment.name}} db'
 
   - stage: "Reports"
-    displayName: "Report"
+    displayName: "Reports"
     jobs:
     - ${{ each report in parameters.reports }}:
 
