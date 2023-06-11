@@ -12,10 +12,10 @@ steps:
       or(
         and(succeeded(),
           eq(variables.isMain, true),
-          or(eq(variables['isAutoTriggered'], true))),
+          eq(variables['isAutoTriggered'], true)),
         and(succeeded(),
           eq(variables.isMain, false),
-          eq('${{ parameters.prImage }}', true),
+          eq(parameters['prImage'], true),
           eq(variables['Build.Reason'], 'Manual'))
       )
     inputs:
@@ -28,13 +28,12 @@ steps:
       or(
         and(succeeded(),
           eq(variables['isMain'], true),
-          or(eq(variables['isAutoTriggered'], true))
-        ),
+          eq(variables['isAutoTriggered'], true)),
         and(succeeded(),
           eq(variables['isMain'], false),
           eq(parameters['prImage']', true),
-          eq(variables['Build.Reason'], 'Manual')
-        ))
+          eq(variables['Build.Reason'], 'Manual'))
+      )
     inputs:
       command: buildAndPush
       containerRegistry: ${{ parameters.spACR }}
