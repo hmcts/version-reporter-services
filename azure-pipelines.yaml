@@ -81,7 +81,7 @@ stages:
               overrideAction: ${{ parameters.overrideAction }}
 
   - ${{ each environment in parameters.env }}:
-    - stage: "DB Infrastructure ${{ environment.name }}"
+    - stage: "Infrastructure_${{ environment.name }}"
       displayName: "DB Infrastructure ${{ environment.name }}"
       jobs:
         - job:
@@ -89,12 +89,11 @@ stages:
             - script: echo Hello, Version Reporter DB!
               displayName: 'Executing ${{environment.name}} db'
 
-    - stage: "Microservice Reports ${{ environment.name }}"
+    - stage: "Report_${{ environment.name }}"
       displayName: "Microservice Reports ${{ environment.name }}"
       jobs:
       - ${{ each report in parameters.reports }}:
         - job:
           steps:
             - template: "reports/${{report.name}}/build.yaml"
-            - script: echo Hello, Version Reporter!
               displayName: 'Executing ${{environment.name}} report ${{report.name}}'
