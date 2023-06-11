@@ -1,26 +1,5 @@
 # Build output will be a CosmosDB resource created via Terraform
 # Branches will only validate, test, format, init, plan
-name: CosmosDB
-trigger:
-  batch: true
-  branches:
-    include:
-      - master
-
-  paths:
-    include:
-      - 'repository/*'
-
-pool:
-  vmImage: 'ubuntu-latest'
-
-resources:
-  repositories:
-  - repository: cnp-azuredevops-libraries
-    type: github
-    ref: refs/heads/master
-    name: hmcts/cnp-azuredevops-libraries
-    endpoint: 'hmcts'
 
 parameters:
   - name: overrideAction
@@ -38,20 +17,6 @@ variables:
     value: ${{ parameters.action }}
   - template: vars/input-variables.yaml@cnp-azuredevops-libraries
 
-stages:
-  - stage: Precheck
-    jobs:
-      - job:
-        timeoutInMinutes: ${{ variables.timeoutInMinutes }}
-        steps:
-          - template: steps/terraform-precheck.yaml@cnp-azuredevops-libraries
-            parameters:
-              keyvaultName: 'infra-vault-nonprod'
-              keyvaultSecret: 'azure-devops-token'
-              serviceConnection: 'DCD-CFT-Sandbox'
-              overrideAction: ${{ parameters.overrideAction }}
-
-  - stage: Infrastructure
-    steps:
-      - script: |
-          echo "My working directory is $(working-dir)"
+steps:
+  - script: |
+      echo "My working directory is $(working-dir)"
