@@ -1,6 +1,10 @@
 # Build output will be a container image pushed to ARC on merged to master
 # Branches will only test code, install necessary libraries etc
 
+variables:
+  - name: working-dir
+    value: 'reports/helm/'
+
 steps:
   - script: |
       echo "Hello from 'Helm Reports'"

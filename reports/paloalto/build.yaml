@@ -1,5 +1,10 @@
 # Build output will be a container image pushed to ARC on merged to master
 # Branches will only test code, install necessary libraries etc
+name: Palo Alto Reports
+
+variables:
+  - name: working-dir
+    value: 'reports/paloalto/'
 
 steps:
   - script: |

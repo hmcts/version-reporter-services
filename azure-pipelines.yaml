@@ -96,4 +96,3 @@ stages:
         - job:
           steps:
             - template: "reports/${{report.name}}/build.yaml"
-              displayName: 'Executing ${{environment.name}} report ${{report.name}}'
