@@ -9,6 +9,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
+  - template: vars/input-variables.yaml@cnp-azuredevops-libraries
   - name: timeoutInMinutes
     value: 60
   - name: project
@@ -19,7 +20,11 @@ variables:
     value: "04d27a32-7a07-48b3-95b8-3c8691e1a263"
   - name: action
     value: ${{ parameters.action }}
-  - template: vars/input-variables.yaml@cnp-azuredevops-libraries
+  - name: majorMinorVersion
+    value: "v0.1"
+${{ if eq(variables['isMain'], true) }}:
+  - name:  patchVersion
+    value: $[counter(variables['majorMinorVersion'],0)]
 
 resources:
   repositories:
@@ -38,12 +43,21 @@ parameters:
       - "UK South"
 
   - name: overrideAction
+    displayName: Override Action
     type: string
     default: plan
     values:
       - plan
       - apply
       - destroy
+
+  - name: prImage
+    displayName: Build PR Image
+    type: boolean
+    default: false
+    values:
+      - true
+      - false
 
   - name: action
     displayName: Action
@@ -82,17 +96,53 @@ stages:
 
   - ${{ each environment in parameters.env }}:
     - stage: "Infrastructure_${{ environment.name }}"
-      displayName: "DB Infrastructure ${{ environment.name }}"
+      displayName: "Cosmos  ${{ environment.name }}"
       jobs:
         - job:
           steps:
             - script: echo Hello, Version Reporter DB!
               displayName: 'Executing ${{environment.name}} db'
 
-    - stage: "Reports_${{ environment.name }}"
-      displayName: "Microservice Reports ${{ environment.name }}"
-      jobs:
-      - ${{ each report in parameters.reports }}:
-        - job:
-          steps:
-            - template: "reports/${{report.name}}/build.yaml"
+  - stage: "Reports"
+    displayName: "Report"
+    jobs:
+    - ${{ each report in parameters.reports }}:
+      - job: check
+        displayName: Check changed files
+        steps:
+          - task: ChangedFiles@1
+            name: CheckChanges
+            inputs:
+              rules: reports/${{report.name}}/**
+              variable: HasChanged
+
+      - job: BuildReportArtifact
+        dependsOn: check
+        condition: eq(dependencies.check.outputs['CheckChanges.HasChanged'], 'true')
+        steps:
+          - template: "reports/${{report.name}}/build.yaml"
+
+      - job: PushReportContainer
+        dependsOn: BuildReportArtifact
+        displayName: Build and Push Container
+        condition: |
+         or( 
+            and(
+             succeeded(),
+             eq(variables.isMain, true)
+            ),
+             and(
+              succeeded(),
+              eq(variables.prImage, true)
+            )
+          )
+        steps:
+          - template: "reports/acr_build.yml"
+            parameters:
+              spACR: "DTS-SHAREDSERVICES-PROD"
+              containerACRRepo: 'version-reporter-service/jobs'
+              buildContext: "reports/${{report.name}}/dist"
+              buildID: $(Build.BuildID)
+              prImage: ${{ variables.prImage }}
+              majorMinorVersion: ${{ variables.majorMinorVersion }}
+              patchVersion: ${{ variables.patchVersion }}
