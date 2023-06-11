@@ -122,7 +122,7 @@ stages:
         steps:
           - template: "reports/acr_build.yml"
             parameters:
-              spACR: "DTS-SHAREDSERVICES-PROD"
+              spACR: "DTS-SS-PUBLIC-PROD"
               containerACRRepo: 'version-reporter-service/jobs'
               buildContext: "reports/${{report.name}}/dist"
               buildID: $(Build.BuildID)
