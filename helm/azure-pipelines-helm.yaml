@@ -1,10 +1,10 @@
 # Build output will be a container image pushed to ARC on merged to master
 # Branches will only test code, install necessary libraries etc
-name: Palo Alto Reports
+name: Helm Cluster Reports
 
 variables:
   - name: working-dir
-    value: 'reports/paloalto/'
+    value: 'helm/'
 
 trigger:
   branches:
@@ -13,16 +13,16 @@ trigger:
 
   paths:
     include:
-      - 'reports/paloalto/*'
+      - 'helm/*'
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
   - script: |
-      echo "Hello from 'Palo Alto Reports'"
+      echo "Hello from 'Helm Reports'"
       echo "My working directory is $(working-dir)"
-  - script: npm install
-    workingDirectory: $(working-dir)
-  - script: npm run chalk
-    workingDirectory: $(working-dir)
+  - script: |
+      echo Add other tasks to build, test, and deploy your project.
+      echo See https://aka.ms/yaml
+    displayName: 'Run a multi-line script - HELM'

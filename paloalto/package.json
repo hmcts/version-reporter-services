@@ -8,7 +8,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "chalk": "node ./index.js",
+    "chalk": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 }

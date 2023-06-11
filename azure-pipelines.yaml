@@ -1,12 +1,12 @@
 name: Version Reporter Service Jobs
 trigger:
-  batch: true
   branches:
     include:
       - master
   paths:
     exclude:
-      - 'reports/*'
+      - 'helm/*'
+      - 'paloalto/*'
       - 'repository/*'
 pool:
   vmImage: ubuntu-latest
