@@ -122,7 +122,7 @@ stages:
         steps:
           - template: "reports/acr_build.yml"
             parameters:
-              spACR: "DTS-CFTPTL-INTSVC"
+              spACR: "DTS-SHAREDSERVICES-PROD"
               containerACRRepo: 'version-reporter-service/jobs'
               buildContext: "reports/${{report.name}}/dist"
               buildID: $(Build.BuildID)
