@@ -13,6 +13,7 @@ The output would be a container image in ACR.
 ## Documentation place holders
 - Introduction
   - What is the Version Reporter Service
+- How the Pipeline works
 - Creating a new report
 - Testing reports
 - Building and Pushing to ACR

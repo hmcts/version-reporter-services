@@ -16,7 +16,9 @@ variables:
   - name: project
     value: "versionreporter"
   - name: product
-    value: "vrs"
+    value: "versionreporter"
+  - name: env
+    value: "stg"
   - name: terraformInitSubscription
     value: "04d27a32-7a07-48b3-95b8-3c8691e1a263"
   - name: action
@@ -67,13 +69,6 @@ parameters:
       - plan
       - apply
 
-  - name: env
-    displayName: Environment
-    type: object
-    default:
-      - name: "stg"
-      - name: "prod"
-
   - name: reports
     displayName: Report to build
     type: object
@@ -98,10 +93,23 @@ stages:
   - stage: "Infrastructure"
     displayName: "Infrastructure"
     jobs:
-      - job:
+      - job: PlanAndApply
         steps:
-          - script: echo Hello, Version Reporter DB!
-            displayName: 'Executing infrastructure stage'
+          - template: steps/terraform.yaml@cnp-azuredevops-libraries
+            parameters:
+              location: ${{ parameters.location }}
+              serviceConnection: "DTS-SHAREDSERVICES-STG"
+              product: ${{ variables.product }}
+              overrideAction: ${{ parameters.overrideAction }}
+              environment: ${{ variables.env }}
+              component: "cosmos"
+              terraformInitSubscription: ${{ variables.terraformInitSubscription }}
+              tfVarsFile: NULL
+              initCommandOptions: >
+                -reconfigure
+              planCommandOptions: >
+                -compact-warnings
+                -lock-timeout=30s
 
   - stage: "Reports"
     displayName: "Reports"
