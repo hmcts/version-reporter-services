@@ -130,16 +130,7 @@ stages:
             and(succeeded(), eq('${{ parameters.prImage }}', true))
           )
         steps:
-          - template: "reports/acr_build.yml"
+          - template: "steps/acr_build.yaml@cnp-azuredevops-libraries"
             parameters:
-              spACR: "MGMT-PRIVATE-ACR-SBOX" # Find out correct SP for ARC
-              containerACRRepo: 'version-reporter-service/jobs'
-              buildContext: "reports/${{report.name}}/dist"
-              buildID: $(Build.BuildID)
-              prImage: ${{ parameters.prImage }}
-              ${{ if eq(variables['isMain'], true) }}:
-                containerTag: "${{ variables.majorMinorVersion }}.$(patchVersion)"
-              ${{ if and(eq(parameters.prImage, true), eq(variables['Build.Reason'], 'PullRequest'), eq(variables['isMain'], false) ) }}:
-                containerTag: "pr-$(System.PullRequest.PullRequestNumber)"
-              ${{ if and(eq(parameters.prImage, true), ne(variables['Build.Reason'], 'PullRequest'), eq(variables['isMain'], false) ) }}:
-                containerTag: "pr-$(Build.BuildID)"
+              serviceConnection: "DTS-SHAREDSERVICES-STG" # "MGMT-PRIVATE-ACR-SBOX" - Find out correct SP for ARC
+              buildPath: "reports/${{report.name}}/dist"
