@@ -94,14 +94,14 @@ stages:
               serviceConnection: 'DCD-CFT-Sandbox'
               overrideAction: ${{ parameters.overrideAction }}
 
-  - ${{ each environment in parameters.env }}:
-    - stage: "Infrastructure_${{ environment.name }}"
-      displayName: "CosmosDB ${{ environment.name }}"
-      jobs:
-        - job:
-          steps:
-            - script: echo Hello, Version Reporter DB!
-              displayName: 'Executing ${{environment.name}} db'
+#  - ${{ each environment in parameters.env }}: We could have stg and prod
+  - stage: "Infrastructure"
+    displayName: "Infrastructure"
+    jobs:
+      - job:
+        steps:
+          - script: echo Hello, Version Reporter DB!
+            displayName: 'Executing infrastructure stage'
 
   - stage: "Reports"
     displayName: "Reports"
@@ -124,7 +124,7 @@ stages:
         steps:
           - template: "reports/acr_build.yml"
             parameters:
-              spACR: "MGMT-PRIVATE-ACR-SBOX"
+              spACR: "MGMT-PRIVATE-ACR-SBOX" # Find out correct SP for ARC
               containerACRRepo: 'version-reporter-service/jobs'
               buildContext: "reports/${{report.name}}/dist"
               buildID: $(Build.BuildID)
