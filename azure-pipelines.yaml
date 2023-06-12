@@ -130,7 +130,7 @@ stages:
             and(succeeded(), eq('${{ parameters.prImage }}', true))
           )
         steps:
-          - template: "steps/acr_build.yaml@cnp-azuredevops-libraries"
+          - template: "steps/acr-build.yaml@cnp-azuredevops-libraries"
             parameters:
               serviceConnection: "DTS-SHAREDSERVICES-STG" # "MGMT-PRIVATE-ACR-SBOX" - Find out correct SP for ARC
               buildPath: "reports/${{report.name}}/dist"
