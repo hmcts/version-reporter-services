@@ -1,0 +1,14 @@
+# Build output will be a container image pushed to ARC on merged to master
+# Branches will only test code, install necessary libraries etc
+
+parameters:
+  dir: "reports/helm/"
+
+steps:
+  - script: |
+      echo "Hello from 'Helm Reports'"
+      echo "My working directory is ${{ parameters.dir }}"
+  - script: |
+      echo Add other tasks to build, test, and deploy your project.
+      echo See https://aka.ms/yaml
+    displayName: 'Run a multi-line script - HELM'

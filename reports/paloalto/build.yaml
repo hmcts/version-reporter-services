@@ -1,0 +1,14 @@
+# Build output will be a container image pushed to ARC on merged to master
+# Branches will only test code, install necessary libraries etc
+
+parameters:
+  dir: "reports/paloalto/"
+
+steps:
+  - script: |
+      echo "Hello from 'Palo Alto Reports'"
+      echo "My working directory is ${{ parameters.dir }}"
+  - script: npm install
+    workingDirectory: ${{ parameters.dir }}
+  - script: npm run chalk
+    workingDirectory: ${{ parameters.dir }}

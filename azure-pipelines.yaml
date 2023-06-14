@@ -1,4 +1,5 @@
 name: Version Reporter Service Jobs
+
 trigger:
   batch: true
   branches:
@@ -8,11 +9,128 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-  - script: echo Hello, world!
-    displayName: 'Run a one-line script'
+variables:
+  - template: vars/input-variables.yaml@cnp-azuredevops-libraries
+  - name: timeoutInMinutes
+    value: 60
+  - name: project
+    value: "versionreporter"
+  - name: product
+    value: "versionreporter"
+  - name: env
+    value: "stg"
+  - name: terraformInitSubscription
+    value: "04d27a32-7a07-48b3-95b8-3c8691e1a263"
+  - name: action
+    value: ${{ parameters.action }}
+  - name: majorMinorVersion
+    value: "v0.1"
+    ${{ if eq(variables['isMain'], true) }}:
+     patchVersion:  $[counter(variables['majorMinorVersion'],0)]
 
-  - script: |
-      echo Add other tasks to build, test, and deploy your project.
-      echo See https://aka.ms/yaml
-    displayName: 'Run a multi-line script'
+resources:
+  repositories:
+    - repository: cnp-azuredevops-libraries
+      type: github
+      ref: master
+      name: hmcts/cnp-azuredevops-libraries
+      endpoint: 'hmcts'
+
+parameters:
+  - name: location
+    displayName: Location
+    type: string
+    default: "UK South"
+    values:
+      - "UK South"
+
+  - name: overrideAction
+    displayName: Override Action
+    type: string
+    default: plan
+    values:
+      - plan
+      - apply
+      - destroy
+
+  - name: prImage
+    displayName: Build PR Image
+    type: boolean
+    default: false
+    values:
+      - true
+      - false
+
+  - name: action
+    displayName: Action
+    type: string
+    default: plan
+    values:
+      - plan
+      - apply
+
+  - name: reports
+    displayName: Report to build
+    type: object
+    default:
+      - name: "helm"
+      - name: "paloalto"
+
+stages:
+  - stage: Precheck
+    jobs:
+      - job:
+        timeoutInMinutes: ${{ variables.timeoutInMinutes }}
+        steps:
+          - template: steps/terraform-precheck.yaml@cnp-azuredevops-libraries
+            parameters:
+              keyvaultName: 'infra-vault-nonprod'
+              keyvaultSecret: 'azure-devops-token'
+              serviceConnection: 'DCD-CFT-Sandbox'
+              overrideAction: ${{ parameters.overrideAction }}
+
+#  - ${{ each environment in parameters.env }}: We could have stg and prod
+  - stage: "Infrastructure"
+    displayName: "Infrastructure"
+    jobs:
+      - job: PlanAndApply
+        steps:
+          - template: steps/terraform.yaml@cnp-azuredevops-libraries
+            parameters:
+              location: ${{ parameters.location }}
+              serviceConnection: "DTS-SHAREDSERVICES-STG"
+              product: ${{ variables.product }}
+              overrideAction: ${{ parameters.overrideAction }}
+              environment: ${{ variables.env }}
+              component: "cosmos"
+              terraformInitSubscription: ${{ variables.terraformInitSubscription }}
+              tfVarsFile: NULL
+              initCommandOptions: >
+                -reconfigure
+              planCommandOptions: >
+                -compact-warnings
+                -lock-timeout=30s
+
+  - stage: "Reports"
+    displayName: "Reports"
+    jobs:
+    - ${{ each report in parameters.reports }}:
+
+      - job: BuildArtifact_${{report.name}}
+        displayName: Build ${{report.name}} Artifact
+        steps:
+          - template: "reports/${{report.name}}/build.yaml"
+
+      - job: PushContainer_${{report.name}}
+        dependsOn: BuildArtifact_${{report.name}}
+        displayName: Push ${{report.name}} Container
+        condition: |
+         or( 
+            and(succeeded(), eq(variables['isMain'], true)),
+            and(succeeded(), eq('${{ parameters.prImage }}', true))
+          )
+        steps:
+          - template: "steps/acr-build.yaml@cnp-azuredevops-libraries"
+            parameters:
+              serviceConnection: "DTS-SHAREDSERVICES-STG" # "MGMT-PRIVATE-ACR-SBOX" - Find out correct SP for ARC
+              buildPath: "reports/${{report.name}}/dist"
