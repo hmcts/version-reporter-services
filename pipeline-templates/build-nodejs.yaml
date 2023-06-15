@@ -12,7 +12,7 @@ steps:
     displayName: 'Install Node.js'
 
   - task: Bash@3
-    displayName: 'Check for tsconfig.json or install tsc'
+    displayName: 'Install tsc'
     inputs:
       targetType: "inline"
       workingDirectory: ${{ parameters.workingDirectory }}
