@@ -117,7 +117,7 @@ stages:
           - template: "pipeline-templates/build-nodejs.yaml"
             parameters:
               prImage: ${{ parameters.prImage }}
-              workingDirectory: $(System.DefaultWorkingDirectory)/$(buildRepoSuffix)/reports/${{report.name}}
+              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
 
       - job: PushContainer_${{report.name}}
         dependsOn: BuildArtifact_${{report.name}}
