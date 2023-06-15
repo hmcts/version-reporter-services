@@ -2,12 +2,13 @@
 # Branches will only test code, install necessary libraries etc
 
 parameters:
-  dir: "reports/helm/"
+  prImage: ""
+  workingDirectory: ""
 
 steps:
   - script: |
       echo "Hello from 'Helm Reports'"
-      echo "My working directory is ${{ parameters.dir }}"
+      echo "My working directory is ${{ parameters.workingDirectory }}"
   - script: |
       echo Add other tasks to build, test, and deploy your project.
       echo See https://aka.ms/yaml

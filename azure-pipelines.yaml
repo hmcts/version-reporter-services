@@ -119,7 +119,7 @@ stages:
           ${{ if eq( report['type'], 'nodejs') }}:
           - template: "pipeline-templates/build-nodejs.yaml"
           ${{ else }}:
-          - template: "reports/${{report.name}}/build.yaml" # Just idea on how different reports can dynamic
+          - template: "reports/${{report.name}}/build.yaml" # Just idea on how different reports can be dynamic
             parameters:
               prImage: ${{ parameters.prImage }}
               workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}/
