@@ -114,10 +114,13 @@ stages:
       - job: BuildArtifact_${{report.name}}
         displayName: Build ${{report.name}} Artifact
         steps:
+          ${{ if eq(report.type, 'nodejs') }}:
           - template: "pipeline-templates/build-nodejs.yaml"
+          ${{ else }}:
+          - template: "reports/${{report.name}}/build.yaml" # Just idea on how different reports can dynamic
             parameters:
               prImage: ${{ parameters.prImage }}
-              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}/
 
       - job: PushContainer_${{report.name}}
         dependsOn: BuildArtifact_${{report.name}}
@@ -131,4 +134,4 @@ stages:
           - template: "steps/acr-build.yaml@cnp-azuredevops-libraries"
             parameters:
               serviceConnection: "DTS-SHAREDSERVICES-STG"
-              buildPath: "reports/${{report.name}}/dist"
+              buildPath: "reports/${{report.name}}/"
