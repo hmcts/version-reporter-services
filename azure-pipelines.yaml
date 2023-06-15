@@ -116,9 +116,9 @@ stages:
       - job: BuildArtifact_${{report.name}}
         displayName: Build ${{report.name}} Artifact
         steps:
-          ${{ if eq( report['type'], 'nodejs') }}:
+        ${{ if eq( report['type'], 'nodejs') }}:
           - template: "pipeline-templates/build-nodejs.yaml"
-          ${{ else }}:
+        ${{ else }}:
           - template: "reports/${{report.name}}/build.yaml" # Just idea on how different reports can be dynamic
             parameters:
               prImage: ${{ parameters.prImage }}
