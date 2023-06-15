@@ -12,24 +12,6 @@ steps:
     displayName: 'Install Node.js'
 
   - task: Bash@3
-    displayName: 'Check for .yarn cache or install packages'
-    inputs:
-      targetType: "inline"
-      workingDirectory: ${{ parameters.workingDirectory }}
-      script: |
-        if [ -d ".yarn/cache/" ]; then
-          echo ".yarn/cache checked in for 'Zero Installs', pushing cache and not running install.."  
-        elif [ ! -d ".yarn/cache/" ]; then
-          echo ".yarn/cache not found, configuring yarn.."
-          echo "Setting yarn version to stable.."
-          yarn set version stable
-          echo "Checking yarn version.."
-          yarn -v
-          echo "Running yarn install.."
-          yarn install
-        fi
-
-  - task: Bash@3
     displayName: 'Check for tsconfig.json or install tsc'
     inputs:
       targetType: "inline"
