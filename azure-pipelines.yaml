@@ -70,7 +70,9 @@ parameters:
     type: object
     default:
       - name: "helm"
+        type: "other"
       - name: "paloalto"
+        type: "nodejs"
 
 stages:
   - stage: Precheck
