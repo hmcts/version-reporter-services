@@ -14,7 +14,7 @@ The output would be a container image in ACR.
 
 <details>
   <summary>VRS Proposed Plan</summary>
-  <img alt="VRS Proposed Plan" src="./images/version-reporter-v3.png" width="80%">
+  <img alt="VRS Proposed Plan" src="./images/version-reporter-v2.png" width="80%">
 </details>
 
 _**Note** This may change as conversations around this picks up._
