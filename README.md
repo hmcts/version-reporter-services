@@ -10,6 +10,15 @@ all the relevant cluster configuration will be setup to use the images generate 
 Each report could be a different technology e.g. Node, Python, Bash or Powershell.
 The output would be a container image in ACR.
 
+### High level Architecture plan
+
+<details>
+  <summary>VRS Proposed Plan</summary>
+  <img alt="VRS Proposed Plan" src="./images/version-reporter-v2.jpg" width="auto">
+</details>
+
+_**Note** This may change as conversations around this picks up._
+
 ## Documentation place holders
 - Introduction
   - What is the Version Reporter Service
