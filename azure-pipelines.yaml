@@ -100,7 +100,7 @@ stages:
               product: ${{ variables.product }}
               overrideAction: ${{ parameters.overrideAction }}
               environment: ${{ variables.env }}
-              component: "cosmos"
+              component: "storage"
               terraformInitSubscription: ${{ variables.terraformInitSubscription }}
               tfVarsFile: NULL
               initCommandOptions: >
@@ -116,7 +116,7 @@ stages:
       - job: BuildArtifact_${{report.name}}
         displayName: Build ${{report.name}} Artifact
         steps:
-          ${{ if eq(report.type, 'nodejs') }}:
+          ${{ if eq( report['type'], 'nodejs') }}:
           - template: "pipeline-templates/build-nodejs.yaml"
           ${{ else }}:
           - template: "reports/${{report.name}}/build.yaml" # Just idea on how different reports can dynamic
