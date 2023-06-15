@@ -1,0 +1,6 @@
+node_modules
+coverage
+crash.log
+crash.*.log
+.idea
+yarn-error.log

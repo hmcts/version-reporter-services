@@ -23,10 +23,6 @@ variables:
     value: "04d27a32-7a07-48b3-95b8-3c8691e1a263"
   - name: action
     value: ${{ parameters.action }}
-  - name: majorMinorVersion
-    value: "v0.1"
-    ${{ if eq(variables['isMain'], true) }}:
-     patchVersion:  $[counter(variables['majorMinorVersion'],0)]
 
 resources:
   repositories:
@@ -115,11 +111,13 @@ stages:
     displayName: "Reports"
     jobs:
     - ${{ each report in parameters.reports }}:
-
       - job: BuildArtifact_${{report.name}}
         displayName: Build ${{report.name}} Artifact
         steps:
-          - template: "reports/${{report.name}}/build.yaml"
+          - template: "pipeline-templates/build-nodejs.yaml"
+            parameters:
+              prImage: ${{ parameters.prImage }}
+              workingDirectory: $(System.DefaultWorkingDirectory)/$(buildRepoSuffix)/reports/${{report.name}}
 
       - job: PushContainer_${{report.name}}
         dependsOn: BuildArtifact_${{report.name}}
@@ -132,5 +130,5 @@ stages:
         steps:
           - template: "steps/acr-build.yaml@cnp-azuredevops-libraries"
             parameters:
-              serviceConnection: "DTS-SHAREDSERVICES-STG" # "MGMT-PRIVATE-ACR-SBOX" - Find out correct SP for ARC
+              serviceConnection: "DTS-SHAREDSERVICES-STG"
               buildPath: "reports/${{report.name}}/dist"

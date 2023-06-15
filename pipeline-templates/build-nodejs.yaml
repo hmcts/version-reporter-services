@@ -1,0 +1,67 @@
+# Build output will be a container image pushed to ARC on merged to master
+# Branches will only test code, install necessary libraries etc
+
+parameters:
+  prImage: ''
+  workingDirectory: ''
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '18.x'
+    displayName: 'Install Node.js'
+
+  - task: Bash@3
+    displayName: 'Check for .yarn cache or install packages'
+    inputs:
+      targetType: "inline"
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        if [ -d ".yarn/cache/" ]; then
+          echo ".yarn/cache checked in for 'Zero Installs', pushing cache and not running install.."  
+        elif [ ! -d ".yarn/cache/" ]; then
+          echo ".yarn/cache not found, configuring yarn.."
+          echo "Setting yarn version to stable.."
+          yarn set version stable
+          echo "Checking yarn version.."
+          yarn -v
+          echo "Running yarn install.."
+          yarn install
+        fi
+
+  - task: Bash@3
+    displayName: 'Check for tsconfig.json or install tsc'
+    inputs:
+      targetType: "inline"
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        FILE=./tsconfig.json
+        if [ -f "$FILE" ]; then
+          echo "$FILE exists."
+        else
+          yarn init
+          yarn add @types/node typescript
+          yarn add -D ts-node
+          yarn tsc --init --rootDir src --outDir ./bin --esModuleInterop --lib ES2019 --module commonjs --noImplicitAny true
+        fi
+
+  - task: Bash@3
+    displayName: "Run application unit Tests"
+    inputs:
+      targetType: "inline"
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        yarn test
+
+  - task: Bash@3
+    displayName: "Build application resource"
+    condition: |
+      or( 
+         and(succeeded(), eq(variables['isMain'], true)),
+         and(succeeded(), eq('${{ parameters.prImage }}', true))
+       )
+    inputs:
+      targetType: "inline"
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        yarn build
