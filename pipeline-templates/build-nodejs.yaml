@@ -20,7 +20,7 @@ steps:
       script: |
         yarn
         
-        FILE=${{ parameters.workingDirectory }}/bin
+        FILE=${{ parameters.workingDirectory }}/tsconfig.json
         if [ ! -f "$FILE" ]; then
           yarn tsc --init --rootDir src --outDir ./bin --esModuleInterop --lib ES2019 --module commonjs --noImplicitAny true
         fi
