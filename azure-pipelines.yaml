@@ -1,4 +1,4 @@
-name: Version Reporter Service Jobs
+name: Version Reporter Service - Backend
 
 trigger:
   batch: true
