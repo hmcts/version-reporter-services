@@ -1,5 +1,6 @@
 # Build output will be a container image pushed to ARC on merged to master
 # Branches will only test code, install necessary libraries etc
+# This would be a base template for NodeJS related reports
 
 parameters:
   prImage: ""
@@ -17,7 +18,7 @@ steps:
       targetType: "inline"
       workingDirectory: ${{ parameters.workingDirectory }}
       script: |
-        echo "Working dir is: ${{ parameters.workingDirectory }}"
+        yarn
         yarn tsc --init --rootDir src --outDir ./bin --esModuleInterop --lib ES2019 --module commonjs --noImplicitAny true
 
   - task: Bash@3
