@@ -139,4 +139,4 @@ stages:
           - template: "steps/acr-build.yaml@cnp-azuredevops-libraries"
             parameters:
               serviceConnection: "DTS-SHAREDSERVICES-STG"
-              buildPath: "reports/${{report.name}}/"
+              buildPath: $(System.DefaultWorkingDirectory)/reports/${{report.name}}/

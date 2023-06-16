@@ -18,9 +18,6 @@ steps:
       workingDirectory: ${{ parameters.workingDirectory }}
       script: |
         echo "Working dir is: ${{ parameters.workingDirectory }}"
-        yarn init
-        yarn add @types/node typescript
-        yarn add -D ts-node
         yarn tsc --init --rootDir src --outDir ./bin --esModuleInterop --lib ES2019 --module commonjs --noImplicitAny true
 
   - task: Bash@3
