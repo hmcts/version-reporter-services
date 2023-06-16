@@ -1,4 +1,4 @@
-name: Version Reporter Service Jobs
+name: Version Reporter Service - Backend
 
 trigger:
   batch: true
@@ -70,7 +70,9 @@ parameters:
     type: object
     default:
       - name: "helm"
+        type: "other"
       - name: "paloalto"
+        type: "nodejs"
 
 stages:
   - stage: Precheck
@@ -98,7 +100,7 @@ stages:
               product: ${{ variables.product }}
               overrideAction: ${{ parameters.overrideAction }}
               environment: ${{ variables.env }}
-              component: "cosmos"
+              component: "storage"
               terraformInitSubscription: ${{ variables.terraformInitSubscription }}
               tfVarsFile: NULL
               initCommandOptions: >
@@ -114,10 +116,16 @@ stages:
       - job: BuildArtifact_${{report.name}}
         displayName: Build ${{report.name}} Artifact
         steps:
+        - ${{ if eq( report['type'], 'nodejs') }}:
           - template: "pipeline-templates/build-nodejs.yaml"
             parameters:
               prImage: ${{ parameters.prImage }}
-              workingDirectory: $(System.DefaultWorkingDirectory)/$(buildRepoSuffix)/reports/${{report.name}}
+              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}/
+        - ${{ else }}:
+          - template: "reports/${{report.name}}/build.yaml" # Just idea on how different reports can be dynamic
+            parameters:
+              prImage: ${{ parameters.prImage }}
+              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}/
 
       - job: PushContainer_${{report.name}}
         dependsOn: BuildArtifact_${{report.name}}
@@ -131,4 +139,4 @@ stages:
           - template: "steps/acr-build.yaml@cnp-azuredevops-libraries"
             parameters:
               serviceConnection: "DTS-SHAREDSERVICES-STG"
-              buildPath: "reports/${{report.name}}/dist"
+              buildPath: $(System.DefaultWorkingDirectory)/reports/${{report.name}}/

@@ -15,5 +15,5 @@ variable "builtFrom" {
 }
 
 variable "env" {
-  default = "sbox"
+  default = "stg"
 }
