@@ -20,7 +20,7 @@ steps:
       script: |
         yarn
         
-        FILE=./bin
+        FILE=${{ parameters.workingDirectory }}/bin
         if [ ! -f "$FILE" ]; then
           yarn tsc --init --rootDir src --outDir ./bin --esModuleInterop --lib ES2019 --module commonjs --noImplicitAny true
         fi
