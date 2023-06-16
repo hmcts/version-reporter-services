@@ -19,7 +19,11 @@ steps:
       workingDirectory: ${{ parameters.workingDirectory }}
       script: |
         yarn
-        yarn tsc --init --rootDir src --outDir ./bin --esModuleInterop --lib ES2019 --module commonjs --noImplicitAny true
+        
+        FILE=./bin
+        if [ ! -f "$FILE" ]; then
+          yarn tsc --init --rootDir src --outDir ./bin --esModuleInterop --lib ES2019 --module commonjs --noImplicitAny true
+        fi
 
   - task: Bash@3
     displayName: "Run application unit Tests"
