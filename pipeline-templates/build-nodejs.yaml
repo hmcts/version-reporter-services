@@ -13,17 +13,12 @@ steps:
     displayName: "Install Node.js"
 
   - task: Bash@3
-    displayName: "Install tsc"
+    displayName: "Install Packages"
     inputs:
       targetType: "inline"
       workingDirectory: ${{ parameters.workingDirectory }}
       script: |
         yarn
-        
-        FILE=${{ parameters.workingDirectory }}/tsconfig.json
-        if [ ! -f "$FILE" ]; then
-          yarn tsc --init --rootDir src --outDir ./bin --esModuleInterop --lib ES2019 --module commonjs --noImplicitAny true
-        fi
 
   - task: Bash@3
     displayName: "Run application unit Tests"
