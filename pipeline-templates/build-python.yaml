@@ -5,13 +5,14 @@
 parameters:
   prImage: ""
   workingDirectory: ""
-  versionSpec: "18.x"
+  versionSpec: "3.11.4"
 
 steps:
-  - task: NodeTool@0
-    displayName: "Install Node.js v${{ parameters.versionSpec }}"
+  - task: UsePythonVersion@0
+    displayName: "Install Python v${{ parameters.versionSpec }}"
     inputs:
       versionSpec: ${{ parameters.versionSpec }}
+      workingDirectory: ${{ parameters.workingDirectory }}
 
   - task: Bash@3
     displayName: "Install Packages"
@@ -19,7 +20,8 @@ steps:
       targetType: "inline"
       workingDirectory: ${{ parameters.workingDirectory }}
       script: |
-        yarn
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
   - task: Bash@3
     displayName: "Run application unit Tests"
@@ -27,17 +29,5 @@ steps:
       targetType: "inline"
       workingDirectory: ${{ parameters.workingDirectory }}
       script: |
-        yarn test
-
-  - task: Bash@3
-    displayName: "Build application resource"
-    condition: |
-      or( 
-         and(succeeded(), eq(variables['isMain'], true)),
-         and(succeeded(), eq('${{ parameters.prImage }}', true))
-       )
-    inputs:
-      targetType: "inline"
-      workingDirectory: ${{ parameters.workingDirectory }}
-      script: |
-        yarn build 
+        pip install pytest pytest-azurepipelines
+        pytest
