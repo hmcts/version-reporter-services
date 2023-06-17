@@ -130,7 +130,7 @@ stages:
           - template: "pipeline-templates/build-python.yaml"
             parameters:
               prImage: ${{ parameters.prImage }}
-              versionSpec: "3.11.4"
+              versionSpec: "3.11"
               workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
         - ${{ else }}:
           - template: "reports/${{report.name}}/build.yaml"
