@@ -138,5 +138,7 @@ stages:
         steps:
           - template: "steps/acr-build.yaml@cnp-azuredevops-libraries"
             parameters:
-              serviceConnection: "DTS-SHAREDSERVICES-STG"
+              serviceConnection: "DTS-SHAREDSERVICES-PROD"
               buildPath: $(System.DefaultWorkingDirectory)/reports/${{report.name}}/
+              acrResourceGroup: "sds-acr-rg"
+              acrName: "sdshmctspublic"
