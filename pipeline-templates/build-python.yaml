@@ -5,22 +5,29 @@
 parameters:
   prImage: ""
   workingDirectory: ""
+  versionSpec: "3.11.4"
 
 steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.11.4'
+    displayName: "Install Python v${{ parameters.versionSpec }}"
     inputs:
-      versionSpec: '3.11.4'
+      versionSpec: ${{ parameters.versionSpec }}
       workingDirectory: ${{ parameters.workingDirectory }}
 
-  - script: |
-      python -m pip install --upgrade pip
-      pip install -r requirements.txt
-    displayName: 'Install dependencies'
-    workingDirectory: ${{ parameters.workingDirectory }}
+  - task: Bash@3
+    displayName: "Install Packages"
+    inputs:
+      targetType: "inline"
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-  - script: |
-      pip install pytest pytest-azurepipelines
-      pytest
-    displayName: 'pytest'
-    workingDirectory: ${{ parameters.workingDirectory }}
+  - task: Bash@3
+    displayName: "Run application unit Tests"
+    inputs:
+      targetType: "inline"
+      workingDirectory: ${{ parameters.workingDirectory }}
+      script: |
+        pip install pytest pytest-azurepipelines
+        pytest

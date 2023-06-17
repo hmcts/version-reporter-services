@@ -5,12 +5,13 @@
 parameters:
   prImage: ""
   workingDirectory: ""
+  versionSpec: "18.x"
 
 steps:
   - task: NodeTool@0
+    displayName: "Install Node.js v${{ parameters.versionSpec }}"
     inputs:
-      versionSpec: "18.x"
-    displayName: "Install Node.js"
+      versionSpec: ${{ parameters.versionSpec }}
 
   - task: Bash@3
     displayName: "Install Packages"
