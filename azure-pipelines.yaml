@@ -124,12 +124,12 @@ stages:
           - template: "pipeline-templates/build-nodejs.yaml"
             parameters:
               prImage: ${{ parameters.prImage }}
-              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}/
+              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
         - ${{ else }}:
           - template: "reports/${{report.name}}/build.yaml" # Just idea on how different reports can be dynamic
             parameters:
               prImage: ${{ parameters.prImage }}
-              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}/
+              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
 
       - job: PushContainer_${{report.name}}
         dependsOn: BuildArtifact_${{report.name}}
@@ -143,13 +143,10 @@ stages:
           - script: |
               echo "##vso[task.setvariable variable=acrResourceGroup]${{ variables['acrResourceGroup'] }}"
               echo "##vso[task.setvariable variable=acrName]${{ variables['acrName'] }}"
-              
-              echo $(acrResourceGroup)
-              echo $(acrName)
             displayName: "Define ACR Variables"
 
           - template: "steps/acr-build.yaml@cnp-azuredevops-libraries"
             parameters:
               serviceConnection: "DTS-SHAREDSERVICES-PROD"
-              buildPath: $(System.DefaultWorkingDirectory)/reports/${{report.name}}/
+              buildPath: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
 

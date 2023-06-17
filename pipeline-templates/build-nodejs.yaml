@@ -19,6 +19,8 @@ steps:
       workingDirectory: ${{ parameters.workingDirectory }}
       script: |
         yarn
+        echo "workingDirectory: ${{ parameters.workingDirectory }}"
+        echo "prImage: ${{ parameters.prImage }}"
 
   - task: Bash@3
     displayName: "Run application unit Tests"
@@ -27,6 +29,8 @@ steps:
       workingDirectory: ${{ parameters.workingDirectory }}
       script: |
         yarn test
+        echo "workingDirectory: ${{ parameters.workingDirectory }}"
+        echo "prImage: ${{ parameters.prImage }}"
 
   - task: Bash@3
     displayName: "Build application resource"
@@ -39,4 +43,4 @@ steps:
       targetType: "inline"
       workingDirectory: ${{ parameters.workingDirectory }}
       script: |
-        yarn build
+        yarn build 
