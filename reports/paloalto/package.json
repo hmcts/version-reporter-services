@@ -1,8 +1,8 @@
 {
-  "name": "paloalto",
+  "name": "Version Reporter",
   "version": "1.0.0",
   "description": "Sample report template",
-  "main": "src/app.ts",
+  "main": "bin/app.js",
   "repository": "git@github.com/hmcts/version-reporter-service.git",
   "author": "Platform Operations Team",
   "license": "MIT",
