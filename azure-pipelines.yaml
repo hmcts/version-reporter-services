@@ -76,7 +76,7 @@ parameters:
       - name: "helm"
         type: "other"
       - name: "paloalto"
-        type: "nodejs"
+        type: "python"
 
 stages:
   - stage: Precheck
@@ -125,8 +125,13 @@ stages:
             parameters:
               prImage: ${{ parameters.prImage }}
               workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+        - ${{ elseif eq( report['type'], 'python')  }}:
+          - template: "pipeline-templates/build-python.yaml"
+            parameters:
+              prImage: ${{ parameters.prImage }}
+              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
         - ${{ else }}:
-          - template: "reports/${{report.name}}/build.yaml" # Just idea on how different reports can be dynamic
+          - template: "reports/${{report.name}}/build.yaml"
             parameters:
               prImage: ${{ parameters.prImage }}
               workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}

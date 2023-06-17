@@ -1,0 +1,26 @@
+# Build output will be a container image pushed to ARC on merged to master
+# Branches will only test code, install necessary libraries etc
+# This would be a base template for NodeJS related reports
+
+parameters:
+  prImage: ""
+  workingDirectory: ""
+
+steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python $(python.version)'
+    inputs:
+      versionSpec: '$(python.version)'
+      workingDirectory: ${{ parameters.workingDirectory }}
+
+  - script: |
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+    displayName: 'Install dependencies'
+    workingDirectory: ${{ parameters.workingDirectory }}
+
+  - script: |
+      pip install pytest pytest-azurepipelines
+      pytest
+    displayName: 'pytest'
+    workingDirectory: ${{ parameters.workingDirectory }}
