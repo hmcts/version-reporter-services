@@ -1,7 +1,6 @@
 .DS_Store
 .git
 .gitignore
-.mocharc.json
 .nyc_output
 .idea
 __mocks__
@@ -9,12 +8,10 @@ README.md
 LICENSE
 coverage
 jest.config.ts
-register.js
 tsconfig.json
 *.log
 node_modules
 scripts
 **/__tests__/**
 tests
-utility
 src
