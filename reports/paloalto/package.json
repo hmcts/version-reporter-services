@@ -1,5 +1,5 @@
 {
-  "name": "Version Reporter",
+  "name": "VersionReporter",
   "version": "1.0.0",
   "description": "Sample report template",
   "main": "bin/app.js",
