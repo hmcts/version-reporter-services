@@ -7,4 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+ENV COSMOSDB_URI="" \
+    COSMOSDB_PRIMARY_KEY="" \
+    COSMOSDB_DATABASE=""\
+    COSMOSDB_CONTAINER=""
+
 CMD [ "python", "./main.py" ]

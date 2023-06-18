@@ -156,4 +156,6 @@ stages:
             parameters:
               serviceConnection: "DTS-SHAREDSERVICES-PROD"
               buildPath: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+              ${{ if eq(variables['isMain'], true) }}:
+                customImageTag: ${{report.name}}:$(Build.SourceBranchName)
 
