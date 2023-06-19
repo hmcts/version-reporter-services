@@ -153,15 +153,12 @@ stages:
               echo "##vso[task.setvariable variable=acrResourceGroup]${{ variables['acrResourceGroup'] }}"
               echo "##vso[task.setvariable variable=acrName]${{ variables['acrName'] }}"
               echo "##vso[task.setvariable variable=customImageTag]''"
-              
-              if [ ${{ variables['isMain'] }} = 'true' ]; then
-                echo "##vso[task.setvariable variable=customImageTag]'${{report.name}}:$(Build.SourceBranchName)'"
-              fi
             displayName: "Define ACR Variables"
 
           - template: steps/acr-build.yaml@cnp-azuredevops-libraries
             parameters:
               serviceConnection: ${{ variables['acrServiceConnection'] }}
               buildPath: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
-              customImageTag: ${{ variables['customImageTag'] }}
+              ${{ eq(${{ variables['isMain'] }}, true) }}:
+                customImageTag: ${{ variables['customImageTag'] }}
 
