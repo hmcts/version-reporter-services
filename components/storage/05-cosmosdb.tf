@@ -52,7 +52,7 @@ resource "azurerm_cosmosdb_sql_container" "this" {
   }
 
   indexing_policy {
-    indexing_mode = "Consistent"
+    indexing_mode = "consistent"
   }
 
 }
