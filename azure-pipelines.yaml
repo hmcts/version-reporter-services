@@ -27,6 +27,8 @@ variables:
     value: "sds-acr-rg"
   - name: acrName
     value: "sdshmctspublic"
+  - name: acrServiceConnection
+    value: "DTS-SHAREDSERVICES-PROD"
 
 resources:
   repositories:
@@ -154,7 +156,7 @@ stages:
 
           - template: "steps/acr-build.yaml@cnp-azuredevops-libraries"
             parameters:
-              serviceConnection: "DTS-SHAREDSERVICES-PROD"
+              serviceConnection: ${{ variables['acrServiceConnection'] }}
               buildPath: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
               ${{ if eq(variables['isMain'], true) }}:
                 customImageTag: ${{report.name}}:$(Build.SourceBranchName)
