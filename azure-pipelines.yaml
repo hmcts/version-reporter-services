@@ -10,7 +10,6 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  - template: vars/input-variables.yaml@cnp-azuredevops-libraries
   - name: timeoutInMinutes
     value: 60
   - name: project
@@ -29,6 +28,7 @@ variables:
     value: "sdshmctspublic"
   - name: acrServiceConnection
     value: "DTS-SHAREDSERVICES-PROD"
+  - template: vars/input-variables.yaml@cnp-azuredevops-libraries
 
 resources:
   repositories:
