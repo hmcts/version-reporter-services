@@ -16,7 +16,7 @@ variables:
   - name: project
     value: "versionreporter"
   - name: product
-    value: "versionreporter"
+    value: "sds-platform"
   - name: env
     value: "stg"
   - name: terraformInitSubscription
