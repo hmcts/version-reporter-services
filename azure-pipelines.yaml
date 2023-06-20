@@ -159,5 +159,5 @@ stages:
             parameters:
               serviceConnection: ${{ variables['acrServiceConnection'] }}
               buildPath: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
-              customImageTag: ${{ variables['customImageTag'] }}
+              customImageTag: $(customImageTag)
 
