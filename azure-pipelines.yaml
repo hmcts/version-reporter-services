@@ -155,7 +155,6 @@ stages:
               echo "##vso[task.setvariable variable=customImageTag]'${{report.name}}:$(Build.SourceBranchName)'"
             displayName: "Define ACR Variables"
 
-          - template: vars/input-variables.yaml@cnp-azuredevops-libraries
           - template: steps/acr-build.yaml@cnp-azuredevops-libraries
             parameters:
               serviceConnection: ${{ variables['acrServiceConnection'] }}
