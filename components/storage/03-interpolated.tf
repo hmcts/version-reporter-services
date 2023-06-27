@@ -13,11 +13,11 @@ locals {
     sbox = "a8140a9e-f1b0-481f-a4de-09e2ee23f7ab"
   }
   readers = {
-    sbox = "ea3a8c1e-af9d-4108-bc86-a7e2d267f49c"
+    sbox    = "ea3a8c1e-af9d-4108-bc86-a7e2d267f49c"
     nonprod = "fb084706-583f-4c9a-bdab-949aac66ba5c"
-    prod = "0978315c-75fe-4ada-9d11-1eb5e0e0b214"
+    prod    = "0978315c-75fe-4ada-9d11-1eb5e0e0b214"
   }
-  common_tags  = module.ctags.common_tags
+  common_tags = module.ctags.common_tags
 }
 
 # Common tags
