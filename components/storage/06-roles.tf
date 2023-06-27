@@ -16,16 +16,6 @@ resource "azurerm_user_assigned_identity" "this" {
   tags                = module.ctags.common_tags
 }
 
-/*
- * Granting the MI Contributor, User Access Administrator and Reader to various
- * subscriptions to enable permissions to carry out relevant operations to retrive data
-*/
-resource "azurerm_role_assignment" "miroles" {
-  scope                = "/subscriptions/${data.azurerm_client_config.current.subscription_id}"
-  role_definition_name = "Contributor"
-  principal_id         = azurerm_user_assigned_identity.this.principal_id
-}
-
 resource "azurerm_role_assignment" "sub_id_user_reader" {
   for_each             = local.readers
   scope                = "/subscriptions/${each.value}"
