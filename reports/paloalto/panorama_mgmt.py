@@ -159,6 +159,7 @@ class PanoramaMgmt:
         ):
             update_document_report(document, {"colorCode": "red"})
             update_document_report(document, {"verdict": "upgrade"})
+            # A good place to send out a slack notice as well if verdict is to upgrade
 
         elif (
                 (get_major_version(desired_version) == get_major_version(sw_version)) and
