@@ -5,7 +5,7 @@ resource "azurerm_resource_group" "this" {
   tags     = local.common_tags
 }
 
-# The cosmosdb accounr
+# The cosmosdb account
 resource "azurerm_cosmosdb_account" "this" {
   name                      = format("%s-%s", var.product, var.service_name)
   location                  = var.location
