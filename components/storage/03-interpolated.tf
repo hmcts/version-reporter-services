@@ -1,7 +1,8 @@
 # General
 locals {
-  storage_name = format("%s-%s", var.product, var.service_name)
-  common_tags  = module.ctags.common_tags
+  storage_name  = format("%s-%s", var.product, var.service_name)
+  keyvault_name = format("%s-%s-kv", var.service_name, var.env)
+  common_tags   = module.ctags.common_tags
 }
 
 # Common tags

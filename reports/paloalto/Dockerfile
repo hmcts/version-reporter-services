@@ -9,10 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV COSMOS_ENDPOINT="" \
-    COSMOS_KEY="" \
-    COSMOSDB_DATABASE="" \
-    COSMOSDB_CONTAINER="" \
+ENV COSMOS_KEY="" \
     AZURE_TENANT_ID="" \
     AZURE_CLIENT_ID="" \
     AZURE_CLIENT_SECRET="" \
