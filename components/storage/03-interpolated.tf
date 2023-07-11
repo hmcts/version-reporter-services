@@ -1,7 +1,7 @@
 # General
 locals {
   storage_name  = format("%s-%s", var.product, var.service_name)
-  keyvault_name = format("sds%s%skv", replace(var.service_name, "-", ""), var.env)
+  keyvault_name = format("%s-%s-kv", var.service_name, var.env)
   common_tags   = module.ctags.common_tags
 }
 
