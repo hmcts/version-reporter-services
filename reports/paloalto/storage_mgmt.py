@@ -16,10 +16,8 @@ class Storage:
         self.connect_to_db()
 
     def connect_to_db(self):
-        logger("Authenticating to cosmos db")
-        credential = DefaultAzureCredential()
         logger("Establishing connection to cosmos db")
-        self.client = CosmosClient(url=self.db_uri, credential=credential)
+        self.client = CosmosClient(self.db_uri, self.db_key)
         logger("Connection established")
 
     def save_document(self, document):
