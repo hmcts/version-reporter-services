@@ -59,8 +59,8 @@ def logger(message):
 
 def db_config():
     return {
-        "uri": os.environ.get('COSMOS_ENDPOINT', None),
+        "uri": "https://sds-platform-version-reporter.documents.azure.com:443/",
         "key": os.environ.get('COSMOS_KEY', None),
-        "database": os.environ.get('COSMOSDB_DATABASE', 'reports'),
-        "container": os.environ.get('COSMOSDB_CONTAINER', 'paloalto')
+        "database": "reports",
+        "container": "paloalto"
     }
