@@ -1,5 +1,5 @@
 resource "azurerm_key_vault" "version_reporter_key_vault" {
-  name                            = format("sds%s%skv", var.service_name, var.env)
+  name                            = local.keyvault_name
   location                        = var.location
   resource_group_name             = azurerm_resource_group.this.name
   enabled_for_disk_encryption     = true
