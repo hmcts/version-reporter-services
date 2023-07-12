@@ -1,5 +1,4 @@
 from azure.cosmos import CosmosClient, exceptions
-from azure.identity import DefaultAzureCredential, ClientSecretCredential
 from utility import logger
 
 
@@ -21,10 +20,11 @@ class Storage:
         logger("Connection established")
 
     def save_document(self, document):
-        print("Saving to db...")
+        logger("Saving to db...")
         try:
             database = self.client.get_database_client(self.db_database)
             container = database.get_container_client(self.db_container)
             container.upsert_item(body=document)
         except exceptions.CosmosHttpResponseError:
+            logger("Saving to db failed")
             raise

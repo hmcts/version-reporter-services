@@ -10,9 +10,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 ENV COSMOS_KEY="" \
+    COSMOS_DB_NAME="" \
+    COSMOS_DB_CONTAINER="" \
+    COSMOS_DB_URI="" \
+    DESIRED_VERSION="" \
     AZURE_TENANT_ID="" \
     AZURE_CLIENT_ID="" \
-    AZURE_CLIENT_SECRET="" \
-    DESIRED_SOFTWARE_VERSION="10.2.0"
+    AZURE_CLIENT_SECRET=""
 
 CMD [ "python", "./main.py" ]

@@ -59,8 +59,9 @@ def logger(message):
 
 def db_config():
     return {
-        "uri": "https://sds-platform-version-reporter.documents.azure.com:443/",
-        "key": os.environ.get('COSMOS_KEY', None),
-        "database": "reports",
-        "container": "paloalto"
+        "uri": os.environ.get("COSMOS_DB_URI", "https://sds-platform-version-reporter.documents.azure.com:443/"),
+        "key": os.environ.get("COSMOS_KEY", None),
+        "database": os.environ.get("COSMOS_DB_NAME", "reports"),
+        "container": os.environ.get("COSMOS_DB_CONTAINER", "paloalto"),
+        "desired_version": os.environ.get("DESIRED_VERSION", "10.2.0")
     }
