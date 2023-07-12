@@ -2,17 +2,16 @@ import xmltodict
 from panos.panorama import Panorama
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
-from azure.mgmt.compute import ComputeManagementClient
-from azure.mgmt.network import NetworkManagementClient
 from utility import *
 
 
 class PanoramaMgmt:
     """Utility for Panorama credentials"""
 
-    def __init__(self, subscription_id, environment, api_admin_key_name="api-admin-key"):
+    def __init__(self, subscription_id, environment, private_ip, api_admin_key_name="api-admin-key"):
         self.environment = environment
         self.subscription_id = subscription_id
+        self.private_ip = private_ip
         self.api_admin_key_name = api_admin_key_name
         self.credential = DefaultAzureCredential()
         self.pano = None
@@ -25,7 +24,13 @@ class PanoramaMgmt:
         """
         api_key = self.get_panos_api_key()
         host_detail = self.get_host_detail()
-        self.pano = Panorama(hostname=host_detail.get("ip"), api_key=api_key)
+        try:
+            logger(f"Connecting to Panorama server at {host_detail}")
+            self.pano = Panorama(hostname=host_detail.get("ip"), api_key=api_key)
+        except Exception as e:
+            logger(f"Connecting to Panorama server at {host_detail} failed with: \n {e}")
+            raise
+
         return True
 
     def get_system_info(self):
@@ -63,6 +68,7 @@ class PanoramaMgmt:
 
         except Exception as e:
             logger("Error occurred generating panorama host details:\n{}".format(e))
+            raise
 
         return document
 
@@ -89,30 +95,27 @@ class PanoramaMgmt:
         return documents
 
     def get_panos_api_key(self):
-        panorama_keyvault_name = f"panorama-{self.environment}-uks-kv"
-        kv_uri = f"https://{panorama_keyvault_name}.vault.azure.net"
+        try:
+            panorama_keyvault_name = f"panorama-{self.environment}-uks-kv"
+            kv_uri = f"https://{panorama_keyvault_name}.vault.azure.net"
 
-        logger(f"Retrieving api key from {panorama_keyvault_name}.")
-        keyvault = SecretClient(vault_url=kv_uri, credential=self.credential)
-        panos_api_key = keyvault.get_secret(self.api_admin_key_name)
+            logger(f"Retrieving api key from {panorama_keyvault_name}.")
+            keyvault = SecretClient(vault_url=kv_uri, credential=self.credential)
+            panos_api_key = keyvault.get_secret(self.api_admin_key_name)
 
-        logger(f"Api key  retrieved from {panorama_keyvault_name}.")
+            logger(f"Api key  retrieved from {panorama_keyvault_name}.")
+        except Exception as e:
+            logger("Error occurred generating panorama host details:\n{}".format(e))
+            raise
+
         return panos_api_key.value
 
     def get_host_detail(self):
         vm_rg = f"panorama-{self.environment}-uks-rg"
         vm_name = f"panorama-{self.environment}-uks-0"
-
-        compute_client = ComputeManagementClient(self.credential, self.subscription_id)
-        network_client = NetworkManagementClient(self.credential, self.subscription_id)
-
-        logger("Get virtual machine detail {} from {}".format(vm_name, vm_rg))
-        vm_os = compute_client.virtual_machines.get(vm_rg, vm_name)
-        private_ip = self.get_private(vm_os, network_client)
-
         pano_vm = {
             "name": vm_name,
-            "ip": private_ip,
+            "ip": self.private_ip,
             "environment": self.environment,
             "resource_group": vm_rg
         }
@@ -190,6 +193,7 @@ class PanoramaMgmt:
                     ip_addresses.append(ip_configuration.private_ip_address)
             except Exception as e:
                 logger("Error occurred getting vm ip address\n{}".format(e))
+                raise
 
         return ip_addresses[0]
 
@@ -200,4 +204,4 @@ class PanoramaMgmt:
 
     @staticmethod
     def get_desired_software_version():
-        return os.environ['DESIRED_SOFTWARE_VERSION']
+        return db_config().get("desired_version")
