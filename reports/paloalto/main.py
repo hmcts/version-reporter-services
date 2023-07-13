@@ -25,15 +25,17 @@ data_sources = [
 
 for data_source in data_sources:
     try:
+        subscription_id = data_source.get("subscription_id")
+        environment = data_source.get("environment")
+        private_ip = data_source.get("ip")
+
+        logger("Processing environment {}:".format(environment))
+
         # Connect to cosmosdb server
         storage = Storage(db_config())
 
         # Connect to panorama server in environment
-        panorama_mgmt = PanoramaMgmt(
-            subscription_id=data_source.get("subscription_id"),
-            environment=data_source.get("environment"),
-            private_ip=data_source.get("ip")
-        )
+        panorama_mgmt = PanoramaMgmt(subscription_id=subscription_id, environment=environment, private_ip=private_ip)
 
         # Ask management server for installed software information
         logger("Fetching Panorama management info")
@@ -50,8 +52,8 @@ for data_source in data_sources:
             logger(f"Saving ngfw server info, document: {idx}")
             storage.save_document(device_document)
 
-        logger("Process complete.")
+        logger("Process complete in {}.".format(environment))
 
     except BaseException as error:
+        logger("Process not complete in {}.".format(environment))
         logger("An exception occurred: {}".format(error))
-        raise
