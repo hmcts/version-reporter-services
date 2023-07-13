@@ -1,6 +1,13 @@
+"""
+Module providing functionality to fetch information
+from Panorama servers and store in a cosmosdb.
+"""
 # --------
 # Import relevant packages
 # --------
+from pan.xapi import PanXapiError
+from panos.errors import PanConnectionTimeout
+
 from panorama_mgmt import PanoramaMgmt
 from storage_mgmt import Storage
 from utility import db_config, logger
@@ -29,13 +36,17 @@ for data_source in data_sources:
         environment = data_source.get("environment")
         private_ip = data_source.get("ip")
 
-        logger("Processing environment {}:".format(environment))
+        logger(f"Processing environment {environment}")
 
         # Connect to cosmosdb server
         storage = Storage(db_config())
 
         # Connect to panorama server in environment
-        panorama_mgmt = PanoramaMgmt(subscription_id=subscription_id, environment=environment, private_ip=private_ip)
+        panorama_mgmt = PanoramaMgmt(
+            subscription_id=subscription_id,
+            environment=environment,
+            private_ip=private_ip
+        )
 
         # Ask management server for installed software information
         logger("Fetching Panorama management info")
@@ -52,8 +63,12 @@ for data_source in data_sources:
             logger(f"Saving ngfw server info, document: {idx}")
             storage.save_document(device_document)
 
-        logger("Process complete in {}.".format(environment))
+        logger(f"Process complete in {environment}.")
 
+    except PanConnectionTimeout as timeout_error:
+        logger(f"Process not complete in {environment} \n With error {timeout_error}")
+    except PanXapiError as api_error:
+        logger(f"Process not complete in {environment} \n With error {api_error}")
     except BaseException as error:
-        logger("Process not complete in {}.".format(environment))
-        logger("An exception occurred: {}".format(error))
+        logger(f"Process not complete in {environment}.")
+        logger(f"An exception occurred: {error}")
