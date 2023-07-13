@@ -38,7 +38,7 @@ class PanoramaMgmt:
         xml_response = self.pano.op('show system info', xml=True)
         return xml_response
 
-    def generate_mgmt_server_document(self):
+    def generate_server_document(self):
         """
         Generate requited document to be saved in cosmos db
         for Panorama vm record
@@ -68,12 +68,12 @@ class PanoramaMgmt:
             self.update_document_verdict(desired_version, document, sw_version, sw_version_latest)
 
         except Exception as e:
-            logger("Error occurred generating panorama host details:\n{}".format(e))
-            raise
+            document = None
+            logger(f"Error occurred generating document Host details: \n{host_detail} \n Error: \n{e}")
 
         return document
 
-    def generate_connected_device_documents(self):
+    def generate_device_documents(self):
         devices = self.get_connected_devices()
         desired_version = self.get_desired_software_version()
         entry = self.get_latest_software_version()
@@ -114,10 +114,13 @@ class PanoramaMgmt:
     def get_host_detail(self):
         vm_rg = f"panorama-{self.environment}-uks-rg"
         vm_name = f"panorama-{self.environment}-uks-0"
+        vm_ip = self.private_ip
+        vm_environment = self.environment
+
         pano_vm = {
             "name": vm_name,
-            "ip": self.private_ip,
-            "environment": self.environment,
+            "ip": vm_ip,
+            "environment": vm_environment,
             "resource_group": vm_rg
         }
 

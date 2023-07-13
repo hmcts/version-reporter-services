@@ -16,6 +16,9 @@ ENV COSMOS_KEY="" \
     DESIRED_VERSION="" \
     AZURE_TENANT_ID="" \
     AZURE_CLIENT_ID="" \
-    AZURE_CLIENT_SECRET=""
+    AZURE_CLIENT_SECRET="" \
+    ENVIRONMENT="" \
+    SERVER_IP="" \
+    HUB_SUBSCRIPTION_ID=""
 
 CMD [ "python", "./main.py" ]
