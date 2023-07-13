@@ -2,7 +2,8 @@ import xmltodict
 from panos.panorama import Panorama
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
-from utility import *
+from utility import update_document, update_document_report, get_document, \
+    get_major_version, get_minor_version, logger, get_formatted_datetime, db_config
 
 
 class PanoramaMgmt:
