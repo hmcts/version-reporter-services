@@ -9,10 +9,10 @@ from utility import update_document, update_document_report, get_document, \
 class PanoramaMgmt:
     """Utility for Panorama credentials"""
 
-    def __init__(self, subscription_id, environment, private_ip, api_admin_key_name="api-admin-key"):
+    def __init__(self, subscription_id, environment, server_ip, api_admin_key_name="api-admin-key"):
         self.environment = environment
         self.subscription_id = subscription_id
-        self.private_ip = private_ip
+        self.server_ip = server_ip
         self.api_admin_key_name = api_admin_key_name
         self.credential = DefaultAzureCredential()
         self.pano = None
@@ -104,9 +104,9 @@ class PanoramaMgmt:
             keyvault = SecretClient(vault_url=kv_uri, credential=self.credential)
             panos_api_key = keyvault.get_secret(self.api_admin_key_name)
 
-            logger(f"Api key  retrieved from {panorama_keyvault_name}.")
+            logger(f"Api key retrieved from {panorama_keyvault_name}.")
         except Exception as e:
-            logger("Error occurred generating panorama host details:\n{}".format(e))
+            logger(f"Error occurred generating panorama host details:\n{e}")
             raise
 
         return panos_api_key.value
@@ -114,7 +114,7 @@ class PanoramaMgmt:
     def get_host_detail(self):
         vm_rg = f"panorama-{self.environment}-uks-rg"
         vm_name = f"panorama-{self.environment}-uks-0"
-        vm_ip = self.private_ip
+        vm_ip = self.server_ip
         vm_environment = self.environment
 
         pano_vm = {
@@ -196,7 +196,7 @@ class PanoramaMgmt:
                 for ip_configuration in ip_configurations:
                     ip_addresses.append(ip_configuration.private_ip_address)
             except Exception as e:
-                logger("Error occurred getting vm ip address\n{}".format(e))
+                logger(f"Error occurred getting vm ip address\n{e}")
                 raise
 
         return ip_addresses[0]

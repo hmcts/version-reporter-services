@@ -20,7 +20,7 @@ data_source = db_config()
 try:
     subscription_id = data_source.get("subscription_id")
     environment = data_source.get("environment")
-    private_ip = data_source.get("ip")
+    server_ip = data_source.get("server_ip")
 
     logger(f"Processing environment {environment}")
 
@@ -31,7 +31,7 @@ try:
     panorama_mgmt = PanoramaMgmt(
         subscription_id=subscription_id,
         environment=environment,
-        private_ip=private_ip
+        server_ip=server_ip
     )
 
     # Ask management server for installed software information
