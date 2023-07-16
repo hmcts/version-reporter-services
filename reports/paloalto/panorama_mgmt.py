@@ -168,6 +168,11 @@ class PanoramaMgmt:
 
     @staticmethod
     def update_document_verdict(desired_version, document, sw_version, sw_version_latest):
+
+        logger(f"desired_version is: {desired_version}")
+        logger(f"sw_version is: {sw_version}")
+        logger(f"sw_version_latest is: {sw_version_latest}")
+
         if (
                 (get_major_version(sw_version_latest) - get_major_version(sw_version)) >= 2 or
                 (get_major_version(desired_version) - get_major_version(sw_version)) >= 2
