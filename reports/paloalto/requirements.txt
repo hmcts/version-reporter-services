@@ -1,4 +1,3 @@
-pytest==7.4.0
 pytz
 xmltodict
 pan-os-python>=1.11.0
