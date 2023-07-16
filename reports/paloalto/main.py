@@ -52,7 +52,7 @@ try:
 
         logger(f"Process complete in {environment}.")
     else:
-        logger(f"Empty document returned. Nothing as saved to db for {environment}.")
+        logger(f"Empty document returned. Nothing was saved to db for {environment}.")
 
 except PanConnectionTimeout as timeout_error:
     logger(f"Process not complete in {environment} \n Timeout error: {timeout_error}")

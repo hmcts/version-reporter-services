@@ -26,16 +26,18 @@ class PanoramaMgmt:
         api_key = self.get_panos_api_key()
         host_detail = self.get_host_detail()
         try:
-            logger(f"Connecting to Panorama server at {host_detail}")
+            logger(f"Connecting to Panorama server: {host_detail.get('name')}")
             self.pano = Panorama(hostname=host_detail.get("ip"), api_key=api_key)
+            logger(f"Connected to Panorama server: {host_detail.get('name')}")
         except Exception as e:
-            logger(f"Connecting to Panorama server at {host_detail} failed with: \n {e}")
+            logger(f"Connecting to Panorama server: {host_detail.get('name')} failed with: \n {e}")
             raise
 
         return True
 
     def get_system_info(self):
         xml_response = self.pano.op('show system info', xml=True)
+        logger("Fetching system info completed")
         return xml_response
 
     def generate_server_document(self):
@@ -52,9 +54,10 @@ class PanoramaMgmt:
             host_detail = self.get_host_detail()
             sw_version = self.get_pan_software_version(system_info)
             desired_version = self.get_desired_software_version()
+            host_name = host_detail.get("name")
 
             update_document(document, {"lastUpdated": get_formatted_datetime("%d %b %Y at %H:%M:%S %p")})
-            update_document_report(document, {"name": host_detail.get("name")})
+            update_document_report(document, {"name": host_name})
             update_document_report(document, {"environment": self.environment})
             update_document_report(document, {"resourceType": "Panorama"})
             update_document_report(document, {"sw_version_installed": sw_version})
@@ -62,14 +65,17 @@ class PanoramaMgmt:
 
             entry = self.get_latest_software_version()
             update_document_report(document, entry)
+            logger(f"Server document update complete for {host_name}")
 
             # color code
             sw_version_latest = entry.get("sw_version_latest")
+            logger(f"Determine verdict for {host_name}")
             self.update_document_verdict(desired_version, document, sw_version, sw_version_latest)
 
+            logger(f"Generating server document complete for {host_name}")
         except Exception as e:
             document = None
-            logger(f"Error occurred generating document Host details: \n{host_detail} \n Error: \n{e}")
+            logger(f"Error occurred generating server document with error: \n{e}")
 
         return document
 
@@ -118,12 +124,13 @@ class PanoramaMgmt:
         vm_environment = self.environment
 
         pano_vm = {
-            "name": vm_name,
-            "ip": vm_ip,
-            "environment": vm_environment,
-            "resource_group": vm_rg
+            "name": f"{vm_name}",
+            "ip": f"{vm_ip}",
+            "environment": f"{vm_environment}",
+            "resource_group": f"{vm_rg}"
         }
 
+        logger("Generating host detail completed")
         return pano_vm
 
     def get_latest_software_version(self):
@@ -141,12 +148,13 @@ class PanoramaMgmt:
                 entry.update({"releaseNotes": version.get("release-notes")})
                 entry.update({"sw_version_released_on": version.get("released-on")})
 
-            if latest + "-h" in version.get("version"):
+            if f"{latest}-h" in version.get("version"):
                 if version.get("current") == "no":
                     hot_fixes.append(version.get("version"))
 
         entry.update({"hot_fixes": hot_fixes})
 
+        logger("Generating system info detail completed")
         return entry
 
     def get_connected_devices(self):
@@ -183,29 +191,15 @@ class PanoramaMgmt:
             update_document_report(document, {"verdict": "ok"})
 
     @staticmethod
-    def get_private(vm_os, network_client):
-        ip_addresses = []
-
-        logger("Getting ip address...")
-
-        for interface in vm_os.network_profile.network_interfaces:
-            name = " ".join(interface.id.split('/')[-1:])
-            sub = "".join(interface.id.split('/')[4])
-            try:
-                ip_configurations = network_client.network_interfaces.get(sub, name).ip_configurations
-                for ip_configuration in ip_configurations:
-                    ip_addresses.append(ip_configuration.private_ip_address)
-            except Exception as e:
-                logger(f"Error occurred getting vm ip address\n{e}")
-                raise
-
-        return ip_addresses[0]
-
-    @staticmethod
     def get_pan_software_version(xml_response):
         response = xmltodict.parse(xml_response)
-        return response["response"]["result"]["system"]["sw-version"]
+        version = response["response"]["result"]["system"]["sw-version"]
+        logger(f"Retrieving software version, found: {version}")
+        return version
 
     @staticmethod
     def get_desired_software_version():
-        return db_config().get("desired_version")
+        config = db_config()
+        desired_version = config.get("desired_version")
+        logger(f"Desired Version is: {desired_version}")
+        return desired_version
