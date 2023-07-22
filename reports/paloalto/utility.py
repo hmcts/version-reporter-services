@@ -13,16 +13,16 @@ def get_document():
         "lastUpdated": None,
         "report": {
             "name": None,
-            "sw_version_latest": None,
-            "sw_version_released_on": None,
-            "sw_version_installed": None,
-            "sw_version_desired": None,
+            "latestVersion": None,
+            "releasedOn": None,
+            "installedVersion": None,
+            "desiredVersion": None,
             "resourceType": None,
             "colorCode": None,
             "verdict": None,
             "environment": None,
             "releaseNotes": None,
-            "hot_fixes": []
+            "hotFixes": []
         }
     }
     return document
