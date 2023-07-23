@@ -32,7 +32,7 @@ variable "max_throughput" {
   description = "The Maximum throughput of SQL database (RU/s)."
 }
 
-/* #---------
+/*
  * Define your partition and partition key based on your reports need
  * partition name should be the same as the report name
  * partition key should be based on the shape of the data stored
@@ -41,6 +41,7 @@ variable "containers_partitions" {
   type        = map(any)
   description = "Partition Keys for corresponding database containers."
   default = {
-    paloalto = "/report/resourceType"
+    paloalto   = "/resourceType"
+    helmcharts = "/namespace"
   }
 }
