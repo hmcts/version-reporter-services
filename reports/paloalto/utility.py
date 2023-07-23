@@ -7,33 +7,26 @@ from datetime import datetime
 def get_document():
     document = {
         "id": f"{uuid.uuid4()}",
-        "name": "paloalto",
         "displayName": "Palo Alto Resources",
         "reportType": "card",
         "lastUpdated": None,
-        "report": {
-            "name": None,
-            "latestVersion": None,
-            "releasedOn": None,
-            "installedVersion": None,
-            "desiredVersion": None,
-            "resourceType": None,
-            "colorCode": None,
-            "verdict": None,
-            "environment": None,
-            "releaseNotes": None,
-            "hotFixes": []
-        }
+        "resourceName": None,
+        "latestVersion": None,
+        "releasedOn": None,
+        "installedVersion": None,
+        "desiredVersion": None,
+        "resourceType": None,
+        "colorCode": None,
+        "verdict": None,
+        "environment": None,
+        "releaseNotes": None,
+        "hotFixes": []
     }
     return document
 
 
 def update_document(doc, update):
     doc.update(update)
-
-
-def update_document_report(doc, update):
-    doc["report"].update(update)
 
 
 def get_now():

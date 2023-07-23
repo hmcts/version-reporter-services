@@ -20,13 +20,12 @@ class Storage:
         logger("Connection established")
 
     def save_document(self, document):
-        report = document.get('report')
-        name = report.get('name')
-        logger(f"Saving to db for: {name}")
+        resource_name = document.get('resourceName')
+        logger(f"Saving to db for: {resource_name}")
         try:
             database = self.client.get_database_client(self.db_database)
             container = database.get_container_client(self.db_container)
             container.upsert_item(body=document)
         except exceptions.CosmosHttpResponseError:
-            logger(f"Saving to db for {name} failed")
+            logger(f"Saving to db for {resource_name} failed")
             raise
