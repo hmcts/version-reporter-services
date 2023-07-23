@@ -2,7 +2,7 @@ import xmltodict
 from panos.panorama import Panorama
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
-from utility import update_document, update_document_report, get_document, \
+from utility import update_document, get_document, \
     get_major_version, get_minor_version, logger, get_formatted_datetime, db_config
 
 
@@ -54,25 +54,25 @@ class PanoramaMgmt:
             host_detail = self.get_host_detail()
             sw_version = self.get_pan_software_version(system_info)
             desired_version = self.get_desired_software_version()
-            host_name = host_detail.get("name")
+            resource_name = host_detail.get("name")
 
             update_document(document, {"lastUpdated": get_formatted_datetime("%d %b %Y at %H:%M:%S %p")})
-            update_document_report(document, {"name": host_name})
-            update_document_report(document, {"environment": self.environment})
-            update_document_report(document, {"resourceType": "Panorama"})
-            update_document_report(document, {"sw_version_installed": sw_version})
-            update_document_report(document, {"sw_version_desired": desired_version})
+            update_document(document, {"resourceName": resource_name})
+            update_document(document, {"environment": self.environment})
+            update_document(document, {"resourceType": "Panorama"})
+            update_document(document, {"installedVersion": sw_version})
+            update_document(document, {"desiredVersion": desired_version})
 
             entry = self.get_latest_software_version()
-            update_document_report(document, entry)
-            logger(f"Server document update complete for {host_name}")
+            update_document(document, entry)
+            logger(f"Server document update complete for {resource_name}")
 
             # color code
-            sw_version_latest = entry.get("sw_version_latest")
-            logger(f"Determine verdict for {host_name}")
-            self.update_document_verdict(desired_version, document, sw_version, sw_version_latest)
+            latest_version = entry.get("latestVersion")
+            logger(f"Determine verdict for {resource_name}")
+            self.update_document_verdict(desired_version, document, sw_version, latest_version)
 
-            logger(f"Generating server document complete for {host_name}")
+            logger(f"Generating server document complete for {resource_name}")
         except Exception as e:
             document = None
             logger(f"Error occurred generating server document with error: \n{e}")
@@ -83,20 +83,20 @@ class PanoramaMgmt:
         devices = self.get_connected_devices()
         desired_version = self.get_desired_software_version()
         entry = self.get_latest_software_version()
-        sw_version_latest = entry.get("sw_version_latest")
+        latest_version = entry.get("latestVersion")
 
         documents = []
         for device in devices:
             document = get_document()
             update_document(document, {"lastUpdated": get_formatted_datetime("%d %b %Y at %H:%M:%S %p")})
-            update_document_report(document, {"name": device.get("hostname")})
-            update_document_report(document, {"environment": self.environment})
-            update_document_report(document, {"resourceType": "Firewall"})
-            update_document_report(document, {"sw_version_installed": device.get("sw-version")})
-            update_document_report(document, {"sw_version_desired": desired_version})
-            update_document_report(document, entry)
+            update_document(document, {"resourceName": device.get("hostname")})
+            update_document(document, {"environment": self.environment})
+            update_document(document, {"resourceType": "Firewall"})
+            update_document(document, {"installedVersion": device.get("sw-version")})
+            update_document(document, {"desiredVersion": desired_version})
+            update_document(document, entry)
 
-            self.update_document_verdict(desired_version, document, device.get("sw-version"), sw_version_latest)
+            self.update_document_verdict(desired_version, document, device.get("sw-version"), latest_version)
             documents.append(document)
 
         return documents
@@ -144,15 +144,15 @@ class PanoramaMgmt:
         for version in versions:
             if version.get("latest") == "yes":
                 latest = version.get("version")
-                entry.update({"sw_version_latest": version.get("version")})
+                entry.update({"latestVersion": version.get("version")})
                 entry.update({"releaseNotes": version.get("release-notes")})
-                entry.update({"sw_version_released_on": version.get("released-on")})
+                entry.update({"releasedOn": version.get("released-on")})
 
             if f"{latest}-h" in version.get("version"):
                 if version.get("current") == "no":
                     hot_fixes.append(version.get("version"))
 
-        entry.update({"hot_fixes": hot_fixes})
+        entry.update({"hotFixes": hot_fixes})
 
         logger("Generating system info detail completed")
         return entry
@@ -167,33 +167,33 @@ class PanoramaMgmt:
     # -------
 
     @staticmethod
-    def update_document_verdict(desired_version, document, sw_version, sw_version_latest):
+    def update_document_verdict(desired_version, document, sw_version, latest_version):
 
         logger(f"desired_version is: {desired_version}")
         logger(f"sw_version is: {sw_version}")
-        logger(f"sw_version_latest is: {sw_version_latest}")
+        logger(f"latestVersion is: {latest_version}")
 
         if (
-                (get_major_version(sw_version_latest) - get_major_version(sw_version)) >= 2 or
+                (get_major_version(latest_version) - get_major_version(sw_version)) >= 2 or
                 (get_major_version(desired_version) - get_major_version(sw_version)) >= 2
         ):
-            update_document_report(document, {"colorCode": "red"})
-            update_document_report(document, {"verdict": "upgrade"})
+            update_document(document, {"colorCode": "red"})
+            update_document(document, {"verdict": "upgrade"})
             # A good place to send out a slack notice as well if verdict is to upgrade
 
         elif (
                 (get_major_version(desired_version) == get_major_version(sw_version)) and
                 ((get_minor_version(desired_version) - get_minor_version(sw_version)) >= 1)
         ):
-            update_document_report(document, {"colorCode": "orange"})
-            update_document_report(document, {"verdict": "review"})
+            update_document(document, {"colorCode": "orange"})
+            update_document(document, {"verdict": "review"})
 
         elif (
                 (get_major_version(desired_version) == get_major_version(sw_version)) and
                 ((get_minor_version(desired_version) - get_minor_version(sw_version)) <= 1)
         ):
-            update_document_report(document, {"colorCode": "green"})
-            update_document_report(document, {"verdict": "ok"})
+            update_document(document, {"colorCode": "green"})
+            update_document(document, {"verdict": "ok"})
 
     @staticmethod
     def get_pan_software_version(xml_response):
