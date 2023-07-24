@@ -77,6 +77,7 @@ store_document() {
 # This is iterated over and each chart is added to helm, making it available to helm whatup
 # --------------------------------------------------------------------------
 
+context=$(kubectl config current-context)
 result=$(kubectl get helmrepositories.source.toolkit.fluxcd.io -A -o json | jq '.items[] | select(.metadata.namespace=="admin" or .metadata.namespace=="monitoring" or .metadata.namespace=="flux-system") | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}' | jq -s)
 
 # Iterate through helm repositories and add them to helm
@@ -125,7 +126,7 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
     colorCode=green
   fi
 
-  document=$(echo "$chart" | jq --arg verdict $verdict --arg colorCode $colorCode '. + {verdict: $verdict, colorCode: $colorCode}')
+  document=$(echo "$chart" | jq --arg context "$context" --arg verdict $verdict --arg colorCode $colorCode '. + {cluster: $context, verdict: $verdict, colorCode: $colorCode}')
   # ---------------------------------------------------------------------------
   # STEP 3:
   # Store document
