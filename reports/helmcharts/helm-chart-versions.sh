@@ -41,7 +41,7 @@ max_versions_away=$MAX_VERSIONS_AWAY
 
 # Extracts a value from json object
 get_value() {
- echo "${row}" | jq -r "${1}"
+  echo "${1}" | jq -r "${2}"
 }
 
 # Extracts the first digit in the version number x.x.x
@@ -80,10 +80,9 @@ store_document() {
 result=$(kubectl get helmrepositories.source.toolkit.fluxcd.io -A -o json | jq '.items[] | select(.metadata.namespace=="admin" or .metadata.namespace=="monitoring" or .metadata.namespace=="flux-system") | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}' | jq -s)
 
 # Iterate through helm repositories and add them to helm
-for row in $(echo "$result" | jq -c '.[]')
-do
-  name=$(get_value '.name')
-  url=$(get_value '.url')
+for row in $(echo "$result" | jq -c '.[]'); do
+  name=$(get_value "$row" '.name')
+  url=$(get_value "$row" '.url')
 
   echo "Adding the chart '${name}' at ${url} to helm"
   helm repo add "$name" "$url"
@@ -101,10 +100,9 @@ helm repo update
 charts=$(helm whatup -A -q -o json | jq '.releases[] | select(.namespace=="admin" or .namespace=="monitoring" or .namespace=="flux-system") | {chartName: .name, namespace: .namespace, installedVersion: .installed_version, latestVersion: .latest_version, appVersion: .app_version, chart: .chart, newestRepo: .newest_repo, updated: .updated, deprecated: .deprecated}' | jq -s)
 
 # Iterate through results and determine chart verdict
-for chart in $(echo "$charts" | jq -c '.[]')
-do
-  latest=$(get_value '.latestVersion');
-  installed=$(get_value '.installedVersion');
+for chart in $(echo "$charts" | jq -c '.[]'); do
+  latest=$(get_value "$chart" '.latestVersion')
+  installed=$(get_value "$chart" '.installedVersion')
 
   latest_major=$(major_version "$latest")
   installed_major=$(major_version "$installed")
@@ -113,14 +111,12 @@ do
   installed_minor=$(minor_version "$installed")
   minor_distance=$(($latest_minor - $installed_minor))
 
-  if [[ $latest_major -gt $installed_major ]]
-  then
-    # major version away, flag as needing upgrade
+  if [[ $latest_major -gt $installed_major ]]; then
+    # major version ahead, flag as needing upgrade
     verdict=upgrade
     colorCode=red
-  elif [[ $minor_distance -gt $max_versions_away ]]
-  then
-    # minor versions away, flag as needing review
+  elif [[ $minor_distance -gt $max_versions_away ]]; then
+    # x minor versions away, flag as needing review
     verdict=review
     colorCode=orange
   else
