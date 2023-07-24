@@ -15,6 +15,7 @@ ENV COSMOS_KEY="" \
     AZURE_TENANT_ID="" \
     AZURE_CLIENT_ID="" \
     AZURE_CLIENT_SECRET="" \
-    ENVIRONMENT=""
+    ENVIRONMENT="" \
+    CLUSTER_NAME=""
 
 CMD ["/helm-chart-versions.sh"]

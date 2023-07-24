@@ -32,6 +32,7 @@
 # ---------------------------------------------------------------------------
 # Define environment variables
 # ---------------------------------------------------------------------------
+context=$CLUSTER_NAME
 environment=$ENVIRONMENT
 max_versions_away=$MAX_VERSIONS_AWAY
 
@@ -77,7 +78,6 @@ store_document() {
 # This is iterated over and each chart is added to helm, making it available to helm whatup
 # --------------------------------------------------------------------------
 
-context=$(kubectl config current-context)
 result=$(kubectl get helmrepositories.source.toolkit.fluxcd.io -A -o json | jq '.items[] | select(.metadata.namespace=="admin" or .metadata.namespace=="monitoring" or .metadata.namespace=="flux-system") | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}' | jq -s)
 
 # Iterate through helm repositories and add them to helm
