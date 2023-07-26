@@ -4,8 +4,9 @@ RUN apk update && apk add python3 py3-pip && pip3 install azure-cosmos
 RUN apk add openssl uuidgen
 RUN helm plugin install https://github.com/fabmation-gmbh/helm-whatup
 
-COPY helm-chart-versions.sh /
-COPY save-to-cosmos.py /
+WORKDIR /app
+
+COPY . .
 
 ENV COSMOS_KEY="" \
     COSMOS_DB_NAME="" \
