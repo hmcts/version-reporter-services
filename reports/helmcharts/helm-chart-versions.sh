@@ -66,7 +66,7 @@ store_document() {
   created_on=$(date '+%Y-%m-%d %H:%M:%S')
   document=$(echo "$1" | jq --arg id "$uuid" --arg environment "$environment" --arg created_on "$created_on" '. + {id: $id, environment: $environment, createdOn: $created_on}')
 
-  python3 save-to-cosmos.py "${document}"
+  python3 ./save-to-cosmos.py "${document}"
   wait $!
 }
 
