@@ -32,7 +32,7 @@
 # ---------------------------------------------------------------------------
 # Define environment variables
 # ---------------------------------------------------------------------------
-context=$CLUSTER_NAME
+cluster_name=$CLUSTER_NAME
 environment=$ENVIRONMENT
 max_versions_away=$MAX_VERSIONS_AWAY
 
@@ -64,7 +64,7 @@ store_document() {
   # Add uuid, created date and environment info
   uuid=$(uuidgen)
   created_on=$(date '+%Y-%m-%d %H:%M:%S')
-  document=$(echo "$1" | jq --arg id "$uuid" --arg environment "$environment" --arg createdOn "$created_on" '. + {id: $id, environment: $environment, createdOn: $createdOn}')
+  document=$(echo "$1" | jq --arg id "$uuid" --arg environment "$environment" --arg created_on "$created_on" '. + {id: $id, environment: $environment, createdOn: $created_on}')
 
   python3 save-to-cosmos.py "${document}"
   wait $!
@@ -115,18 +115,18 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
   if [[ $latest_major -gt $installed_major ]]; then
     # major version ahead, flag as needing upgrade
     verdict=upgrade
-    colorCode=red
+    color_code=red
   elif [[ $minor_distance -gt $max_versions_away ]]; then
     # x minor versions away, flag as needing review
     verdict=review
-    colorCode=orange
+    color_code=orange
   else
     # Happy days
     verdict=ok
-    colorCode=green
+    color_code=green
   fi
 
-  document=$(echo "$chart" | jq --arg context "$context" --arg verdict $verdict --arg colorCode $colorCode '. + {cluster: $context, verdict: $verdict, colorCode: $colorCode}')
+  document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" --arg verdict $verdict --arg color_code $color_code '. + {clusterName: $cluster_name, verdict: $verdict, colorCode: $color_code}')
   # ---------------------------------------------------------------------------
   # STEP 3:
   # Store document
