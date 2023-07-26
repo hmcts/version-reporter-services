@@ -79,6 +79,7 @@ store_document() {
 # --------------------------------------------------------------------------
 
 result=$(kubectl get helmrepositories.source.toolkit.fluxcd.io -A -o json | jq '.items[] | select(.metadata.namespace=="admin" or .metadata.namespace=="monitoring" or .metadata.namespace=="flux-system") | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}' | jq -s)
+[[ "$result" == "" ]] && echo "Error: cannot get helm repositories." && exit 1
 
 # Iterate through helm repositories and add them to helm
 for row in $(echo "$result" | jq -c '.[]'); do
@@ -99,6 +100,7 @@ helm repo update
 # Use helm whatup to extract installed chart information
 # --------------------------------------------------------------------------
 charts=$(helm whatup -A -q -o json | jq '.releases[] | select(.namespace=="admin" or .namespace=="monitoring" or .namespace=="flux-system") | {chartName: .name, namespace: .namespace, installedVersion: .installed_version, latestVersion: .latest_version, appVersion: .app_version, chart: .chart, newestRepo: .newest_repo, updated: .updated, deprecated: .deprecated}' | jq -s)
+[[ "$charts" == "" ]] && echo "Error: helm whatup failed." && exit 1
 
 # Iterate through results and determine chart verdict
 for chart in $(echo "$charts" | jq -c '.[]'); do
