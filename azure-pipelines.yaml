@@ -159,9 +159,9 @@ stages:
               image_tag=$(echo ${image_tag_sha}-${last_commit_time})
               
               echo "##vso[task.setvariable variable=tag]${{variables.acrRepository}}/${{report.name}}:prod-${image_tag}"
-              echo "Image tag: $(tag)"
             displayName: "ACR Image Tag - ${{report.name}}"
-
+          - script: |
+              echo "Image tag: $(tag)"
 #          - template: steps/acr-build.yaml@cnp-azuredevops-libraries
 #            parameters:
 #              serviceConnection: ${{ variables['acrServiceConnection'] }}
