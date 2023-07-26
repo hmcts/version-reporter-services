@@ -5,7 +5,7 @@ RUN apk add openssl uuidgen
 RUN helm plugin install https://github.com/fabmation-gmbh/helm-whatup
 
 COPY helm-chart-versions.sh /
-COPY send-to-cosmos.py /
+COPY save-to-cosmos.py /
 
 ENV COSMOS_KEY="" \
     COSMOS_DB_NAME="" \
