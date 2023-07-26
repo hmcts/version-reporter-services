@@ -19,4 +19,4 @@ ENV COSMOS_KEY="" \
     ENVIRONMENT="" \
     CLUSTER_NAME=""
 
-CMD ["./helm-chart-versions.sh"]
+CMD ["/helm-chart-versions.sh"]
