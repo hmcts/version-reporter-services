@@ -64,7 +64,7 @@ store_document() {
   # Add uuid, created date and environment info
   uuid=$(uuidgen)
   created_on=$(date '+%Y-%m-%d %H:%M:%S')
-  document=$(echo "$1" | jq --arg id "$uuid" --arg environment "$environment" --arg created_on "$created_on" '. + {id: $id, environment: $environment, createdOn: $created_on}')
+  document=$(echo "$1" | jq --arg id "$uuid" --arg environment "$environment" --arg created_on "$created_on" '. + {id: $id, environment: $environment, createdOn: $created_on, lastUpdated: $created_on}')
 
   python3 ./save-to-cosmos.py "${document}"
   wait $!
@@ -128,7 +128,12 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
     color_code=green
   fi
 
-  document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" --arg verdict $verdict --arg color_code $color_code '. + {clusterName: $cluster_name, verdict: $verdict, colorCode: $color_code}')
+  # Enhance document with additional information
+  document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" \
+                                --arg verdict $verdict \
+                                --arg report_type "list" \
+                                --arg display_name "HELM Repositories" \
+                                --arg color_code $color_code '. + {displayName: $display_name, clusterName: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
   # ---------------------------------------------------------------------------
   # STEP 3:
   # Store document
