@@ -131,7 +131,7 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
   # Enhance document with additional information
   document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" \
                                 --arg verdict $verdict \
-                                --arg report_type "list" \
+                                --arg report_type "table" \
                                 --arg display_name "HELM Repositories" \
                                 --arg color_code $color_code '. + {displayName: $display_name, clusterName: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
   # ---------------------------------------------------------------------------
