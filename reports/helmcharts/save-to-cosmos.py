@@ -13,7 +13,7 @@ container_name = os.environ.get("COSMOS_DB_CONTAINER", "helmcharts")
 
 
 # Checks to determine if the chart has already been processed
-# If chart data has not changed the chart name, namespace, latest version and cluster will be the same,
+# If chart data has not changed i.e the chart name, namespace, latest version and cluster name, it will be the same
 def document_exists(container, data):
     db_result = None
     chart_name = data.get("chartName")
@@ -47,8 +47,8 @@ def document_exists(container, data):
     return db_result
 
 
-# If the chart is still at the same version then we'll update only the installed version which is whats
-# likely to have changed due to an update
+# If the chart is still at the same version then we'll update only the installed version
+# which is whats likely to have changed due to an update
 def update_document(container, current_doc, new_doc):
     installed_version = new_doc.get("installedVersion")
     last_updated = get_formatted_datetime()
