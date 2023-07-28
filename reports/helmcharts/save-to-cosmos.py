@@ -102,4 +102,4 @@ except exceptions.CosmosHttpResponseError:
     print(f"Saving to db failed")
     raise
 
-print("Job completed.")
+print("save to database completed.")
