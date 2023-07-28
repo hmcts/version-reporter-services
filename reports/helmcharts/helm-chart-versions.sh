@@ -64,7 +64,9 @@ store_document() {
   # Add uuid, created date and environment info
   uuid=$(uuidgen)
   created_on=$(date '+%Y-%m-%d %H:%M:%S')
-  document=$(echo "$1" | jq --arg id "$uuid" --arg environment "$environment" --arg created_on "$created_on" '. + {id: $id, environment: $environment, createdOn: $created_on, lastUpdated: $created_on}')
+  document=$(echo "$1" | jq --arg id "$uuid" \
+                            --arg environment "$environment" \
+                            --arg created_on "$created_on" '. + {id: $id, environment: $environment, createdOn: $created_on, lastUpdated: $created_on}')
 
   python3 ./save-to-cosmos.py "${document}"
   wait $!

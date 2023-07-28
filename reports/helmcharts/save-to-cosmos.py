@@ -40,7 +40,7 @@ def document_exists(container, data):
     else:
         total = len(items)
         if total > 1:
-            print(f"Expected {chart_name} to return only 1 item, it returned {total} ")
+            print(f"Expected {chart_name} to return only 1 item, it returned {total}")
 
         db_result = items[0]  # Should be only one match
 
