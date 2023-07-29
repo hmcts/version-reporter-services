@@ -186,13 +186,13 @@ stages:
           displayName: "Push ${{report.name}} Container"
           variables:
             isLabelled: $[dependencies.['BuildArtifact_${{report.name}}'].outputs['isLabelled']]
-#          condition: |
-#           or(
-#              and(succeeded(),
+          condition: |
+           or(
+              and(succeeded(),
 #                  eq(variables['isMain'], true),
-#                  eq(variables['isLabelled'], true)),
-#              and(succeeded(), eq('${{ parameters.prImage }}', true))
-#            )
+                  eq(variables['isLabelled'], true)),
+              and(succeeded(), eq('${{ parameters.prImage }}', true))
+            )
           steps:
             - script: |
                 repo_sha=$(git rev-parse --verify HEAD)
