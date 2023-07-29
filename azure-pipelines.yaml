@@ -185,13 +185,13 @@ stages:
         - job: PushContainer_${{report.name}}
           dependsOn: BuildArtifact_${{report.name}}
           displayName: Push ${{report.name}} Container
-          condition: |
-           or(
-              and(succeeded(), 
+#          condition: |
+#           or(
+#              and(succeeded(),
 #                  eq(variables['isMain'], true),
-                  eq(variables['isLabelled'], true)),
-              and(succeeded(), eq('${{ parameters.prImage }}', true))
-            )
+#                  eq(variables['isLabelled'], true)),
+#              and(succeeded(), eq('${{ parameters.prImage }}', true))
+#            )
           steps:
             - script: |
                 repo_sha=$(git rev-parse --verify HEAD)
