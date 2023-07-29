@@ -85,7 +85,7 @@ parameters:
 stages:
   - stage: Precheck
     jobs:
-      - job:
+      - job: "Precheck"
         timeoutInMinutes: ${{ variables.timeoutInMinutes }}
         steps:
           - template: steps/terraform-precheck.yaml@cnp-azuredevops-libraries
@@ -120,8 +120,9 @@ stages:
   - stage: "Reports"
     displayName: "Reports"
     jobs:
-      - job:
+      - job: GetToken
         displayName: 'Get token from Keyvault'
+        dependsOn: "Precheck"
         steps:
           - task: AzureKeyVault@2
             inputs:
@@ -130,15 +131,15 @@ stages:
               SecretsFilter: "github-api-token"
               RunAsPreJob: false
           - script: |
-              echo "##vso[task.setvariable variable=token;isOutput=true]$(github-api-token)"
+              echo "##vso[task.setvariable variable=token;isSecret=true;isOutput=true]$(github-api-token)"
             name: gitToken
 
       - ${{ each report in parameters.reports }}:
         - job: BuildArtifact_${{report.name}}
           displayName: "Build ${{report.name}} Artifact"
-          dependsOn: 'Get token from Keyvault'
+          dependsOn: "GetToken"
           variables:
-            token: $[dependencies['Get token from Keyvault'].outputs['gitToken.token']]
+            token: $[dependencies.GetToken.outputs['gitToken.token']]
           steps:
           - task: Bash@3
             displayName: "Get ${{report.name}} Label"
