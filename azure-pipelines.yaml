@@ -215,5 +215,6 @@ stages:
                 scriptLocation: 'inlineScript'
                 workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
                 inlineScript: |
+                  echo "Got here"
 #                  az acr build -r ${{variables.acrName}} -t $(tag) -g ${{variables.acrResourceGroup}} .
   
