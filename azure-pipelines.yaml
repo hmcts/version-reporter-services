@@ -149,10 +149,7 @@ stages:
             inputs:
               targetType: 'inline'
               script: |      
-                echo "Label is: ${LABEL}"
-                echo "PR number is: ${PR_NUMBER}"
-                echo "Other is: ${TOKEN:0:5}"
-                RESPONSE=$(curl -L \
+                RESPONSE=$(curl -sL \
                                 -H "Accept: application/vnd.github+json" \
                                 -H "Authorization: Bearer ${TOKEN}" \
                                 -H "X-GitHub-Api-Version: 2022-11-28" \
@@ -160,11 +157,11 @@ stages:
     
                 if [[ $RESPONSE == $LABEL ]]
                 then
-                  echo "${RESPONSE} label found. A Container image will be published for this report."
-                  echo "##vso[task.setvariable variable=isLabelled]true"
+                  echo "'${RESPONSE}' label found. A Container image will be published for this report."
+                  echo "##vso[task.setvariable variable=isLabelled;isOutput=true]true"
                 else
-                  echo "No label found for ${LABEL}. A Container image will not be published for this report."
-                  echo "##vso[task.setvariable variable=isLabelled]false"
+                  echo "No '${LABEL}' found on branch. A Container image will not be published for this report."
+                  echo "##vso[task.setvariable variable=isLabelled;isOutput=true]false"
                 fi
 
           - ${{ if eq( report['type'], 'nodejs') }}:
@@ -191,7 +188,7 @@ stages:
           condition: |
            or(
               and(succeeded(), 
-                  eq(variables['isMain'], true), 
+#                  eq(variables['isMain'], true),
                   eq(variables['isLabelled'], true)),
               and(succeeded(), eq('${{ parameters.prImage }}', true))
             )
@@ -218,5 +215,5 @@ stages:
                 scriptLocation: 'inlineScript'
                 workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
                 inlineScript: |
-                  az acr build -r ${{variables.acrName}} -t $(tag) -g ${{variables.acrResourceGroup}} .
+#                  az acr build -r ${{variables.acrName}} -t $(tag) -g ${{variables.acrResourceGroup}} .
   
