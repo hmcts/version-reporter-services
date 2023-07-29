@@ -160,7 +160,7 @@ stages:
                   echo "'${RESPONSE}' label found. A Container image will be published for this report."
                   echo "##vso[task.setvariable variable=isLabelled;isOutput=true]true"
                 else
-                  echo "No '${LABEL}' found on branch. A Container image will not be published for this report."
+                  echo "No '${LABEL}' found. A Container image will not be published for this report."
                   echo "##vso[task.setvariable variable=isLabelled;isOutput=true]false"
                 fi
 
@@ -199,7 +199,7 @@ stages:
                 last_commit_time=$(date +'%Y%m%d%H%M%S')
                 image_tag=$(echo ${image_tag_sha}-${last_commit_time})
                 
-                if [[ ${{variables.isLabelled}} == true ]]
+                if [[ $(isLabelled) == true ]]
                 then
                   echo "PR is labelled, creating container tag"
                 fi
