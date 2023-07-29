@@ -186,14 +186,14 @@ stages:
           displayName: "Test for Label"
           dependsOn: BuildArtifact_${{report.name}}
           variables:
-            labelled: $[dependencies.['BuildArtifact_${{report.name}}'].outputs['isLabelled']]
+            labelled: $[dependencies['BuildArtifact_${{report.name}}'].outputs['isLabelled']]
           steps:
             - script: echo "Label is $(labelled)"
 
         - job: "PushContainer_${{report.name}}"
           displayName: "Push ${{report.name}} Container"
           variables:
-            labelled: $[dependencies.['BuildArtifact_${{report.name}}'].outputs['isLabelled']]
+            labelled: $[dependencies['BuildArtifact_${{report.name}}'].outputs['isLabelled']]
           condition: |
            or(
               and(succeeded(),
