@@ -141,7 +141,7 @@ stages:
             env:
               LABEL: ${{report.name}}
               PR_NUMBER: $(System.PullRequest.PullRequestNumber)
-              TOKEN: ${{variable.token}}
+              TOKEN: ${{variables.token}}
             inputs:
               targetType: 'inline'
               script: |      
