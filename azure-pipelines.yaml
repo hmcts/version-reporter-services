@@ -131,6 +131,7 @@ stages:
               RunAsPreJob: false
           - script: |
               echo "##vso[task.setvariable variable=token;issecret=true]$(github-api-token)"
+
       - ${{ each report in parameters.reports }}:
         - job: BuildArtifact_${{report.name}}
           displayName: "Build ${{report.name}} Artifact"
@@ -140,7 +141,7 @@ stages:
             env:
               LABEL: ${{report.name}}
               PR_NUMBER: $(System.PullRequest.PullRequestNumber)
-              TOKEN: $(token)
+              TOKEN: ${{variable.token}}
             inputs:
               targetType: 'inline'
               script: |      
