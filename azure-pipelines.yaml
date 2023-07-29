@@ -185,6 +185,8 @@ stages:
         - job: PushContainer_${{report.name}}
           dependsOn: BuildArtifact_${{report.name}}
           displayName: Push ${{report.name}} Container
+          variables:
+            isLabelled: $[dependencies.['BuildArtifact_${{report.name}}'].outputs['isLabelled']]
 #          condition: |
 #           or(
 #              and(succeeded(),
