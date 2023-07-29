@@ -142,7 +142,9 @@ stages:
               PR_NUMBER: $(System.PullRequest.PullRequestNumber)
             inputs:
               targetType: 'inline'
-              script: |              
+              script: |      
+                echo "Label is: ${LABEL}"
+                echo " PR number is: ${PR_NUMBER}"
                 RESPONSE=$(curl -L \
                                 -H "Accept: application/vnd.github+json" \
                                 -H "Authorization: Bearer $TOKEN" \
