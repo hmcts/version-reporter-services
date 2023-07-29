@@ -126,9 +126,9 @@ stages:
           - task: AzureKeyVault@1
             inputs:
               azureSubscription: "DCD-CFT-Sandbox"
-              connectedServiceName: "DCD-CFT-Sandbox"
               keyVaultName: "infra-vault-nonprod"
               secretsFilter: "github-api-token"
+              runAsPreJob: false
 
       - ${{ each report in parameters.reports }}:
         - job: BuildArtifact_${{report.name}}
