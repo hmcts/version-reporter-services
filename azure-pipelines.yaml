@@ -95,13 +95,6 @@ stages:
               serviceConnection: 'DCD-CFT-Sandbox'
               overrideAction: ${{ parameters.overrideAction }}
 
-          - task: AzureKeyVault@1
-            displayName: 'Get Git token from Keyvault'
-            inputs:
-              azureSubscription: "DCD-CFT-Sandbox"
-              keyVaultName: "infra-vault-nonprod"
-              secretsFilter: "github-api-token"
-
 #  - ${{ each environment in parameters.env }}: We could have stg and prod
   - stage: "Infrastructure"
     displayName: "Infrastructure"
@@ -127,75 +120,85 @@ stages:
   - stage: "Reports"
     displayName: "Reports"
     jobs:
-    - ${{ each report in parameters.reports }}:
-      - job: BuildArtifact_${{report.name}}
-        displayName: Build ${{report.name}} Artifact
+      - job:
+        displayName: 'Get token from Keyvault'
         steps:
-        - bash: |
-            LABEL=${{report.name}}
-            PR_NUMBER=$(System.PullRequest.PullRequestNumber)
-            REPO=$(Build.Repository.Name)
-            RESPONSE=$(curl -L \
-                            -H "Accept: application/vnd.github+json" \
-                            -H "Authorization: Bearer $(github-api-token)" \
-                            -H "X-GitHub-Api-Version: 2022-11-28" \
-                            https://api.github.com/repos/hmcts/${REPO}/pulls/${PR_NUMBER} | jq --arg LABEL "$LABEL" -r '.labels[] | select(.name==$LABEL) | .name')
-
-            if [[ $RESPONSE == $LABEL ]]
-              echo "${RESPONSE} label found. A Container image will be published for this report."
-              echo "##vso[task.setvariable variable=isLabelled]true"
-            else
-              echo "No label found for ${LABEL}. A Container image will not be published for this report."
-              echo "##vso[task.setvariable variable=isLabelled]false"
-            fi
-
-          displayName: "Get ${{report.name}} Label"
-
-        - ${{ if eq( report['type'], 'nodejs') }}:
-          - template: "pipeline-templates/build-nodejs.yaml"
-            parameters:
-              prImage: ${{ parameters.prImage }}
-              versionSpec: "18.x"
-              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
-        - ${{ elseif eq( report['type'], 'python')  }}:
-          - template: "pipeline-templates/build-python.yaml"
-            parameters:
-              prImage: ${{ parameters.prImage }}
-              versionSpec: "3.11"
-              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
-        - ${{ else }}:
-          - template: "reports/${{report.name}}/build.yaml"
-            parameters:
-              prImage: ${{ parameters.prImage }}
-              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
-
-      - job: PushContainer_${{report.name}}
-        dependsOn: BuildArtifact_${{report.name}}
-        displayName: Push ${{report.name}} Container
-        condition: |
-         or(
-            and(succeeded(), 
-                eq(variables['isMain'], true), 
-                eq(variables['isLabelled'], true)),
-            and(succeeded(), eq('${{ parameters.prImage }}', true))
-          )
-        steps:
-          - script: |
-              repo_sha=$(git rev-parse --verify HEAD)
-              image_tag_sha=${repo_sha:0:7}
-              last_commit_time=$(date +'%Y%m%d%H%M%S')
-              image_tag=$(echo ${image_tag_sha}-${last_commit_time})
-              
-              echo "##vso[task.setvariable variable=tag]'${{variables.acrRepository}}/${{report.name}}:prod-${image_tag}'"
-            displayName: "ACR: Tag ${{report.name}}"
-
-          - task: AzureCLI@1
-            displayName: 'ACR: Build ${{report.name}}'
-            enabled: true
+          - task: AzureKeyVault@1
             inputs:
-              azureSubscription: ${{ variables.acrServiceConnection }}
-              scriptLocation: 'inlineScript'
-              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
-              inlineScript: |
-                az acr build -r ${{variables.acrName}} -t $(tag) -g ${{variables.acrResourceGroup}} .
+              azureSubscription: "DCD-CFT-Sandbox"
+              keyVaultName: "infra-vault-nonprod"
+              secretsFilter: "github-api-token"
 
+      - ${{ each report in parameters.reports }}:
+        - job: BuildArtifact_${{report.name}}
+          displayName: "Build ${{report.name}} Artifact"
+          steps:
+          - bash: |
+              LABEL=${{report.name}}
+              PR_NUMBER=$(System.PullRequest.PullRequestNumber)
+              REPO=$(Build.Repository.Name)
+              RESPONSE=$(curl -L \
+                              -H "Accept: application/vnd.github+json" \
+                              -H "Authorization: Bearer $(github-api-token)" \
+                              -H "X-GitHub-Api-Version: 2022-11-28" \
+                              https://api.github.com/repos/hmcts/${REPO}/pulls/${PR_NUMBER} | jq --arg LABEL "$LABEL" -r '.labels[] | select(.name==$LABEL) | .name')
+  
+              if [[ $RESPONSE == $LABEL ]]
+              then
+                echo "${RESPONSE} label found. A Container image will be published for this report."
+                echo "##vso[task.setvariable variable=isLabelled]true"
+              else
+                echo "No label found for ${LABEL}. A Container image will not be published for this report."
+                echo "##vso[task.setvariable variable=isLabelled]false"
+              fi
+
+            displayName: "Get ${{report.name}} Label"
+
+          - ${{ if eq( report['type'], 'nodejs') }}:
+            - template: "pipeline-templates/build-nodejs.yaml"
+              parameters:
+                prImage: ${{ parameters.prImage }}
+                versionSpec: "18.x"
+                workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+          - ${{ elseif eq( report['type'], 'python')  }}:
+            - template: "pipeline-templates/build-python.yaml"
+              parameters:
+                prImage: ${{ parameters.prImage }}
+                versionSpec: "3.11"
+                workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+          - ${{ else }}:
+            - template: "reports/${{report.name}}/build.yaml"
+              parameters:
+                prImage: ${{ parameters.prImage }}
+                workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+
+        - job: PushContainer_${{report.name}}
+          dependsOn: BuildArtifact_${{report.name}}
+          displayName: Push ${{report.name}} Container
+          condition: |
+           or(
+              and(succeeded(), 
+                  eq(variables['isMain'], true), 
+                  eq(variables['isLabelled'], true)),
+              and(succeeded(), eq('${{ parameters.prImage }}', true))
+            )
+          steps:
+            - script: |
+                repo_sha=$(git rev-parse --verify HEAD)
+                image_tag_sha=${repo_sha:0:7}
+                last_commit_time=$(date +'%Y%m%d%H%M%S')
+                image_tag=$(echo ${image_tag_sha}-${last_commit_time})
+                
+                echo "##vso[task.setvariable variable=tag]'${{variables.acrRepository}}/${{report.name}}:prod-${image_tag}'"
+              displayName: "ACR: Tag ${{report.name}}"
+
+            - task: AzureCLI@1
+              displayName: 'ACR: Build ${{report.name}}'
+              enabled: true
+              inputs:
+                azureSubscription: ${{ variables.acrServiceConnection }}
+                scriptLocation: 'inlineScript'
+                workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+                inlineScript: |
+                  az acr build -r ${{variables.acrName}} -t $(tag) -g ${{variables.acrResourceGroup}} .
+  
