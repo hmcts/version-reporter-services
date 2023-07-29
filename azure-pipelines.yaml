@@ -149,7 +149,7 @@ stages:
               echo "##vso[task.setvariable variable=isLabelled]false"
             fi
 
-          displayName: "Get Report Label"
+          displayName: "Get ${{report.name}} Label"
 
         - ${{ if eq( report['type'], 'nodejs') }}:
           - template: "pipeline-templates/build-nodejs.yaml"
