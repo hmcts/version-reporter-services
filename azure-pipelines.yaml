@@ -144,7 +144,8 @@ stages:
               targetType: 'inline'
               script: |      
                 echo "Label is: ${LABEL}"
-                echo " PR number is: ${PR_NUMBER}"
+                echo "PR number is: ${PR_NUMBER}"
+                echo "Other is: ${TOKEN:0:3}"
                 RESPONSE=$(curl -L \
                                 -H "Accept: application/vnd.github+json" \
                                 -H "Authorization: Bearer $TOKEN" \
