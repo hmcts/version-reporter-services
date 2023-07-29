@@ -195,7 +195,7 @@ stages:
                 last_commit_time=$(date +'%Y%m%d%H%M%S')
                 image_tag=$(echo ${image_tag_sha}-${last_commit_time})
                 
-                if [[ ${{variables.isLabelled == true ]]
+                if [[ ${{variables.isLabelled}} == true ]]
                 then
                   echo "PR is labelled, creating container tag"
                 fi
