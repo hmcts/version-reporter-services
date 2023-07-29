@@ -182,15 +182,22 @@ stages:
                 prImage: ${{ parameters.prImage }}
                 workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
 
+        - job: "Test for Label"
+          displayName: "Test for Label"
+          variables:
+            labelled: $[dependencies.['BuildArtifact_${{report.name}}'].outputs['isLabelled']]
+          steps:
+            - script: echo "Label is $(labelled)"
+
         - job: "PushContainer_${{report.name}}"
           displayName: "Push ${{report.name}} Container"
           variables:
-            isLabelled: $[dependencies.['BuildArtifact_${{report.name}}'].outputs['isLabelled']]
+            labelled: $[dependencies.['BuildArtifact_${{report.name}}'].outputs['isLabelled']]
           condition: |
            or(
               and(succeeded(),
-#                  eq(variables['isMain'], true),
-                  eq(variables['isLabelled'], true)),
+                  eq(variables['isMain'], true),
+                  eq(variables['labelled'], true)),
               and(succeeded(), eq('${{ parameters.prImage }}', true))
             )
           steps:
