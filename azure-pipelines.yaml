@@ -98,7 +98,7 @@ stages:
           - task: AzureKeyVault@1
             displayName: 'Get Git token from Keyvault'
             inputs:
-              azureSubscription: "DCD-CNP-DEV"
+              azureSubscription: "DCD-CFT-Sandbox"
               keyVaultName: "infra-vault-nonprod"
               secretsFilter: "github-api-token"
 
