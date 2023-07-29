@@ -182,8 +182,9 @@ stages:
                 prImage: ${{ parameters.prImage }}
                 workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
 
-        - job: TestforLabel
+        - job:
           displayName: "Test for Label"
+          dependsOn: BuildArtifact_${{report.name}}
           variables:
             labelled: $[dependencies.['BuildArtifact_${{report.name}}'].outputs['isLabelled']]
           steps:
