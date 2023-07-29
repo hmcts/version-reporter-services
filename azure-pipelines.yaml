@@ -122,7 +122,6 @@ stages:
     jobs:
       - job: GetToken
         displayName: 'Get token from Keyvault'
-        dependsOn: "Precheck"
         steps:
           - task: AzureKeyVault@2
             inputs:
