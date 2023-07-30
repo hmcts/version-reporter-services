@@ -165,8 +165,8 @@ stages:
             enabled: true
             inputs:
               azureSubscription: ${{ variables.acrServiceConnection }}
-              scriptLocation: 'inlineScript'
               workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
-              inlineScript: |
-                az acr build -r ${{variables.acrName}} -t $(tag) -g ${{variables.acrResourceGroup}} .
+              scriptType: bash
+              scriptPath: $(System.DefaultWorkingDirectory)/pipeline-scripts/publish-image.sh
+              arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}}
 
