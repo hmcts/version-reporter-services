@@ -14,10 +14,10 @@ PUBLISH_IMAGE=$5
 
 CHANGES=$(git diff HEAD^..HEAD --name-only | grep -c "/${REPORT_NAME}/" | xargs)
 
-if [[ "$CHANGES" -gt 0 || "$PUBLISH_IMAGE" == "$REPORT_NAME" ]]
+if [[ "$CHANGES" -gt 0 || "$PUBLISH_IMAGE" == "$REPORT_NAME" || "$PUBLISH_IMAGE" == "All" ]]
 then
 
-  if [[ "$PUBLISH_IMAGE" = "$REPORT_NAME" ]]
+  if [[ "$PUBLISH_IMAGE" == "$REPORT_NAME" || "$PUBLISH_IMAGE" == "All" ]]
   then
     echo "Publishing a new image to '${ACR_NAME} for '${REPORT_NAME}'"
   else
