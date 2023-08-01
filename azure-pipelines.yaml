@@ -69,6 +69,7 @@ parameters:
   - name: publishImage
     displayName: Publish New Image
     type: string
+    default: "All"
     values:
       - "helmcharts"
       - "paloalto"
