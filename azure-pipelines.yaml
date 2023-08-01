@@ -177,5 +177,5 @@ stages:
               workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
               scriptType: bash
               scriptPath: $(System.DefaultWorkingDirectory)/pipeline-scripts/publish-image.sh
-              arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}} ${{variables.publishImage}}
+              arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}} ${{parameters.publishImage}}
 
