@@ -24,7 +24,7 @@ then
     echo "${CHANGES} files have been modified in '${REPORT_NAME}' report. Publishing a new image to '${ACR_NAME}"
   fi
 
-  az acr build -r "$ACR_NAME" -t "$TAG" -g "$ACR_RESOURCE_GROUP" .
+  az acr build -r "${ACR_NAME}" -t "${TAG}" -g "${ACR_RESOURCE_GROUP}" .
 else
   echo "${CHANGES} files have been modified in '${REPORT_NAME}' report. No image published to '${ACR_NAME}'"
 fi
