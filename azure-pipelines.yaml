@@ -65,6 +65,15 @@ parameters:
       - true
       - false
 
+  # If you need to republish a particular report image
+  - name: publishImage
+    displayName: Publish New Image
+    type: string
+    default: None
+    values:
+      - "helmcharts"
+      - "paloalto"
+
   - name: action
     displayName: Action
     type: string
@@ -168,5 +177,5 @@ stages:
               workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
               scriptType: bash
               scriptPath: $(System.DefaultWorkingDirectory)/pipeline-scripts/publish-image.sh
-              arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}}
+              arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}} ${{variables.publishImage}}
 
