@@ -71,6 +71,7 @@ parameters:
     type: string
     default: "All"
     values:
+      - "All"
       - "helmcharts"
       - "paloalto"
 
