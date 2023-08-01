@@ -12,7 +12,7 @@ ACR_RESOURCE_GROUP=$3
 ACR_NAME=$4
 PUBLISH_IMAGE=$5
 
-CHANGES=$(git diff HEAD^..HEAD --name-only | grep -c "/${REPORT_NAME}/" | xargs)
+CHANGES=$(git diff master..HEAD^ --name-only | grep -c "/${REPORT_NAME}/" | xargs)
 
 if [[ "$CHANGES" -gt 0 || "$PUBLISH_IMAGE" == "$REPORT_NAME" || "$PUBLISH_IMAGE" == "All" ]]
 then
