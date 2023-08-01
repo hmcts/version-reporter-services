@@ -14,7 +14,7 @@ PUBLISH_IMAGE=$5
 
 CHANGES=$(git diff HEAD^..HEAD --name-only | grep -c "/${REPORT_NAME}/" | xargs)
 
-if [[ "$CHANGES" -gt 0 || "$PUBLISH_IMAGE" = "$REPORT_NAME" ]]
+if [[ "$CHANGES" -gt 0 || "$PUBLISH_IMAGE" == "$REPORT_NAME" ]]
 then
 
   if [[ "$PUBLISH_IMAGE" = "$REPORT_NAME" ]]
