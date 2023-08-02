@@ -158,7 +158,12 @@ stages:
         displayName: Push ${{report.name}} Container
         condition: |
          or(
-            and(succeeded(), eq(variables['isMain'], true)),
+            and(succeeded(), 
+                eq(variables['isMain'], true),
+                or(
+                    eq(${{ parameters.publishImage }}, ${{report.name}}), 
+                    eq(${{ parameters.publishImage }}, 'All')
+                  )
             and(succeeded(), eq('${{ parameters.prImage }}', true))
           )
         steps:
@@ -179,5 +184,5 @@ stages:
               workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
               scriptType: bash
               scriptPath: $(System.DefaultWorkingDirectory)/pipeline-scripts/publish-image.sh
-              arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}} ${{parameters.publishImage}}
+              arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}}
 
