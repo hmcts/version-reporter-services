@@ -69,11 +69,12 @@ parameters:
   - name: publishImage
     displayName: Publish New Image
     type: string
-    default: "All"
+    default: "None"
     values:
-      - "All"
+      - "None"
       - "helmcharts"
       - "paloalto"
+      - "All"
 
   - name: action
     displayName: Action
@@ -158,31 +159,13 @@ stages:
         condition: |
          or(
             and(succeeded(), eq(variables['isMain'], true)),
-            and(succeeded(), eq('${{ parameters.prImage }}', true))
+            or(
+              eq('${{parameters.publishImage}}', '${{report.name}}'), 
+              eq('${{parameters.publishImage}}', 'All')
+            ),
+            and(succeeded(), eq('${{parameters.prImage}}', true))
           )
         steps:
-          - bash: |
-              # Test outputs
-              echo "System.PullRequest.PullRequestNumber:" 
-              echo $PULL_REQUEST_NUMBER
-              echo "Build.TriggeredBy.BuildNumber:"
-              echo $BUILD_NUMBER
-              echo "System.PullRequest.SourceBranch:"
-              echo $SOURCE_BRANCH
-              echo "System.PullRequest.SourceRepositoryURI:"
-              echo $SOURCE_REPOSITORY_URI
-              echo "System.PullRequest.TargetBranch:"
-              echo $TARGET_BRANCH
-              echo "System.PullRequest.targetBranchName:"
-              echo $(TARGET_BRANCH_NAME)
-            env:
-              PULL_REQUEST_NUMBER: $(System.PullRequest.PullRequestNumber)
-              BUILD_NUMBER: $(Build.TriggeredBy.BuildNumber)
-              SOURCE_BRANCH: $(System.PullRequest.SourceBranch)
-              SOURCE_REPOSITORY_URI: $(System.PullRequest.SourceRepositoryURI)
-              TARGET_BRANCH: $(System.PullRequest.TargetBranch)
-              TARGET_BRANCH_NAME: $(System.PullRequest.targetBranchName)
-
           - script: |
               repo_sha=$(git rev-parse --verify HEAD)
               image_tag_sha=${repo_sha:0:7}
@@ -200,5 +183,5 @@ stages:
               workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
               scriptType: bash
               scriptPath: $(System.DefaultWorkingDirectory)/pipeline-scripts/publish-image.sh
-              arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}} ${{parameters.publishImage}}
+              arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}}
 
