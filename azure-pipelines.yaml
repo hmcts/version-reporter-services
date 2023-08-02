@@ -163,12 +163,18 @@ stages:
         steps:
           - bash: |
               # Test outputs
-              echo "System.PullRequest.PullRequestNumber: ${PULL_REQUEST_NUMBER}"
-              echo "Build.TriggeredBy.BuildNumber: ${BUILD_NUMBER}"
-              echo "System.PullRequest.SourceBranch: ${SOURCE_BRANCH}"
-              echo "System.PullRequest.SourceRepositoryURI: ${SOURCE_REPOSITORY_URI}"
-              echo "System.PullRequest.TargetBranch: ${TARGET_BRANCH}"
-              echo "System.PullRequest.targetBranchName: ${TARGET_BRANCH_NAME}"
+              echo "System.PullRequest.PullRequestNumber:" 
+              echo $PULL_REQUEST_NUMBER
+              echo "Build.TriggeredBy.BuildNumber:"
+              echo $BUILD_NUMBER
+              echo "System.PullRequest.SourceBranch:"
+              echo $SOURCE_BRANCH
+              echo "System.PullRequest.SourceRepositoryURI:"
+              echo $SOURCE_REPOSITORY_URI
+              echo "System.PullRequest.TargetBranch:"
+              echo $TARGET_BRANCH
+              echo "System.PullRequest.targetBranchName:"
+              echo $TARGET_BRANCH_NAME
             env:
               PULL_REQUEST_NUMBER: $(System.PullRequest.PullRequestNumber)
               BUILD_NUMBER: $(Build.TriggeredBy.BuildNumber)
