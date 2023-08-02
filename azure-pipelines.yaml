@@ -174,7 +174,7 @@ stages:
               echo "System.PullRequest.TargetBranch:"
               echo $TARGET_BRANCH
               echo "System.PullRequest.targetBranchName:"
-              echo $TARGET_BRANCH_NAME
+              echo $(TARGET_BRANCH_NAME)
             env:
               PULL_REQUEST_NUMBER: $(System.PullRequest.PullRequestNumber)
               BUILD_NUMBER: $(Build.TriggeredBy.BuildNumber)
