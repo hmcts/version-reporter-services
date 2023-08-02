@@ -161,10 +161,10 @@ stages:
             and(succeeded(), 
                 eq(variables['isMain'], true),
                 or(
-                    eq(${{ parameters.publishImage }}, ${{report.name}}), 
-                    eq(${{ parameters.publishImage }}, 'All')
+                    eq('${{parameters.publishImage}}', '${{report.name}}'), 
+                    eq('${{parameters.publishImage}}', 'All')
                   )
-            and(succeeded(), eq('${{ parameters.prImage }}', true))
+            and(succeeded(), eq('${{parameters.prImage}}', true))
           )
         steps:
           - script: |
