@@ -12,19 +12,11 @@ ACR_RESOURCE_GROUP=$3
 ACR_NAME=$4
 PUBLISH_IMAGE=$5
 
-CHANGES=$(git diff refs/heads/master..HEAD^ --name-only | grep -c "/${REPORT_NAME}/" | xargs)
-
-if [[ "$CHANGES" -gt 0 || "$PUBLISH_IMAGE" == "$REPORT_NAME" || "$PUBLISH_IMAGE" == "All" ]]
+if [[ "$PUBLISH_IMAGE" == "$REPORT_NAME" || "$PUBLISH_IMAGE" == "All" ]]
 then
-
-  if [[ "$PUBLISH_IMAGE" == "$REPORT_NAME" || "$PUBLISH_IMAGE" == "All" ]]
-  then
-    echo "Publishing a new image to '${ACR_NAME} for '${REPORT_NAME}'"
-  else
-    echo "${CHANGES} files have been modified in '${REPORT_NAME}' report. Publishing a new image to '${ACR_NAME}"
-  fi
-
+  echo "Publishing a new image to '${ACR_NAME} for '${REPORT_NAME}'"
   az acr build -r "${ACR_NAME}" -t "${TAG}" -g "${ACR_RESOURCE_GROUP}" .
 else
-  echo "${CHANGES} files have been modified in '${REPORT_NAME}' report. No image published to '${ACR_NAME}'"
+  echo "No image published to '${ACR_NAME}' for ${REPORT_NAME}."
+  echo "You can manually publish your image via the pipeline 'Publish New Image' option"
 fi
