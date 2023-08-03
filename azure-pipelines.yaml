@@ -74,6 +74,7 @@ parameters:
       - "None"
       - "helmcharts"
       - "paloalto"
+      - "renovate"
       - "All"
 
   - name: action
@@ -92,6 +93,8 @@ parameters:
         type: "bash"
       - name: "paloalto"
         type: "python"
+      - name: "renovate"
+        type: "bash"
 
 stages:
   - stage: Precheck
@@ -158,10 +161,11 @@ stages:
         displayName: Push ${{report.name}} Container
         condition: |
          or(
-            and(succeeded(), eq(variables['isMain'], true)),
-            or(
-              eq('${{parameters.publishImage}}', '${{report.name}}'), 
-              eq('${{parameters.publishImage}}', 'All')
+            and(
+              succeeded(), 
+              eq(variables['isMain'], true),
+              or(eq('${{parameters.publishImage}}', '${{report.name}}'), 
+                 eq('${{parameters.publishImage}}', 'All'))
             ),
             and(succeeded(), eq('${{parameters.prImage}}', true))
           )
