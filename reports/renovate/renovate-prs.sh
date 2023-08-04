@@ -48,6 +48,7 @@ store_documents() {
 # ---------------------------------------------------------------------------
 # Process Renovate PRs
 # ---------------------------------------------------------------------------
+echo "Fetching renovate PRs. Maximum of ${max_repos}"
 
 # Get PRs opened by renovate
 renovate_repos=$(gh search prs \
@@ -57,6 +58,7 @@ renovate_repos=$(gh search prs \
   --sort=created \
   --json title,repository,createdAt,url,state -L "$max_repos" | jq -r '. | unique_by(.title)')
 
+echo "Reshaping renovate PRs. Maximum of ${max_repos}"
 # Reshape response
 renovate_result=$(echo "$renovate_repos" | jq '[.[] | {repository: .repository.name, repositoryWithOwner: .repository.nameWithOwner, title: .title, state: .state, url: .url, createdAt: .createdAt}]')
 renovate_result=$(echo "$renovate_result" | jq --arg createdBy "renovate" '[.[] + {createdBy: $createdBy}]')
@@ -66,12 +68,17 @@ renovate_result=$(echo "$renovate_result" | jq --arg createdBy "renovate" '[.[] 
 # ---------------------------------------------------------------------------
 
 # Get PRs opened by updatecli
+echo "Fetching updatcli PRs. Maximum of ${max_repos}"
+
 updatecli_repos=$(gh search prs "[updatecli]" \
   --owner hmcts \
   --state=open \
   --sort=created \
   --json title,repository,createdAt,url,state -L "$max_repos" | jq -r '. | unique_by(.title)')
+
 # Reshape response
+echo "Reshaping renovate PR. Maximum of ${max_repos}"
+
 updatecli_result=$(echo "$updatecli_repos" | jq '[.[] | {repository: .repository.name, repositoryWithOwner: .repository.nameWithOwner, title: .title, state: .state, url: .url, createdAt: .createdAt}]')
 updatecli_result=$(echo "$updatecli_result" | jq --arg createdBy "updatecli" '[.[] + {createdBy: $createdBy}]')
 # ---------------------------------------------------------------------------
@@ -79,10 +86,13 @@ updatecli_result=$(echo "$updatecli_result" | jq --arg createdBy "updatecli" '[.
 # ---------------------------------------------------------------------------
 
 # Merge results
+echo "Merging results..."
 repositories=$(jq --argjson renovate "$renovate_result" --argjson updatecli "$updatecli_result" -n '$renovate + $updatecli')
 
 count=$(jq length <<<"$repositories")
 declare -a documents=()
+
+echo "Generate documents with verdicts for storage"
 
 for ((idx = 0; idx < count; idx++)); do
   repository=$(jq -r ".[$idx]" <<<"$repositories")
@@ -141,6 +151,7 @@ done
 documents=$(jq -c -n '$ARGS.positional' --jsonargs "${documents[@]}")
 
 # Pass documents to python for database storage
+echo "Send documents for storage"
 store_documents "$documents"
 
 echo "Job process completed"
