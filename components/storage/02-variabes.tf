@@ -43,5 +43,6 @@ variable "containers_partitions" {
   default = {
     paloalto   = "/resourceType"
     helmcharts = "/namespace"
+    renovate   = "/repository"
   }
 }
