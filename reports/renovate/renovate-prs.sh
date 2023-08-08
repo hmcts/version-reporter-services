@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #############################################################################
 # Renovate ETL report
 # ---------------------------------------------------------------------------
@@ -58,6 +58,8 @@ renovate_repos=$(gh search prs \
   --sort=created \
   --json title,repository,createdAt,url,state -L "$max_repos" | jq -r '. | unique_by(.title)')
 
+[[ "$renovate_repos" == "" ]] && echo "Error: cannot get renovate repositories." && exit 1
+
 echo "Reshaping renovate PRs. Maximum of ${max_repos}"
 # Reshape response
 renovate_result=$(echo "$renovate_repos" | jq '[.[] | {repository: .repository.name, repositoryWithOwner: .repository.nameWithOwner, title: .title, state: .state, url: .url, createdAt: .createdAt}]')
@@ -75,6 +77,8 @@ updatecli_repos=$(gh search prs "[updatecli]" \
   --state=open \
   --sort=created \
   --json title,repository,createdAt,url,state -L "$max_repos" | jq -r '. | unique_by(.title)')
+
+[[ "$updatecli_repos" == "" ]] && echo "Error: cannot get updatecli repositories." && exit 1
 
 # Reshape response
 echo "Reshaping renovate PR. Maximum of ${max_repos}"
