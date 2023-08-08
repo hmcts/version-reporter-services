@@ -93,13 +93,17 @@ updatecli_result=$(echo "$updatecli_result" | jq --arg createdBy "updatecli" '[.
 echo "Merging results..."
 repositories=$(jq --argjson renovate "$renovate_result" --argjson updatecli "$updatecli_result" -n '$renovate + $updatecli')
 
-count=$(jq length <<<"$repositories")
+count=$(echo "$repositories" | jq '. | length')
+echo "Merged results, ${count} in total"
+
+# Define an array variable to hold all documents
 declare -a documents=()
 
 echo "Generate documents with verdicts for storage"
 
+# Loop through merged documents and enhance each
 for ((idx = 0; idx < count; idx++)); do
-  repository=$(jq -r ".[$idx]" <<<"$repositories")
+  repository=$(echo "$repositories" | jq -r ".[$idx]")
 
   # The document id
   uuid=$(uuidgen)
