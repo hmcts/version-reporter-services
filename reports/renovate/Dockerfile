@@ -1,6 +1,6 @@
 FROM python:3.11.4-alpine3.18
 
-RUN apk update && apk add curl coreutils yq jq openssl github-cli PyGithub
+RUN apk update && apk add curl coreutils yq jq openssl github-cli
 RUN pip3 install azure-cosmos pytz
 
 WORKDIR /app
