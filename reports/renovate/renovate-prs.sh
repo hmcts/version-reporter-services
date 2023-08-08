@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #############################################################################
 # Renovate ETL report
 # ---------------------------------------------------------------------------
@@ -41,7 +41,7 @@ get_date_value() {
 # for connecting and saving to cosmos.
 # ---------------------------------------------------------------------------
 store_documents() {
-  python3 ./save-to-cosmos.py "${1}"
+  python3 /app/save-to-cosmos.py "${1}"
   wait $!
 }
 
@@ -57,6 +57,8 @@ renovate_repos=$(gh search prs \
   --state=open \
   --sort=created \
   --json title,repository,createdAt,url,state -L "$max_repos" | jq -r '. | unique_by(.title)')
+
+[[ "$renovate_repos" == "" ]] && echo "Error: cannot get renovate repositories." && exit 1
 
 echo "Reshaping renovate PRs. Maximum of ${max_repos}"
 # Reshape response
@@ -75,6 +77,8 @@ updatecli_repos=$(gh search prs "[updatecli]" \
   --state=open \
   --sort=created \
   --json title,repository,createdAt,url,state -L "$max_repos" | jq -r '. | unique_by(.title)')
+
+[[ "$updatecli_repos" == "" ]] && echo "Error: cannot get updatecli repositories." && exit 1
 
 # Reshape response
 echo "Reshaping renovate PR. Maximum of ${max_repos}"
