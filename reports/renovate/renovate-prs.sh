@@ -60,7 +60,7 @@ renovate_repos=$(gh search prs \
 
 [[ "$renovate_repos" == "" ]] && echo "Error: cannot get renovate repositories." && exit 1
 
-echo "Reshaping renovate PRs. Maximum of ${max_repos}"
+echo "Reshaping renovate PRs. Maximum of $(echo "$renovate_repos" | jq '. | length')"
 # Reshape response
 renovate_result=$(echo "$renovate_repos" | jq '[.[] | {repository: .repository.name, repositoryWithOwner: .repository.nameWithOwner, title: .title, state: .state, url: .url, createdAt: .createdAt}]')
 renovate_result=$(echo "$renovate_result" | jq --arg createdBy "renovate" '[.[] + {createdBy: $createdBy}]')
@@ -80,9 +80,8 @@ updatecli_repos=$(gh search prs "[updatecli]" \
 
 [[ "$updatecli_repos" == "" ]] && echo "Error: cannot get updatecli repositories." && exit 1
 
+echo "Reshaping updatecli PR. Total of $(echo "$updatecli_repos" | jq '. | length')"
 # Reshape response
-echo "Reshaping renovate PR. Maximum of ${max_repos}"
-
 updatecli_result=$(echo "$updatecli_repos" | jq '[.[] | {repository: .repository.name, repositoryWithOwner: .repository.nameWithOwner, title: .title, state: .state, url: .url, createdAt: .createdAt}]')
 updatecli_result=$(echo "$updatecli_result" | jq --arg createdBy "updatecli" '[.[] + {createdBy: $createdBy}]')
 # ---------------------------------------------------------------------------
