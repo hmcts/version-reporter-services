@@ -23,17 +23,20 @@ def remove_documents(container):
                 enable_cross_partition_query=True):
             container.delete_item(item, partition_key=item["repository"])
 
-        print(f"Removing documents complete")
-    except exceptions.CosmosHttpResponseError as exception:
-        print(f"Removing items from db failed with: {exception}")
+        print("Removing documents complete")
+    except exceptions.CosmosHttpResponseError as remove_response_error:
+        print(f"Removing items from db failed with: {remove_response_error}")
 
 
 # Add new documents to database
 def add_documents(container, data):
-    print(f"Adding all document.")
-    for document in data:
-        update_days_between(document)
-        save_document(container, document)
+    print("Adding all document.")
+    try:
+        for document in data:
+            update_days_between(document)
+            save_document(container, document)
+    except exceptions.CosmosHttpResponseError as add_response_error:
+        print(f"Adding document to db failed with CosmosHttpResponseError: {add_response_error}")
 
 
 def update_days_between(document):
@@ -49,8 +52,8 @@ def save_document(container, document):
     resource_name = document.get('title')
     try:
         container.create_item(body=document)
-    except exceptions.CosmosHttpResponseError:
-        print(f"Saving to db for {resource_name} failed")
+    except exceptions.CosmosHttpResponseError as save_response_error:
+        print(f"Saving to db for {resource_name} failed with CosmosHttpResponseError: {save_response_error}")
         raise
 
 
@@ -85,8 +88,11 @@ try:
     add_documents(db_container, documents)
     print("Document save complete")
 
-except exceptions.CosmosHttpResponseError:
-    print(f"Saving to db failed")
+except AttributeError as attribute_error:
+    print(f"Saving to db failed with AttributeError error: {attribute_error}")
+    raise
+except exceptions.CosmosHttpResponseError as http_response_error:
+    print(f"Saving to db failed with CosmosHttpResponseError {http_response_error}")
     raise
 
 print("Save to database completed.")
