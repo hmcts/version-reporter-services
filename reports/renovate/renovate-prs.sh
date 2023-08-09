@@ -97,12 +97,10 @@ count=$(echo "$repositories" | jq '. | length')
 echo "Merged results, ${count} in total"
 
 # Define an array variable to hold all documents
-documents=()
 idx=1
 
-echo "Generate documents with verdicts for storage"
-
 # Loop through merged documents and enhance each
+echo "Generate documents with verdicts for storage"
 while [ "$idx" -lt "$count" ]
 do
   repository=$(echo "$repositories" | jq -r ".[$idx]")
