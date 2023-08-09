@@ -98,7 +98,7 @@ try:
         add_document(db_container, document)
         print(f"'{name}' document successfully saved")
 
-except exceptions.AttributeError as attribute_error:
+except AttributeError as attribute_error:
     print(f"Saving to db failed with AttributeError error: {attribute_error}")
     raise
 except exceptions.CosmosHttpResponseError as http_response_error:
