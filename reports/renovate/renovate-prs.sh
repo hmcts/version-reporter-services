@@ -96,13 +96,15 @@ repositories=$(jq --argjson renovate "$renovate_result" --argjson updatecli "$up
 count=$(echo "$repositories" | jq '. | length')
 echo "Merged results, ${count} in total"
 
-# Define an array variable to hold all documents
-declare -a documents
-
 echo "Generate documents with verdicts for storage"
 
+# Define an array variable to hold all documents
+documents=()
+idx=1
+
 # Loop through merged documents and enhance each
-for ((idx = 0; idx < count; idx++)); do
+while [ "$idx" -lt "$count" ]
+do
   repository=$(echo "$repositories" | jq -r ".[$idx]")
 
   # The document id
@@ -149,6 +151,8 @@ for ((idx = 0; idx < count; idx++)); do
     --arg color_code "$color_code" '. + {id: $id, displayName: $display_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
 
   documents+=("$document")
+
+  idx=$((idx + 1))
 done
 
 # ---------------------------------------------------------------------------
