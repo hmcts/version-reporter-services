@@ -96,11 +96,11 @@ repositories=$(jq --argjson renovate "$renovate_result" --argjson updatecli "$up
 count=$(echo "$repositories" | jq '. | length')
 echo "Merged results, ${count} in total"
 
-echo "Generate documents with verdicts for storage"
-
 # Define an array variable to hold all documents
 documents=()
 idx=1
+
+echo "Generate documents with verdicts for storage"
 
 # Loop through merged documents and enhance each
 while [ "$idx" -lt "$count" ]
