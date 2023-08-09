@@ -99,6 +99,7 @@ echo "Merged results, ${count} in total"
 # Define an array variable to hold all documents
 idx=0
 
+
 # Loop through merged documents and enhance each
 echo "Generate documents with verdicts for storage"
 while [ "$idx" -lt "$count" ]
