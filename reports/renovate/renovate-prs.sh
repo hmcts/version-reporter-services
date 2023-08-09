@@ -97,7 +97,7 @@ count=$(echo "$repositories" | jq '. | length')
 echo "Merged results, ${count} in total"
 
 # Define an array variable to hold all documents
-idx=1
+idx=0
 
 # Loop through merged documents and enhance each
 echo "Generate documents with verdicts for storage"
@@ -148,7 +148,7 @@ do
     --arg display_name "Open Renovate Pull Requests" \
     --arg color_code "$color_code" '. + {id: $id, displayName: $display_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
 
-  documents+=("$document")
+  documents[$idx]="$document"
 
   idx=$((idx + 1))
 done
