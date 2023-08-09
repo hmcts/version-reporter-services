@@ -60,7 +60,7 @@ renovate_repos=$(gh search prs \
 
 [[ "$renovate_repos" == "" ]] && echo "Error: cannot get renovate repositories." && exit 1
 
-echo "Reshaping renovate PRs. Maximum of ${max_repos}"
+echo "Reshaping renovate PRs. Maximum of $(echo "$renovate_repos" | jq '. | length')"
 # Reshape response
 renovate_result=$(echo "$renovate_repos" | jq '[.[] | {repository: .repository.name, repositoryWithOwner: .repository.nameWithOwner, title: .title, state: .state, url: .url, createdAt: .createdAt}]')
 renovate_result=$(echo "$renovate_result" | jq --arg createdBy "renovate" '[.[] + {createdBy: $createdBy}]')
@@ -80,9 +80,8 @@ updatecli_repos=$(gh search prs "[updatecli]" \
 
 [[ "$updatecli_repos" == "" ]] && echo "Error: cannot get updatecli repositories." && exit 1
 
+echo "Reshaping updatecli PR. Total of $(echo "$updatecli_repos" | jq '. | length')"
 # Reshape response
-echo "Reshaping renovate PR. Maximum of ${max_repos}"
-
 updatecli_result=$(echo "$updatecli_repos" | jq '[.[] | {repository: .repository.name, repositoryWithOwner: .repository.nameWithOwner, title: .title, state: .state, url: .url, createdAt: .createdAt}]')
 updatecli_result=$(echo "$updatecli_result" | jq --arg createdBy "updatecli" '[.[] + {createdBy: $createdBy}]')
 # ---------------------------------------------------------------------------
@@ -97,7 +96,8 @@ count=$(echo "$repositories" | jq '. | length')
 echo "Merged results, ${count} in total"
 
 # Define an array variable to hold all documents
-idx=1
+idx=0
+
 
 # Loop through merged documents and enhance each
 echo "Generate documents with verdicts for storage"
@@ -148,7 +148,7 @@ do
     --arg display_name "Open Renovate Pull Requests" \
     --arg color_code "$color_code" '. + {id: $id, displayName: $display_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
 
-  documents+=("$document")
+  documents[$idx]="$document"
 
   idx=$((idx + 1))
 done
