@@ -97,7 +97,7 @@ count=$(echo "$repositories" | jq '. | length')
 echo "Merged results, ${count} in total"
 
 # Define an array variable to hold all documents
-declare -a documents=()
+declare -a documents
 
 echo "Generate documents with verdicts for storage"
 
