@@ -93,13 +93,16 @@ try:
         update_document(db_container, current_document, document)
         print(f"'{name}' document successfully updated")
     else:
-        name = current_document.get("chartName")
+        name = document.get("chartName")
         print(f"Adding '{name}' chart to database")
         add_document(db_container, document)
         print(f"'{name}' document successfully saved")
 
-except exceptions.CosmosHttpResponseError:
-    print(f"Saving to db failed")
+except exceptions.AttributeError as attribute_error:
+    print(f"Saving to db failed with AttributeError error: {attribute_error}")
+    raise
+except exceptions.CosmosHttpResponseError as http_response_error:
+    print(f"Saving to db failed with CosmosHttpResponseError error: {http_response_error}")
     raise
 
 print("Save to database completed.")
