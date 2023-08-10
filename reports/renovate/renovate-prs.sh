@@ -97,7 +97,7 @@ echo "Merged results, ${count} in total"
 
 # Define an array variable to hold all documents
 idx=0
-declear -a document=()
+declare -a document=()
 
 # Loop through merged documents and enhance each
 echo "Generate documents with verdicts for storage"
