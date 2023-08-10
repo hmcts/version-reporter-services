@@ -3,7 +3,6 @@ FROM alpine:3.18.3
 RUN apk update && apk add curl coreutils yq jq openssl github-cli uuidgen bash
 RUN apk update && apk add python3 py3-pip && pip3 install azure-cosmos pytz
 
-
 WORKDIR /app
 
 COPY . .
