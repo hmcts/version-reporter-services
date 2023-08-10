@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #############################################################################
 # Renovate ETL report
 # ---------------------------------------------------------------------------
@@ -97,7 +97,7 @@ echo "Merged results, ${count} in total"
 
 # Define an array variable to hold all documents
 idx=0
-
+declear -a document=()
 
 # Loop through merged documents and enhance each
 echo "Generate documents with verdicts for storage"
@@ -148,8 +148,7 @@ do
     --arg display_name "Open Renovate Pull Requests" \
     --arg color_code "$color_code" '. + {id: $id, displayName: $display_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
 
-  documents[$idx]="$document"
-
+  documents+=("$document")
   idx=$((idx + 1))
 done
 
