@@ -58,7 +58,7 @@ renovate_repos=$(gh search prs \
   --sort=created \
   --json title,repository,createdAt,url,state -L "$max_repos" | jq -r '. | unique_by(.title)')
 
-[[ "$renovate_repos" == "" ]] && echo "Error: cannot get renovate repositories." && exit 1
+[[ "$renovate_repos" == "" ]] && echo "Job process existed: Cannot get renovate repositories." && exit 0
 
 echo "Reshaping renovate PRs. Maximum of $(echo "$renovate_repos" | jq '. | length')"
 # Reshape response
@@ -78,7 +78,7 @@ updatecli_repos=$(gh search prs "[updatecli]" \
   --sort=created \
   --json title,repository,createdAt,url,state -L "$max_repos" | jq -r '. | unique_by(.title)')
 
-[[ "$updatecli_repos" == "" ]] && echo "Error: cannot get updatecli repositories." && exit 1
+[[ "$updatecli_repos" == "" ]] && echo "Job process exited: Cannot get updatecli repositories." && exit 0
 
 echo "Reshaping updatecli PR. Total of $(echo "$updatecli_repos" | jq '. | length')"
 # Reshape response
