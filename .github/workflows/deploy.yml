@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: dashboard
+        working-directory: version-reporter-services/dashboard
 
     steps:
       - name: Checkout repo
