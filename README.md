@@ -1,30 +1,7 @@
-# Version Reporter Services
-The Version Reporter Service MicroServices Project is a work-in-progress abd this README will be updated
-in a little while.
+# Vue 3 + Vite
 
-## General Idea
-The general idea is to have a repo the build the various microservices container images and puch them
-to the container registry. The application will be configured to run via the `cnp-flux-config` repo where
-all the relevant cluster configuration will be setup to use the images generate by this repo.
+This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
-Each report could be a different technology e.g. Node, Python, Bash or Powershell.
-The output would be a container image in ACR.
+## Recommended IDE Setup
 
-### High level Architecture plan
-
-<details>
-  <summary>VRS Proposed Plan</summary>
-  <img alt="VRS" src="./images/version-reporter-v2.jpg" width="80%">
-</details>
-
-_**Note** This may change as conversations around this picks up._
-
-## Documentation place holders
-- Introduction
-  - What is the Version Reporter Service
-- How the Pipeline works
-- Creating a new report
-- Testing reports
-- Building and Pushing to ACR
-
-_Above sections, and more would be filled out over time_
+- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).

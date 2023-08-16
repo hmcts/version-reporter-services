@@ -3,18 +3,15 @@ name: Deploy
 on:
   pull_request:
     branches:
-      - master
+      - dashboard
   push:
     branches:
-      - master
+      - dashboard
 
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./dashboard
 
     steps:
       - name: Checkout repo
@@ -25,17 +22,15 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-        working-directory: ./dashboard
 
       - name: Build project
         run: npm run build
-        working-directory: ./dashboard
 
       - name: Upload production-ready build files
         uses: actions/upload-artifact@v3
         with:
           name: production-files
-          path: ./dashboard/dist
+          path: ./dist
 
   deploy:
     name: Deploy
