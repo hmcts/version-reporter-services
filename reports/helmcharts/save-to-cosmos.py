@@ -16,15 +16,15 @@ container_name = os.environ.get("COSMOS_DB_CONTAINER", "helmcharts")
 # If chart data has not changed i.e the chart name, namespace, latest version and cluster name, it will be the same
 def document_exists(container, data):
     db_result = None
-    chart_name = data.get("chartName")
+    chart_name = data.get("chart")
     namespace = data.get("namespace")
-    latest_version = data.get("latestVersion")
-    cluster_name = data.get("clusterName")
+    latest_version = data.get("latest")
+    cluster_name = data.get("cluster")
 
-    print(f"Querying for existing document by chartName: {chart_name}")
+    print(f"Querying for existing document by chart: {chart_name}")
 
     items = list(container.query_items(
-        query="SELECT * FROM helmcharts r WHERE r.chartName=@chart_name and r.namespace=@namespace and r.latestVersion=@latest_version and r.clusterName=@cluster_name",
+        query="SELECT * FROM helmcharts r WHERE r.chart=@chart_name and r.namespace=@namespace and r.latest=@latest_version and r.cluster=@cluster_name",
         parameters=[
             dict(name='@chart_name', value=chart_name),
             dict(name='@namespace', value=namespace),
@@ -50,14 +50,14 @@ def document_exists(container, data):
 # If the chart is still at the same version then we'll update only the installed version
 # which is whats likely to have changed due to an update
 def update_document(container, current_doc, new_doc):
-    installed_version = new_doc.get("installedVersion")
+    installed_version = new_doc.get("installed")
     last_updated = get_formatted_datetime()
 
-    current_doc["installedVersion"] = installed_version
+    current_doc["installed"] = installed_version
     current_doc["lastUpdated"] = last_updated
 
     response = container.upsert_item(body=current_doc)
-    print('Upserted Item: Id: {0}, chart: {1}'.format(response['id'], response['chartName']))
+    print('Upserted Item: Id: {0}, chart: {1}'.format(response['id'], response['chart']))
 
 
 # Add new documents to database
@@ -88,12 +88,12 @@ try:
     current_document = document_exists(db_container, document)
 
     if current_document is not None:
-        name = current_document.get("chartName")
+        name = current_document.get("chart")
         print(f"Updating '{name}' chart to database")
         update_document(db_container, current_document, document)
         print(f"'{name}' document successfully updated")
     else:
-        name = document.get("chartName")
+        name = document.get("chart")
         print(f"Adding '{name}' chart to database")
         add_document(db_container, document)
         print(f"'{name}' document successfully saved")

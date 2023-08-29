@@ -27,6 +27,9 @@ try:
     # Connect to cosmosdb server
     storage = Storage(data_source)
 
+    # Remove all existing docs
+    storage.remove_documents(environment)
+
     # Connect to panorama server in environment
     panorama_mgmt = PanoramaMgmt(
         subscription_id=subscription_id,
