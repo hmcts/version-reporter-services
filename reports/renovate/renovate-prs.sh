@@ -135,16 +135,15 @@ do
   if [[ $doc_year -lt $cur_year ]] || [[ $doc_month -lt $cur_month ]] || [[ $days_between -gt $max_days_exceded ]]; then # created over 1 year or month ago
     verdict="upgrade"
     color_code="red"
-  fi
-
-  if [[ $days_between -gt $max_days_away ]] && [[ $days_between -le $max_days_exceded ]]; then # same month but more than acceptable number of days
+  elif [[ $days_between -gt $max_days_away ]] && [[ $days_between -le $max_days_exceded ]]; then # same month but more than acceptable number of days
     verdict="review"
     color_code="orange"
-  fi
-
-  if [[ $days_between -le $max_days_away ]]; then # number of days is 0 to max days
+  elif [[ $days_between -le $max_days_away ]]; then # number of days is 0 to max days
     verdict="ok"
     color_code="green"
+  else
+      verdict="Unknown"
+      color_code="grey"
   fi
 
   # Enhance document with additional information
