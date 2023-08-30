@@ -20,7 +20,7 @@ class Storage:
         logger("Connection established")
 
     def save_document(self, document):
-        resource_name = document.get('resourceName')
+        resource_name = document.get('resource')
         logger(f"Saving to db for: {resource_name}")
         try:
             database = self.client.get_database_client(self.db_database)
@@ -29,3 +29,19 @@ class Storage:
         except exceptions.CosmosHttpResponseError:
             logger(f"Saving to db for {resource_name} failed")
             raise
+
+    def remove_documents(self, environment):
+        try:
+            database = self.client.get_database_client(self.db_database)
+            container = database.get_container_client(self.db_container)
+
+            print(f"Removing all existing documents")
+            for item in container.query_items(
+                    query='SELECT * FROM c WHERE c.environment = @environment',
+                    parameters=[dict(name='@environment', value=environment)],
+                    enable_cross_partition_query=True):
+                container.delete_item(item, partition_key=item["resourceType"])
+
+            print("Removing documents complete")
+        except exceptions.CosmosHttpResponseError as remove_response_error:
+            print(f"Removing items from db failed with: {remove_response_error}")

@@ -128,15 +128,21 @@ do
   doc_day=$(get_date_value "$document_date" "day")
   cur_day=$(get_date_value "$current_date" "day")
   # ----
-  days_between=$((cur_day - doc_day)) # e.g. today is 15th pr was opened 10th, days btw is 5
 
-  if [[ $doc_year -lt $cur_year || $doc_month -lt $cur_month ]]; then # created over 1 year or month ago
+  days_between=$((cur_day - doc_day)) # e.g. today is 15th pr was opened 10th, days btw is 5
+  max_days_exceded=$(echo "$max_days_away*2" | bc -l)
+
+  if [[ $doc_year -lt $cur_year ]] || [[ $doc_month -lt $cur_month ]] || [[ $days_between -gt $max_days_exceded ]]; then # created over 1 year or month ago
     verdict="upgrade"
     color_code="red"
-  elif [[ $days_between -gt $max_days_away ]]; then # same month but more than acceptable number of days
+  fi
+
+  if [[ $days_between -gt $max_days_away ]] && [[ $days_between -le $max_days_exceded ]]; then # same month but more than acceptable number of days
     verdict="review"
     color_code="orange"
-  else # same month and within acceptable number of days
+  fi
+
+  if [[ $days_between -le $max_days_away ]]; then # number of days is 0 to max days
     verdict="ok"
     color_code="green"
   fi

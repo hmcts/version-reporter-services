@@ -102,13 +102,13 @@ helm repo update
 # ---------------------------------------------------------------------------
 # Use helm whatup to extract installed chart information
 # --------------------------------------------------------------------------
-charts=$(helm whatup -A -q -o json | jq '.releases[] | select(.namespace=="admin" or .namespace=="monitoring" or .namespace=="flux-system") | {chartName: .name, namespace: .namespace, installedVersion: .installed_version, latestVersion: .latest_version, appVersion: .app_version, chart: .chart, newestRepo: .newest_repo, updated: .updated, deprecated: .deprecated}' | jq -s)
+charts=$(helm whatup -A -q -o json | jq '.releases[] | select(.namespace=="admin" or .namespace=="monitoring" or .namespace=="flux-system") | {chart: .name, namespace: .namespace, installed: .installed_version, latest: .latest_version, appVersion: .app_version, newestRepo: .newest_repo, updated: .updated, deprecated: .deprecated}' | jq -s)
 [[ "$charts" == "" ]] && echo "Error: helm whatup failed." && exit 1
 
 # Iterate through results and determine chart verdict
 for chart in $(echo "$charts" | jq -c '.[]'); do
-  latest=$(get_value "$chart" '.latestVersion')
-  installed=$(get_value "$chart" '.installedVersion')
+  latest=$(get_value "$chart" '.latest')
+  installed=$(get_value "$chart" '.installed')
 
   latest_major=$(major_version "$latest")
   installed_major=$(major_version "$installed")
@@ -136,7 +136,7 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
                                 --arg verdict $verdict \
                                 --arg report_type "table" \
                                 --arg display_name "HELM Repositories" \
-                                --arg color_code $color_code '. + {displayName: $display_name, clusterName: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
+                                --arg color_code $color_code '. + {displayName: $display_name, cluster: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
   # ---------------------------------------------------------------------------
   # STEP 3:
   # Store document
