@@ -12,7 +12,6 @@
 # NOTE: The renovate table is emptied first the refreshed with new data
 #############################################################################
 
-max_days_away=$MAX_DAYS_AWAY
 max_repos=$MAX_REPOS
 
 # Extracts a value from json object
@@ -100,7 +99,6 @@ idx=0
 declare -a document=()
 
 # Loop through merged documents and enhance each
-echo "Generate documents with verdicts for storage"
 while [ "$idx" -lt "$count" ]
 do
   repository=$(echo "$repositories" | jq -r ".[$idx]")
@@ -108,50 +106,10 @@ do
   # The document id
   uuid=$(uuidgen)
 
-  # Get document date as array
-  document_date=$(get_value "$repository" '.createdAt')
-  document_date=$(jq --arg document_date "$document_date" -n '$document_date | fromdate | strftime("%-y-%-m-%-e")')
-  # Get current date as array
-  current_date=$(jq -n 'now | strflocaltime("%-y-%-m-%-e")')
-
-  # ---------------------------------------------------------------------------
-  # Determine verdict
-  # ---------------------------------------------------------------------------
-
-  # if year or month is less than that of current
-  doc_year=$(get_date_value "$document_date" "year")
-  cur_year=$(get_date_value "$current_date" "year")
-  # ----
-  doc_month=$(get_date_value "$document_date" "month")
-  cur_month=$(get_date_value "$current_date" "month")
-  # ----
-  doc_day=$(get_date_value "$document_date" "day")
-  cur_day=$(get_date_value "$current_date" "day")
-  # ----
-
-  days_between=$((cur_day - doc_day)) # e.g. today is 15th pr was opened 10th, days btw is 5
-  max_days_exceded=$(echo "$max_days_away*2" | bc -l)
-
-  if [[ $doc_year -lt $cur_year ]] || [[ $doc_month -lt $cur_month ]] || [[ $days_between -gt $max_days_exceded ]]; then # created over 1 year or month ago
-    verdict="upgrade"
-    color_code="red"
-  elif [[ $days_between -gt $max_days_away ]] && [[ $days_between -le $max_days_exceded ]]; then # same month but more than acceptable number of days
-    verdict="review"
-    color_code="orange"
-  elif [[ $days_between -le $max_days_away ]]; then # number of days is 0 to max days
-    verdict="ok"
-    color_code="green"
-  else
-      verdict="Unknown"
-      color_code="grey"
-  fi
-
   # Enhance document with additional information
   document=$(echo "$repository" | jq --arg id "$uuid" \
-    --arg verdict "$verdict" \
     --arg report_type "table" \
-    --arg display_name "Open Renovate Pull Requests" \
-    --arg color_code "$color_code" '. + {id: $id, displayName: $display_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
+    --arg display_name "Open Renovate Pull Requests" '. + {id: $id, displayName: $display_name,  reportType: $report_type}')
 
   documents+=("$document")
   idx=$((idx + 1))

@@ -10,6 +10,7 @@ endpoint = os.environ.get("COSMOS_DB_URI", None)
 key = os.environ.get("COSMOS_KEY", None)
 database = os.environ.get("COSMOS_DB_NAME", "reports")
 container_name = os.environ.get("COSMOS_DB_CONTAINER", "renovate")
+max_days_away = int(os.environ.get("MAX_DAYS_AWAY", 3))
 
 
 # Checks to determine if the chart has already been processed
@@ -34,6 +35,7 @@ def add_documents(container, data):
     try:
         for document in data:
             update_days_between(document)
+            update_verdict(document)
             save_document(container, document)
     except exceptions.CosmosHttpResponseError as add_response_error:
         print(f"Adding document to db failed with CosmosHttpResponseError: {add_response_error}")
@@ -46,6 +48,21 @@ def update_days_between(document):
     # difference between dates in timedelta
     days_opened = date_today - date_opened
     document["daysOpened"] = days_opened.days
+
+
+def update_verdict(document):
+    max_days_exceeded = max_days_away * 2
+    days_opened = int(document["daysOpened"])
+
+    if days_opened < max_days_away:
+        document["verdict"] = "ok"
+        document["color_code"] = "green"
+    elif max_days_away <= days_opened <= max_days_exceeded:
+        document["verdict"] = "review"
+        document["color_code"] = "orange"
+    elif days_opened > max_days_exceeded:
+        document["verdict"] = "upgrade"
+        document["color_code"] = "red"
 
 
 def save_document(container, document):
