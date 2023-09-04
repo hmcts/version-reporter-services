@@ -38,6 +38,14 @@ def get_now():
     return datetime.now(pytz.timezone('Europe/London'))
 
 
+def get_info(line):
+    data = line.split("|")
+    return {
+        "docName": data[0].strip(),
+        "docUrl": data[1].strip()
+    }
+
+
 def get_formatted_datetime(strformat="%Y-%m-%d %H:%M:%S"):
     datetime_london = get_now()
     return datetime_london.strftime(strformat)
@@ -128,12 +136,12 @@ def build_report():
         lines = file.readlines()
 
     for line in lines:
-        data = line.split("|")
-        name = data[0].strip()
-        url = data[1].strip()
+        data = get_info(line)
+        doc_name = data.get("docName")
+        doc_url = data.get("docUrl")
 
-        print(f"Parent url: {url}")
-        parent_page = requests.get(url)
+        print(f"Parent url: {doc_url}")
+        parent_page = requests.get(doc_url)
         parent_doc = BeautifulSoup(parent_page.text, "html.parser")
         parent_nav = parent_doc.find("nav", {"id": "toc", "aria-labelledby": "toc-heading"})
 
@@ -142,11 +150,11 @@ def build_report():
 
             print(f"Following and processing: {len(nav_list)} links")
             for a in nav_list:
-                full_url = urljoin(url, a['href'])
+                full_url = urljoin(doc_url, a['href'])
 
                 child_page = requests.get(full_url)
                 if child_page is not None:
-                    doc = extract_doc_details(name, full_url, child_page.text)
+                    doc = extract_doc_details(doc_name, full_url, child_page.text)
                     if doc is not None:
                         documents.append(doc)
 
@@ -163,7 +171,6 @@ try:
     database = client.get_database_client(database)
     db_container = database.get_container_client(container_name)
     report_data = build_report()
-    print(json.dumps(report_data, indent=4))
     print(f"Processing {len(report_data)} documents")
 
     if report_data is not None and len(report_data) > 0:
