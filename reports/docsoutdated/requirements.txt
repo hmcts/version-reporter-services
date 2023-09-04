@@ -1,0 +1,5 @@
+pytest
+beautifulsoup4
+azure-cosmos>=4.4.0
+requests
+datefinder
