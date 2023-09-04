@@ -56,13 +56,13 @@ def update_verdict(document):
 
     if days_opened < max_days_away:
         document["verdict"] = "ok"
-        document["color_code"] = "green"
+        document["colorCode"] = "green"
     elif max_days_away <= days_opened <= max_days_exceeded:
         document["verdict"] = "review"
-        document["color_code"] = "orange"
+        document["colorCode"] = "orange"
     elif days_opened > max_days_exceeded:
         document["verdict"] = "upgrade"
-        document["color_code"] = "red"
+        document["colorCode"] = "red"
 
 
 def save_document(container, document):
