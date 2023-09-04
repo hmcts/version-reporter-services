@@ -41,9 +41,9 @@ variable "containers_partitions" {
   type        = map(any)
   description = "Partition Keys for corresponding database containers."
   default = {
-    paloalto   = "/resourceType"
-    helmcharts = "/namespace"
-    renovate   = "/repository"
+    paloalto     = "/resourceType"
+    helmcharts   = "/namespace"
+    renovate     = "/repository"
     docsoutdated = "/title"
   }
 }
