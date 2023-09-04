@@ -8,10 +8,10 @@ RUN npm install
 
 COPY . /app
 
-ENV COSMOSDB_URI="" \
-    COSMOSDB_PRIMARY_KEY="" \
-    COSMOSDB_DATABASE="" \
-    COSMOSDB_CONTAINER=""
+ENV COSMOS_KEY="" \
+    COSMOS_DB_NAME="" \
+    COSMOS_DB_CONTAINER="" \
+    COSMOS_DB_URI=""
 
 EXPOSE 80
 CMD ["npm", "start"]

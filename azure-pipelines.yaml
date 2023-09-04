@@ -95,6 +95,8 @@ parameters:
         type: "python"
       - name: "renovate"
         type: "bash"
+      - name: "docsoutdated"
+        type: "python"
 
 stages:
   - stage: Precheck
