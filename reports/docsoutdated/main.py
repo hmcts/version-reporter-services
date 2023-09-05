@@ -85,10 +85,16 @@ def add_documents(container, data):
         print(f"Adding document to db failed with CosmosHttpResponseError: {add_response_error}")
 
 
-def extract_doc_details(name, web_url, webpage):
+def extract_doc_details(doc_name, web_url, webpage):
     document = None
     page = BeautifulSoup(webpage, "html.parser")
+
     title = page.find("title")
+    if title is None:
+        doc_title = f"{doc_name} - NoTitle"
+    else:
+        doc_title = title.text
+
     section = page.find("div", {"class": "page-expiry--not-expired"})
     if section is None:
         section = page.find("div", {"class": "page-expiry--expired"})
@@ -101,8 +107,8 @@ def extract_doc_details(name, web_url, webpage):
             for item in date_matches:
                 dates.append(item)
 
-            document["docName"] = name
-            document["docTitle"] = title.text
+            document["docName"] = doc_name
+            document["docTitle"] = doc_title
             document["url"] = web_url
             document["pageExpiry"] = datetime.strftime(dates.pop(), "%Y-%m-%d")
 
