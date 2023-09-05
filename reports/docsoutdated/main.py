@@ -108,7 +108,7 @@ def extract_doc_details(doc_name, web_url, webpage):
                 dates.append(item)
 
             document["docName"] = doc_name
-            document["docTitle"] = doc_title
+            document["docTitle"] = doc_title.replace(" - HMCTS", '')
             document["url"] = web_url
             document["pageExpiry"] = datetime.strftime(dates.pop(), "%Y-%m-%d")
 
