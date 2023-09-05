@@ -26,9 +26,9 @@ def get_document():
         "docName": None,
         "docTitle": None,
         "reportType": "card",
-        "lastReviewed": None,
-        "pageExpiry": None,
-        "daysLeft": None,
+        "reviewed": None,
+        "expiry": None,
+        "days": None,
         "url": None,
         "colorCode": None,
         "verdict": None
@@ -110,17 +110,17 @@ def extract_doc_details(doc_name, web_url, webpage):
             document["docName"] = doc_name
             document["docTitle"] = doc_title.replace(" - HMCTS", '')
             document["url"] = web_url
-            document["pageExpiry"] = datetime.strftime(dates.pop(), "%Y-%m-%d")
+            document["expiry"] = datetime.strftime(dates.pop(), "%Y-%m-%d")
 
             if len(dates) == 1:
-                document["lastReviewed"] = datetime.strftime(dates.pop(), "%Y-%m-%d")
+                document["reviewed"] = datetime.strftime(dates.pop(), "%Y-%m-%d")
 
             date_today = datetime.strptime(date.today().strftime("%Y-%m-%d"), "%Y-%m-%d")
-            date_expiry = datetime.strptime(document["pageExpiry"], "%Y-%m-%d")
+            date_expiry = datetime.strptime(document["expiry"], "%Y-%m-%d")
             days_left = date_expiry - date_today
-            document["daysLeft"] = days_left.days
+            document["days"] = days_left.days
 
-        days_left = document["daysLeft"]
+        days_left = document["days"]
 
         if days_left >= 30:
             document["colorCode"] = "green"
