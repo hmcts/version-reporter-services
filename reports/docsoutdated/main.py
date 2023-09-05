@@ -23,7 +23,7 @@ def get_document():
         "reportName": "docsoutdated",
         "reportTitle": "Documentation out-of-date",
         "displayName": "HMCTS Documentation Review",
-        "docName": None,
+        "document": None,
         "docTitle": None,
         "reportType": "card",
         "reviewed": None,
@@ -107,7 +107,7 @@ def extract_doc_details(doc_name, web_url, webpage):
             for item in date_matches:
                 dates.append(item)
 
-            document["docName"] = doc_name
+            document["document"] = doc_name
             document["docTitle"] = doc_title.replace(" - HMCTS", '')
             document["url"] = web_url
             document["expiry"] = datetime.strftime(dates.pop(), "%Y-%m-%d")
