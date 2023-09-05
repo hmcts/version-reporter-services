@@ -20,10 +20,12 @@ container_name = os.environ.get("COSMOS_DB_CONTAINER", "docsoutdated")
 def get_document():
     document = {
         "id": f"{uuid.uuid4()}",
-        "docName": None,
+        "reportName": "docsoutdated",
+        "reportTitle": "Documentation out-of-date",
         "displayName": "HMCTS Documentation Review",
+        "docName": None,
+        "docTitle": None,
         "reportType": "card",
-        "title": None,
         "lastReviewed": None,
         "pageExpiry": None,
         "daysLeft": None,
@@ -100,8 +102,8 @@ def extract_doc_details(name, web_url, webpage):
                 dates.append(item)
 
             document["docName"] = name
+            document["docTitle"] = title.text
             document["url"] = web_url
-            document["title"] = title.text
             document["pageExpiry"] = datetime.strftime(dates.pop(), "%Y-%m-%d")
 
             if len(dates) == 1:
