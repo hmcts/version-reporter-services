@@ -44,6 +44,6 @@ variable "containers_partitions" {
     paloalto     = "/resourceType"
     helmcharts   = "/namespace"
     renovate     = "/repository"
-    docsoutdated = "/reportTitle"
+    docsoutdated = "/docTitle"
   }
 }
