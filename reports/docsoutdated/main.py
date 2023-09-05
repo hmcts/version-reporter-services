@@ -60,7 +60,7 @@ def remove_documents(container):
         for item in container.query_items(
                 query='SELECT * FROM c',
                 enable_cross_partition_query=True):
-            container.delete_item(item, partition_key=item["reportTitle"])
+            container.delete_item(item, partition_key=item["docTitle"])
 
         print("Removing documents complete")
     except exceptions.CosmosHttpResponseError as remove_response_error:
