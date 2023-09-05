@@ -60,7 +60,7 @@ def remove_documents(container):
         for item in container.query_items(
                 query='SELECT * FROM c',
                 enable_cross_partition_query=True):
-            container.delete_item(item, partition_key=item["title"])
+            container.delete_item(item, partition_key=item["reportTitle"])
 
         print("Removing documents complete")
     except exceptions.CosmosHttpResponseError as remove_response_error:
@@ -68,7 +68,7 @@ def remove_documents(container):
 
 
 def save_document(container, document):
-    resource_name = document.get('title')
+    resource_name = document.get('reportTitle')
     try:
         container.create_item(body=document)
     except exceptions.CosmosHttpResponseError as save_response_error:
