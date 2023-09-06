@@ -62,13 +62,7 @@ minor_version() {
 # ---------------------------------------------------------------------------
 store_document() {
   # Add uuid, created date and environment info
-  uuid=$(uuidgen)
-  created_on=$(date '+%Y-%m-%d %H:%M:%S')
-  document=$(echo "$1" | jq --arg id "$uuid" \
-                            --arg environment "$environment" \
-                            --arg created_on "$created_on" '. + {id: $id, environment: $environment, createdOn: $created_on, lastUpdated: $created_on}')
-
-  python3 ./save-to-cosmos.py "${document}"
+  python3 ./save-to-cosmos.py "${1}"
   wait $!
 }
 
@@ -105,6 +99,7 @@ helm repo update
 charts=$(helm whatup -A -q -o json | jq '.releases[] | select(.namespace=="admin" or .namespace=="monitoring" or .namespace=="flux-system") | {chart: .name, namespace: .namespace, installed: .installed_version, latest: .latest_version, appVersion: .app_version, newestRepo: .newest_repo, updated: .updated, deprecated: .deprecated}' | jq -s)
 [[ "$charts" == "" ]] && echo "Error: helm whatup failed." && exit 1
 
+declare -a documents=()
 # Iterate through results and determine chart verdict
 for chart in $(echo "$charts" | jq -c '.[]'); do
   latest=$(get_value "$chart" '.latest')
@@ -132,16 +127,26 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
   fi
 
   # Enhance document with additional information
+  uuid=$(uuidgen)
+  created_on=$(date '+%Y-%m-%d %H:%M:%S')
+
   document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" \
                                 --arg verdict $verdict \
+                                --arg id "$uuid" \
+                                --arg environment "$environment" \
+                                --arg created_on "$created_on" \
                                 --arg report_type "table" \
                                 --arg display_name "HELM Repositories" \
-                                --arg color_code $color_code '. + {displayName: $display_name, cluster: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
-  # ---------------------------------------------------------------------------
-  # STEP 3:
-  # Store document
-  # ---------------------------------------------------------------------------
-  store_document "$document"
+                                --arg color_code $color_code '. + {id: $id, environment: $environment, createdOn: $created_on, lastUpdated: $created_on, displayName: $display_name, cluster: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
+
+  documents+=("$document")
 done
+
+# ---------------------------------------------------------------------------
+# STEP 3:
+# Store document
+# ---------------------------------------------------------------------------
+documents=$(jq -c -n '$ARGS.positional' --jsonargs "${documents[@]}")
+store_document "$documents"
 
 echo "Job process completed"
