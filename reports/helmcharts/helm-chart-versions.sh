@@ -99,6 +99,9 @@ helm repo update
 charts=$(helm whatup -A -q -o json | jq '.releases[] | select(.namespace=="admin" or .namespace=="monitoring" or .namespace=="flux-system") | {chart: .name, namespace: .namespace, installed: .installed_version, latest: .latest_version, appVersion: .app_version, newestRepo: .newest_repo, updated: .updated, deprecated: .deprecated}' | jq -s)
 [[ "$charts" == "" ]] && echo "Error: helm whatup failed." && exit 1
 
+count=$(echo "$charts" | jq '. | length')
+echo "${count} charts in total to be processed"
+
 declare -a documents=()
 # Iterate through results and determine chart verdict
 for chart in $(echo "$charts" | jq -c '.[]'); do
