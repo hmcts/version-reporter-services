@@ -1,4 +1,4 @@
-FROM alpine/k8s:1.28.3
+FROM alpine/k8s:1.28.4
 
 RUN apk update && apk add python3 py3-pip && pip3 install azure-cosmos pytz
 RUN apk add openssl uuidgen bash
