@@ -98,6 +98,8 @@ parameters:
         type: "bash"
       - name: "docsoutdated"
         type: "python"
+      - name: "hourlyusage"
+        type: "python"
 
 stages:
   - stage: Precheck
