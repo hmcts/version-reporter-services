@@ -3,15 +3,10 @@ resources
 | extend nics=array_length(properties.networkProfile.networkInterfaces)
 | extend customLocation = extract(@"(?:[^\/])+$", 0, tostring(extendedLocation.name))
 | extend modLocation = case (
-		location =~ 'eastus', 'East US',
-		location =~ 'eastus2', 'East US2',
-		location =~ 'westus', 'West US',
-		location =~ 'westus2', 'West US2',
-		location =~ 'southcentralus', 'South Central US',
 		location =~ 'westeurope', 'West Europe',
-		location =~ 'southeastasia', 'South East Asia',
 		location =~ 'northeurope', 'North Europe',
-		location =~ 'centralUS', 'Central US',
+		location =~ 'uksouth', 'UK South',
+		location =~ 'ukwest', 'UK West',
 		location)
 | extend location = iff(isnotempty(customLocation) and isnotnull(customLocation), strcat(customLocation, " (", modLocation, ")"), location)
 | mvexpand nic=properties.networkProfile.networkInterfaces limit 400
