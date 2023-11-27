@@ -52,7 +52,6 @@ def main():
         print('Exception | Storage:')
         print(ex)
 
-    storage.remove_output_file()
     print(f"Hourly report cron job completed at: {get_current_date_time()}")
 
 
