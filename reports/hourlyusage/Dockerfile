@@ -9,6 +9,11 @@ COPY . .
 
 ENV AZURE_STORAGE_CONTAINER="" \
     AZURE_STORAGE_URL="" \
-    AZURE_STORAGE_ACCESS_KEY=""
+    AZURE_STORAGE_ACCESS_KEY="" \
+    AZURE_TENANT_ID="" \
+    AZURE_CLIENT_ID="" \
+    AZURE_CLIENT_SECRET="" \
+    ENVIRONMENT="" \
+    CLUSTER_NAME=""
 
 CMD [ "python", "./main.py" ]
