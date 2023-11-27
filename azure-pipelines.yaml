@@ -76,6 +76,7 @@ parameters:
       - "helmcharts"
       - "paloalto"
       - "renovate"
+      - "hourlyusage"
       - "All"
 
   - name: action
