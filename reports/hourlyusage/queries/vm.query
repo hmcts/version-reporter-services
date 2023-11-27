@@ -1,0 +1,82 @@
+resources
+| where type =~ "microsoft.hybridcompute/machines" or type =~ "microsoft.compute/virtualmachines"
+| extend nics=array_length(properties.networkProfile.networkInterfaces)
+| extend customLocation = extract(@"(?:[^\/])+$", 0, tostring(extendedLocation.name))
+| extend modLocation = case (
+		location =~ 'westeurope', 'West Europe',
+		location =~ 'northeurope', 'North Europe',
+		location =~ 'uksouth', 'UK South',
+		location =~ 'ukwest', 'UK West',
+		location)
+| extend location = iff(isnotempty(customLocation) and isnotnull(customLocation), strcat(customLocation, " (", modLocation, ")"), location)
+| mvexpand nic=properties.networkProfile.networkInterfaces limit 400
+| where (type == "microsoft.compute/virtualmachines" and nics == 1 or nic.properties.primary =~ 'true' or isempty(nic)) or type <> "microsoft.compute/virtualmachines"
+| project
+        id,
+        name,
+        type,
+        location,
+        subscriptionId,
+        vmSize = coalesce(tostring(properties.hardwareProfile.vmSize), '-'),
+        nicId = tostring(tolower(nic.id)),
+        powerState = coalesce(properties.powerState, properties.status.powerState, tostring(split(tolower(properties.extended.instanceView.powerState.code), "powerstate/")[1])),
+        provisioningState = tostring(properties.provisioningState),
+        hibernationState = tostring(split(tolower(properties.extended.instanceView.hibernationState.code), "hibernationstate/")[1])
+| summarize by id, name, type, location, subscriptionId, vmSize, powerState, provisioningState, hibernationState
+| project id,
+        name,
+        type,
+        location,
+        subscriptionId,
+        status = case(
+            provisioningState =~ 'CREATING', 'Creating',
+            provisioningState =~ 'DELETING', 'Deleting',
+            (provisioningState =~ 'FAILED' and isnotnull(powerState) and isnotempty(powerState)), case(
+                powerState =~ 'RUNNING', 'Running',
+                powerState =~ 'POWEREDON', 'Running',
+                powerState =~ 'STOPPED', 'Stopped',
+                powerState =~ 'DEALLOCATED', case(
+                    hibernationState =~ 'HIBERNATED', 'Hibernated (deallocated)',
+                    'Stopped (deallocated)'
+                ),
+                powerState =~ 'POWEREDOFF', 'Powered off',
+                powerState =~ 'SUSPENDED', 'Suspended',
+                'Unknown'
+            ),
+            provisioningState =~ 'FAILED', 'Failed',
+            (provisioningState =~ 'SUCCEEDED' and isnotnull(powerState) and isnotempty(powerState)), case(
+                powerState =~ 'RUNNING', 'Running',
+                powerState =~ 'POWEREDON', 'Running',
+                powerState =~ 'STOPPED', 'Stopped',
+                powerState =~ 'DEALLOCATED', case(
+                    hibernationState =~ 'HIBERNATED', 'Hibernated (deallocated)',
+                    'Stopped (deallocated)'
+                ),
+                powerState =~ 'POWEREDOFF', 'Powered off',
+                powerState =~ 'SUSPENDED', 'Suspended',
+                powerState =~ 'STARTING', 'Starting',
+                'Unknown'
+            ),
+            (provisioningState =~ 'UPDATING' and isnotnull(powerState) and isnotempty(powerState)), case(
+                powerState =~ 'DEALLOCATING', 'Deallocating',
+                powerState =~ 'RUNNING', 'Running',
+                powerState =~ 'STARTING', 'Starting',
+                powerState =~ 'STOPPING', 'Stopping',
+                'Updating'
+            ),
+            'Unknown'
+        ),
+        vmSize
+| join kind=inner (
+    resourcecontainers
+    | where type == 'microsoft.resources/subscriptions'
+    | project subscriptionId, subscriptionName = name)
+    on subscriptionId
+| extend locationDisplayName=case(
+    location =~ 'uksouth','UK South',
+    location =~ 'westeurope','West Europe',
+    location =~ 'ukwest','UK West' ,location)
+| where (status =~ ('running'))
+| where (type =~ ('microsoft.compute/virtualmachines'))
+| project subscriptionName, sku = vmSize
+| sort by subscriptionName asc

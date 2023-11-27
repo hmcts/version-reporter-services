@@ -1,0 +1,10 @@
+pytest
+pathlib
+pandas
+requests
+msal
+msgraph-sdk
+azure-identity
+azure-mgmt-resourcegraph
+azure-mgmt-resource
+azure-storage-blob

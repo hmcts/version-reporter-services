@@ -1,0 +1,8 @@
+resources
+| join kind=inner (
+    resourcecontainers
+    | where type == 'microsoft.resources/subscriptions'
+    | project subscriptionId, subscriptionName = name)
+    on subscriptionId
+| where type=~ 'microsoft.compute/virtualmachinescalesets'
+| project subscriptionName, sku = tostring(sku.name), total = toint(sku.capacity)
