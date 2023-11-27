@@ -7,9 +7,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV COSMOS_KEY="" \
-    COSMOS_DB_NAME="" \
-    COSMOS_DB_CONTAINER="" \
-    COSMOS_DB_URI=""
+ENV AZURE_STORAGE_CONTAINER="" \
+    AZURE_STORAGE_URL="" \
+    AZURE_STORAGE_ACCESS_KEY=""
 
 CMD [ "python", "./main.py" ]
