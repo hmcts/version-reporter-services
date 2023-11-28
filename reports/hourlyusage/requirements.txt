@@ -1,7 +1,6 @@
 pytest
 pathlib
 pandas
-requests
 msal
 msgraph-sdk
 azure-identity
