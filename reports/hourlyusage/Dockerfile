@@ -5,10 +5,13 @@ WORKDIR /usr/src/app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN useradd -ms /bin/bash admin
 COPY . .
 
-RUN chmod 777 /usr/src/app/output.csv
-RUN ls -ln /usr/src/app/output.csv
+RUN chown -R admin:admin /usr/src/app
+RUN chmod 755 /usr/src/app
+
+USER admin
 
 ENV AZURE_STORAGE_CONTAINER="" \
     AZURE_STORAGE_URL="" \
