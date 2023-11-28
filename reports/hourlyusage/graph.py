@@ -4,7 +4,7 @@ from json import loads
 from azure.mgmt.resource import SubscriptionClient
 from azure.identity import DefaultAzureCredential
 from msgraph.generated.models.o_data_errors.o_data_error import ODataError
-from utility import get_vm_query, get_vmss_query, remove_moj_subscriptions, get_output_file
+from utility import get_vm_query, get_vmss_query, remove_moj_subscriptions
 
 
 class Graph:
@@ -122,10 +122,10 @@ class Graph:
         return loads(result.to_json(orient="records"))
 
     @staticmethod
-    def save_as_csv(result):
-        output_file = get_output_file()
+    def get_output_as_csv(result):
         df = pd.DataFrame(result)
-        df.to_csv(output_file, index=False, header=False, encoding="utf-8")
+        output_data = df.to_csv(index=False, header=False, encoding="utf-8")
+        return output_data
 
     @staticmethod
     def add_timestamp(result, start_time):

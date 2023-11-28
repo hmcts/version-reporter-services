@@ -9,8 +9,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN chmod 755 /usr/src/app
-
 ENV AZURE_STORAGE_CONTAINER="" \
     AZURE_STORAGE_URL="" \
     AZURE_STORAGE_ACCESS_KEY="" \

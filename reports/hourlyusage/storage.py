@@ -1,7 +1,7 @@
 import os
 import datetime
 from azure.storage.blob import BlobServiceClient
-from utility import get_output_file, get_headers_file
+from utility import get_headers_file
 
 
 class Storage:
@@ -41,11 +41,9 @@ class Storage:
         return blob_client
 
     @staticmethod
-    def append_data_to_blob(append_blob_name, blob_client):
+    def append_data_to_blob(data, append_blob_name, blob_client):
         print(f"Adding data to Azure Storage as blob: {append_blob_name}")
-        output_file = get_output_file()
-        with open(file=output_file, mode="rb") as data:
-            blob_client.append_block(data=data)
+        blob_client.append_block(data=data)
         print(f"{append_blob_name} successfully updated")
 
     @staticmethod
@@ -54,10 +52,3 @@ class Storage:
         report_name = f"{today.strftime('%Y-%m')}-running.csv"
         return report_name
 
-    @staticmethod
-    def remove_output_file():
-        output_file = get_output_file()
-        if os.path.exists(output_file):
-            os.remove(output_file)
-        else:
-            print(f"The file '{output_file}' does not exist")

@@ -9,6 +9,7 @@ def main():
 
     graph: Graph = Graph()
     storage: Storage = Storage()
+    output_data = None
 
     # Connect to resource manager, execute query and return the data
     try:
@@ -25,7 +26,7 @@ def main():
         graph.add_timestamp(result, start_time)
 
         # Convert to csv without header or index so it can be appended
-        graph.save_as_csv(result)
+        output_data = graph.get_output_as_csv(result)
     except Exception as ex:
         print('Exception | Resource manager:')
         print(ex)
@@ -47,7 +48,10 @@ def main():
         blob_client = storage.create_append_blob(append_blob_name, blob_service_client)
 
         # Add data to end of file
-        storage.append_data_to_blob(append_blob_name, blob_client)
+        if output_data:
+            storage.append_data_to_blob(output_data, append_blob_name, blob_client)
+        else:
+            print("No output data available to append.")
     except Exception as ex:
         print('Exception | Storage:')
         print(ex)
