@@ -3,10 +3,6 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 
-def get_output_file():
-    return "./output.csv"
-
-
 def get_headers_file():
     return "./queries/headers.csv"
 

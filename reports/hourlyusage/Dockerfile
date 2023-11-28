@@ -3,12 +3,11 @@ FROM python:3.12.0-alpine3.18
 WORKDIR /usr/src/app
 
 COPY requirements.txt ./
+
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-
-RUN chmod 777 /usr/src/app/output.csv
-RUN ls -ln /usr/src/app/output.csv
 
 ENV AZURE_STORAGE_CONTAINER="" \
     AZURE_STORAGE_URL="" \
