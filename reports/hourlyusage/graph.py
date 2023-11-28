@@ -122,7 +122,7 @@ class Graph:
         return loads(result.to_json(orient="records"))
 
     @staticmethod
-    def get_output_as_csv(result):
+    def get_csv(result):
         df = pd.DataFrame(result)
         output_data = df.to_csv(index=False, header=False, encoding="utf-8")
         return output_data

@@ -26,7 +26,7 @@ def main():
         graph.add_timestamp(result, start_time)
 
         # Convert to csv without header or index so it can be appended
-        output_data = graph.get_output_as_csv(result)
+        output_data = graph.get_csv(result)
     except Exception as ex:
         print('Exception | Resource manager:')
         print(ex)
