@@ -1,6 +1,8 @@
-FROM python:3.12.0-alpine3.18
+FROM alpine:3.18.4
 
-WORKDIR /usr/src/app
+RUN apk update && apk add python3 py3-pip
+
+WORKDIR /app
 
 COPY requirements.txt ./
 
