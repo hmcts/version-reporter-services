@@ -5,6 +5,7 @@ WORKDIR /usr/src/app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN chmod 777 ./output.csv
 COPY . .
 
 ENV AZURE_STORAGE_CONTAINER="" \
