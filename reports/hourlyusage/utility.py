@@ -28,4 +28,4 @@ def remove_moj_subscriptions(result_data, property_name):
 
 def get_current_date_time():
     now = datetime.now(timezone.utc)
-    return now.strftime("%Y:%m:%d %H:%M:%S")
+    return now.strftime("%Y-%m-%d %H:%M:%S")
