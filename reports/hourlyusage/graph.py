@@ -134,5 +134,5 @@ class Graph:
         date = runtime.strftime("%Y-%m-%d")
         hour = runtime.strftime("%H%p")
         for row in result:
-            row['runDate'] = date
-            row['runHour'] = hour
+            row['date'] = date
+            row['hour'] = hour
