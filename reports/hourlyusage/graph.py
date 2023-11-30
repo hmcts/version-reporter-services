@@ -1,6 +1,7 @@
 import pandas as pd
 import azure.mgmt.resourcegraph as arg
 from json import loads
+from datetime import datetime
 from azure.mgmt.resource import SubscriptionClient
 from azure.identity import DefaultAzureCredential
 from msgraph.generated.models.o_data_errors.o_data_error import ODataError
@@ -129,5 +130,9 @@ class Graph:
 
     @staticmethod
     def add_timestamp(result, start_time):
+        runtime = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+        date = runtime.strftime("%Y-%m-%d")
+        hour = runtime.strftime("%H%p")
         for row in result:
-            row['dateTime'] = start_time
+            row['date'] = date
+            row['time'] = hour
