@@ -135,4 +135,4 @@ class Graph:
         hour = runtime.strftime("%H%p")
         for row in result:
             row['date'] = date
-            row['hour'] = hour
+            row['time'] = hour
