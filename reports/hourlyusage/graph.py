@@ -1,6 +1,6 @@
 import pandas as pd
 import azure.mgmt.resourcegraph as arg
-from json import loads
+from json import loads, dumps
 from datetime import datetime
 from azure.mgmt.resource import SubscriptionClient
 from azure.identity import DefaultAzureCredential
@@ -89,7 +89,7 @@ class Graph:
         return vm_result
 
     def process_arg_vmss_data(self):
-        print("Executing running VMSS query")
+        print("\nExecuting running VMSS query")
         graph_result = self.get_arg_data("vmss")
         graph_result = remove_moj_subscriptions(graph_result, "subscriptionName")  # skip moj subs
         df_vmss = pd.DataFrame(graph_result)
@@ -111,8 +111,10 @@ class Graph:
 
     @staticmethod
     def process_combined_data(vm_result, vmss_result):
-        vm_result.join(vmss_result)
-        graph_result = loads(vm_result)
+        # We convert the data back to dictionary, merge them and convert back to string
+        all_results = dumps(loads(vm_result) + loads(vmss_result))
+
+        graph_result = loads(all_results)
         df = pd.DataFrame(graph_result)
         '''
         Same outcome as per the process_arg_vmss_data as both result now have same columns i.e. 
@@ -132,7 +134,7 @@ class Graph:
     def add_timestamp(result, start_time):
         runtime = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
         date = runtime.strftime("%Y-%m-%d")
-        hour = runtime.strftime("%H%p")
+        hour = runtime.strftime("%H")
         for row in result:
             row['date'] = date
             row['time'] = hour
