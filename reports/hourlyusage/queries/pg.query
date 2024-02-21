@@ -5,4 +5,4 @@ resources
     | project subscriptionId, subscriptionName = name, location)
     on subscriptionId
 | where type == "microsoft.dbforpostgresql/flexibleservers"
-| project name, sku.name, subscriptionName, location
+| project subscriptionName, sku = sku.name

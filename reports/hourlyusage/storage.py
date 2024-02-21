@@ -47,8 +47,9 @@ class Storage:
         print(f"{append_blob_name} successfully updated")
 
     @staticmethod
-    def get_append_blob_name():
+    def get_append_blob_name(file_type="vm"):
         today = datetime.date.today()
         report_name = f"{today.strftime('%Y-%m')}-running.csv"
+        if file_type == "pg":
+            report_name = f"{today.strftime('%Y-%m')}-running-pg.csv"
         return report_name
-
