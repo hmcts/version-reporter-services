@@ -5,7 +5,7 @@ from datetime import datetime
 from azure.mgmt.resource import SubscriptionClient
 from azure.identity import DefaultAzureCredential
 from msgraph.generated.models.o_data_errors.o_data_error import ODataError
-from utility import get_vm_query, get_vmss_query, remove_moj_subscriptions
+from utility import get_vm_query, get_vmss_query, get_pg_query, remove_moj_subscriptions
 
 
 class Graph:
@@ -26,6 +26,8 @@ class Graph:
                 query_string = get_vm_query()
             elif query_type == "vmss":
                 query_string = get_vmss_query()
+            elif query_type == "pg":
+                query_string = get_pg_query()
             else:
                 raise ODataError('Invalid query type!')
 
@@ -66,9 +68,9 @@ class Graph:
 
         return result
 
-    def process_arg_vm_data(self):
-        print("Executing running VM query")
-        graph_result = self.get_arg_data("vm")
+    def process_arg_vm_data(self, query_type='vm'):
+        print(f"\nExecuting running query: {query_type} for running vms")
+        graph_result = self.get_arg_data(query_type)
         graph_result = remove_moj_subscriptions(graph_result, "subscriptionName")  # skip moj subs
         df_vm = pd.DataFrame(graph_result)
         '''

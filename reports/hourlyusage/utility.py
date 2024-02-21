@@ -21,6 +21,10 @@ def get_vmss_query():
     return get_query("./queries/vmss.query")
 
 
+def get_pg_query():
+    return get_query("./queries/pg.query")
+
+
 def remove_moj_subscriptions(result_data, property_name):
     result = filter(lambda data: not data[property_name].lower().startswith("moj"), result_data)
     return list(result)

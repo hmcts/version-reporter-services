@@ -1,0 +1,8 @@
+resources
+| join kind=inner (
+    resourcecontainers
+    | where type == 'microsoft.resources/subscriptions'
+    | project subscriptionId, subscriptionName = name, location)
+    on subscriptionId
+| where type == "microsoft.dbforpostgresql/flexibleservers"
+| project subscriptionName, sku = sku.name
