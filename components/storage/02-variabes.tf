@@ -45,5 +45,6 @@ variable "containers_partitions" {
     helmcharts   = "/namespace"
     renovate     = "/repository"
     docsoutdated = "/docTitle"
+    netflow      = "/netflow"
   }
 }
