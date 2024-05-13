@@ -5,4 +5,5 @@ resources
     | project subscriptionId, subscriptionName = name, location)
     on subscriptionId
 | where type == "microsoft.dbforpostgresql/flexibleservers"
+| where properties.state !in~ ("Stopping", "Stopped")
 | project subscriptionName, sku = sku.name
