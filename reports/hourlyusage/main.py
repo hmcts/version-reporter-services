@@ -18,6 +18,7 @@ def run():
     storage: Storage = Storage()
     vm_vmss_output_data = None
     pg_vm_output_data = None
+    pg_vm_active_output_data = None
 
     # Connect to resource manager, execute query and return the data
     try:
@@ -26,6 +27,9 @@ def run():
 
         # Process data for postgres flexible servers
         pg_vm_output_data = process_pg_vm(graph, start_time)
+
+        # Process data for active postgres flexible servers
+        pg_vm_active_output_data = process_pg_active_vm(graph, start_time)
 
     except Exception as ex:
         print('Exception | Resource manager:')
@@ -45,7 +49,7 @@ def run():
         process_and_save_pg_vm_data(blob_service_client, storage, pg_vm_output_data)
 
         # Process only flexible postgres that are currently active and save to storage account
-        process_and_save_pg_active_vm_data(blob_service_client, storage, pg_vm_output_data)
+        process_and_save_pg_active_vm_data(blob_service_client, storage, pg_vm_active_output_data)
     except Exception as ex:
         print('Exception | Storage:')
         print(ex)
@@ -95,12 +99,12 @@ def process_and_save_pg_vm_data(blob_service_client, storage, pg_vm_output_data)
         print("No flexible postgres vm output data available to append.")
 
 
-def process_and_save_pg_active_vm_data(blob_service_client, storage, pg_vm_output_data):
+def process_and_save_pg_active_vm_data(blob_service_client, storage, pg_vm_active_output_data):
     """
     Processes and saves to storage account the results for postgres running vms
     :param blob_service_client:
     :param storage:
-    :param pg_vm_output_data:
+    :param pg_vm_active_output_data:
     :return:
     """
     # Create file name by month e.g. 2023-11-running-pg-active.csv
@@ -110,10 +114,10 @@ def process_and_save_pg_active_vm_data(blob_service_client, storage, pg_vm_outpu
     pg_blob_client = storage.create_append_blob(pg_vm_append_blob_name, blob_service_client)
 
     # Add data to end of file
-    if pg_vm_output_data:
-        storage.append_data_to_blob(pg_vm_output_data, pg_vm_append_blob_name, pg_blob_client)
+    if pg_vm_active_output_data:
+        storage.append_data_to_blob(pg_vm_active_output_data, pg_vm_append_blob_name, pg_blob_client)
     else:
-        print("No flexible postgres vm output data available to append.")
+        print("No active flexible postgres vm output data available to append.")
 
 
 def setup_storage(storage):
