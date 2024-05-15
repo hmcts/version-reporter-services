@@ -1,5 +1,5 @@
-import json
-from json import loads, dumps
+from json import loads
+
 from graph import Graph
 from storage import Storage
 from utility import get_current_date_time
@@ -18,6 +18,7 @@ def run():
     storage: Storage = Storage()
     vm_vmss_output_data = None
     pg_vm_output_data = None
+    pg_vm_active_output_data = None
 
     # Connect to resource manager, execute query and return the data
     try:
@@ -26,6 +27,9 @@ def run():
 
         # Process data for postgres flexible servers
         pg_vm_output_data = process_pg_vm(graph, start_time)
+
+        # Process data for active postgres flexible servers
+        pg_vm_active_output_data = process_pg_active_vm(graph, start_time)
 
     except Exception as ex:
         print('Exception | Resource manager:')
@@ -41,8 +45,11 @@ def run():
         # Process the combined vm and vmss data as save to storage account
         process_and_save_vm_vmss_data(blob_service_client, storage, vm_vmss_output_data)
 
-        # Process the flexible postgres vm data as save to storage account
+        # Process all flexible postgres vm data as save to storage account
         process_and_save_pg_vm_data(blob_service_client, storage, pg_vm_output_data)
+
+        # Process only flexible postgres that are currently active and save to storage account
+        process_and_save_pg_active_vm_data(blob_service_client, storage, pg_vm_active_output_data)
     except Exception as ex:
         print('Exception | Storage:')
         print(ex)
@@ -92,6 +99,27 @@ def process_and_save_pg_vm_data(blob_service_client, storage, pg_vm_output_data)
         print("No flexible postgres vm output data available to append.")
 
 
+def process_and_save_pg_active_vm_data(blob_service_client, storage, pg_vm_active_output_data):
+    """
+    Processes and saves to storage account the results for postgres running vms
+    :param blob_service_client:
+    :param storage:
+    :param pg_vm_active_output_data:
+    :return:
+    """
+    # Create file name by month e.g. 2023-11-running-pg-active.csv
+    pg_vm_append_blob_name = storage.get_append_blob_name("pg-active")
+
+    # Create a blob client using the local file name as the name for the blob
+    pg_blob_client = storage.create_append_blob(pg_vm_append_blob_name, blob_service_client)
+
+    # Add data to end of file
+    if pg_vm_active_output_data:
+        storage.append_data_to_blob(pg_vm_active_output_data, pg_vm_append_blob_name, pg_blob_client)
+    else:
+        print("No active flexible postgres vm output data available to append.")
+
+
 def setup_storage(storage):
     # Create the BlobServiceClient object
     blob_service_client = storage.get_blob_service_client()
@@ -124,6 +152,22 @@ def process_vms_and_vmss(graph, start_time):
 def process_pg_vm(graph, start_time):
     # Get vm data from MRG, Group result, total sku's per subscriptions
     pg_vm_result = graph.process_arg_vm_data("pg")
+
+    # Convert back to json for processing
+    result = loads(pg_vm_result)
+
+    # Time stamp the data
+    graph.add_timestamp(result, start_time)
+
+    # Convert to csv without header or index so it can be appended
+    output_data = graph.get_csv(result)
+
+    return output_data
+
+
+def process_pg_active_vm(graph, start_time):
+    # Get vm data from MRG, Group result, total sku's per subscriptions
+    pg_vm_result = graph.process_arg_vm_data("pg-active")
 
     # Convert back to json for processing
     result = loads(pg_vm_result)
