@@ -50,6 +50,10 @@ class Storage:
     def get_append_blob_name(file_type="vm"):
         today = datetime.date.today()
         report_name = f"{today.strftime('%Y-%m')}-running.csv"
+
         if file_type == "pg":
-            report_name = f"{today.strftime('%Y-%m')}-running-pg.csv"
+            report_name = f"{today.strftime('%Y-%m')}-running-pg-allocated.csv"
+        if file_type == "pg-active":
+            report_name = f"{today.strftime('%Y-%m')}-running-pg-active.csv"
+
         return report_name
