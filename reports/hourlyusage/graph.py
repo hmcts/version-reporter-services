@@ -1,11 +1,13 @@
-import pandas as pd
-import azure.mgmt.resourcegraph as arg
-from json import loads, dumps
 from datetime import datetime
-from azure.mgmt.resource import SubscriptionClient
+from json import loads, dumps
+
+import azure.mgmt.resourcegraph as arg
+import pandas as pd
 from azure.identity import DefaultAzureCredential
+from azure.mgmt.resource import SubscriptionClient
 from msgraph.generated.models.o_data_errors.o_data_error import ODataError
-from utility import get_vm_query, get_vmss_query, get_pg_query, remove_moj_subscriptions
+
+from utility import remove_moj_subscriptions, get_query
 
 
 class Graph:
@@ -20,19 +22,9 @@ class Graph:
     def get_arg_data(self, query_type: str):
         arg_response = None
         try:
-            query_string = None
-            query_type = query_type.lower()
-            if query_type == "vm":
-                query_string = get_vm_query()
-            elif query_type == "vmss":
-                query_string = get_vmss_query()
-            elif query_type == "pg":
-                query_string = get_pg_query()
-            else:
-                raise ODataError('Invalid query type!')
-
-            # Execute the ARG query
+            query_string = get_query(query_type)
             arg_response = self.get_resources(query_string)
+
             if arg_response:
                 arg_response = arg_response.get("data")
 
