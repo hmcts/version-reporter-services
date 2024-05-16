@@ -167,10 +167,10 @@ def process_pg_vm(graph, start_time):
 
 def process_pg_active_vm(graph, start_time):
     # Get vm data from MRG, Group result, total sku's per subscriptions
-    pg_vm_result = graph.process_arg_vm_data("pg-active")
+    pg_active_vm_result = graph.process_arg_vm_data("pg-active")
 
     # Convert back to json for processing
-    result = loads(pg_vm_result)
+    result = loads(pg_active_vm_result)
 
     # Time stamp the data
     graph.add_timestamp(result, start_time)
