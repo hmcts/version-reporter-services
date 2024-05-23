@@ -1,4 +1,4 @@
-FROM alpine:3.19.1
+FROM alpine:3.20.0
 
 RUN apk update && apk add python3 py3-pip
 
