@@ -4,7 +4,12 @@
 
 The Version Reporter Service MicroServices Project is a scaffold that allows custom reporting services to be built easily via the same pipeline and repository whilst maintaining any custom configuration required within the report itself.
 
-### Reports
+### Goal
+
+Provide a single solution to allow reporting of unique or custom services within the project.
+<br> Make it easy to add new reports in future by making the scaffolding in this repository generic and easy to scale.
+
+### Report structure
 
 Each report is a set of files specific to that report and the folder structure of this repository is designed to maintain a completely exclusive setup for each report.
 
@@ -26,12 +31,6 @@ A report should consist of:
   <summary>VRS Proposed Plan</summary>
   <img alt="VRS" src="./images/version-reporter-v2.jpg" width="80%">
 </details>
-
-### Goal
-
-Provide a single solution to allow reporting of unique or custom services within the project.
-
-Make it easy to add new reports in future by making the scaffolding in this repository generic and easy to scale.
 
 ## Infrastructure
 
@@ -71,6 +70,37 @@ variable "containers_partitions" {
 If you wish to create a new report that utilises CosmosDB for storage you will need to create a new partition key in the above variable.
 Each `key:value` is created in a `for_each` within the code which results in individual containers per report.
 
+## Reports
+
+This repository contains the code and builds for many reporting services, you will find a list below linking to the individual report readme.
+If you plan to add a new report please ensure that it includes a readme with usage and build instructions.
+
+- Docs Outdated: [Readme](reports/docsoutdated/README.md)
+- Helm Charts: [Readme](reports/helmcharts/README.md)
+- Hourly Usage: [Readme](reports/hourlyusage/README.md)
+- Palo Alto: [Readme](reports/paloalto/README.md)
+- Renovate: [Readme](reports/renovate/README.md)
+
+
+## Container Images
+
+Each of the reports contains a `Dockerfile`, this is used to build the container image that is then used for deployment to AKS.
+
+Each `Dockerfile` is unique to the report and sets up a specific environment for that report to function such as environment variables, packages and run commands.
+
+Example:
+
+The `docsoutdated` report is built with Python, the container image:
+
+- Uses a python base image
+- Installs the required packages via Pip and the [requirements.txt](reports/docsoutdated/requirements.txt) file.
+- Sets environment variables for access to CosmosDB
+- Sets the CMD to run the [main.py](reports/docsoutdated/main.py) file that does the bulk of the work.
+
+This image is perfectly setup to run this one report and the image when built can be deployed to AKS via Flux.
+
+**Every report created in this repository must follow this pattern, a Dockerfile must exist and it must be capable of running the report in isolation i.e. the container image has everything required for the script(s) to run as expected.**
+
 ## CI/CD
 
 This repository contains an Azure Pipeline yaml definition [file](azure-pipelines.yaml) which is used to:
@@ -98,39 +128,47 @@ There are 3 stages within the pipeline:
   - Creates a job per report that sets up the environment for each report depending on the technology used e.g. Bash, Node, Python
   - Builds and publishes container images to ACR using Dockerfiles
 
-## Reports
+### Build and Publish
 
-This repository contains the code and builds for many reporting services, you will find a list below linking to the individual report readme.
-If you plan to add a new report please ensure that it includes a readme with usage and build instructions.
+Container images are built via the ADO pipeline, the final step of the pipeline is a bash script will accept inputs and runs the Azure CLI `acr build` command to build and push the newly built image to Azure Container Registry.
 
-- Docs Outdated: [Readme](reports/docsoutdated/README.md)
-- Helm Charts: [Readme](reports/helmcharts/README.md)
-- Hourly Usage: [Readme](reports/hourlyusage/README.md)
-- Palo Alto: [Readme](reports/paloalto/README.md)
-- Renovate: [Readme](reports/renovate/README.md)
+There is a variable defined during the script which defines the tag used for the container image, this is made up of easily determined information
 
-## Container Images
+```yaml
+  - script: |
+      repo_sha=$(git rev-parse --verify HEAD)
+      image_tag_sha=${repo_sha:0:7}
+      last_commit_time=$(date +'%Y%m%d%H%M%S')
+      image_tag=$(echo ${image_tag_sha}-${last_commit_time})
+      
+      echo "##vso[task.setvariable variable=tag]${{variables.acrRepository}}/${{report.name}}:prod-${image_tag}"
+    displayName: "ACR: Tag ${{report.name}}"
+```
 
-Each of the reports contains a `Dockerfile`, this is used to build the container image that is then used for deployment to AKS.
+This variable as well as other variables and parameters defined in the pipeline are then used during the build and publish script.
+The arguments are position sensitive for the bash script but these should not need to change when adding a new report.
 
-Each `Dockerfile` is unique to the report and sets up a specific environment for that report to function such as environment variables, packages and run commands.
+```yaml
+  - task: AzureCLI@1
+    displayName: 'ACR: Build ${{report.name}}'
+    enabled: true
+    inputs:
+      azureSubscription: ${{ variables.acrServiceConnection }}
+      workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+      scriptType: bash
+      scriptPath: $(System.DefaultWorkingDirectory)/pipeline-scripts/publish-image.sh
+      arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}}
+```
 
-Example:
+### Adding new reports to the pipeline
 
-The `docsoutdated` report is built with Python, the container image:
+Adding a new report to the pipeline is the final step to make it all work. 
 
-- Uses a python base image
-- Installs the required packages via Pip and the [requirements.txt](reports/docsoutdated/requirements.txt) file.
-- Sets environment variables for access to CosmosDB
-- Sets the CMD to run the [main.py](reports/docsoutdated/main.py) file that does the bulk of the work.
+When you have created the report files, scripts and structure defined under [Report structure](#report-structure) you will need to add the report into the pipeline so that you can build and publish the image.
 
-This image is perfectly setup to run this one report and the image when built can be deployed to AKS via Flux.
+The pipeline steps/jobs are fixed and there is no need to modify these to add a new report. Within the pipeline there is a parameter called `reports` which is a `dictionary` of reports and the scripting language e.g. `helmcharts` and `bash`, this means the scripts within the `helmcharts` report have been written in `bash`.
 
-**Every report created in this repository must follow this pattern, a Dockerfile must exist and it must be capable of running the report in isolation i.e. the container image has everything required for the script(s) to run as expected.**
-
-### Build
-
-### Publish
+Add your new report to this list where `name` should match the folder name of your report and `type` should be the scripting language used for the script. The language will determine the template used to prepare and build the script if necessary.
 
 ## Deployment
 
