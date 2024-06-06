@@ -177,3 +177,35 @@ Deployment of the reports is carried out via Flux which is not part of this repo
 More information can be found [here](https://github.com/hmcts/sds-flux-config/tree/9a8ac5f9d043b4a95b9a05e6ed47c28e0c59c563/apps/monitoring/version-reporter).
 
 The images created by in this repository should be used for the deployments along with any necessary inputs for them to operate correctly.
+
+## Local Development
+
+The repository is split into pipeline development and reports development:
+
+- components - the Terraform code that builds the required resources for the reporting services. See [Infrastructure](#infrastructure) for more info.
+- pipeline-reports-templates - examples of nodejs and python report folders that can be copied and customised into the `reports` folder, see [Report structure](#report-structure) for more info.
+- pipeline-scripts - scripts used within the pipeline to carry out specific tasks
+- pipeline-templates - these are ADO templates that are loaded by the pipeline as/when required
+- reports - the actual code for each report type
+
+Pipeline development is utilising ADO Yaml and development requires testing to take place via Azure DevOps where you can test pipeline changes from your branch.
+
+The following are useful tools or references for ADO pipeline development:
+
+- [ADO YAML Reference](https://learn.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/?view=azure-pipelines)
+- [VSCode pipeline extension](https://marketplace.visualstudio.com/items?itemName=ms-azure-devops.azure-pipelines)
+
+Its also possible to edit the pipeline within Azure DevOps which provides live linting, references to existing tasks and the ability to validate and download the complete YAML file at the end to be stored in Git: [Link](https://learn.microsoft.com/en-us/azure/devops/pipelines/get-started/yaml-pipeline-editor?view=azure-devops)
+
+Report development is dependant on updating existing or creating new reports.
+Each of the existing reports is written in a specific language which we've discussed already, this means you will need to setup your local environment to suit if you are editing one of these reports:
+
+- NodeJS - to setup NodeJS it is recommended to install `NVM`/`FNM` (OS dependant options) which are simple tools to help manage multiple NodeJS installs:
+  - [MacOSX](https://nodejs.org/en/download/package-manager)
+  - [Windows](https://nodejs.org/en/download/package-manager)
+
+- Python - to setup Python it is recommended to install `Pyenv` which allows you to manage multiple Python versions and virtual environments
+  - [MacOSX](https://realpython.com/intro-to-pyenv/#installing-pyenv)
+  - [Windows](https://github.com/pyenv-win/pyenv-win)
+
+If you are creating a new report, please try to use one of the current language so we do not end up with too many languages that cannot be maintained by the team. NodeJS, Python and Bash are the preferred options as they are widely known or documented.
