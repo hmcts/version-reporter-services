@@ -1,7 +1,9 @@
 FROM alpine/k8s:1.30.0
 
-RUN apk update && apk add python3 py3-pip && pip3 install azure-cosmos pytz
-RUN apk add openssl uuidgen bash
+RUN apk update 
+RUN apk add python3 py3-pip openssl uuidgen bash
+RUN rm /usr/lib/python*/EXTERNALLY-MANAGED && python3 -m ensurepip
+RUN pip3 install azure-cosmos pytz
 RUN helm plugin install https://github.com/fabmation-gmbh/helm-whatup
 
 WORKDIR /app
