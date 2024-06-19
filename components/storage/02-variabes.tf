@@ -46,5 +46,6 @@ variable "containers_partitions" {
     renovate     = "/repository"
     docsoutdated = "/docTitle"
     netflow      = "/netflow"
+    aksversions  = "/clusterName"
   }
 }
