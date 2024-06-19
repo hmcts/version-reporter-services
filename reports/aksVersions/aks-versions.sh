@@ -1,33 +1,20 @@
 #!/bin/bash
 #############################################################################
-# Helm ETL report
+# AKS Version report
 # ---------------------------------------------------------------------------
-# This application aims to find out the installed version of chart in the helm
-# repository running on the cluster.
+# This application aims to find out the deployed version of each AKS Cluster and 
+# any available upgrades and set the status for each AKS cluster based on that information.
 #
-# Chart information from the namespaces listed below would be extracted and processed.
-# - admin
-# - monitoring
-# - flux-system
+# Subscriptions used are limited to any containing
+# - SHAREDSERVICES
+# - CFT
 #
-# Helm whatup would also be using in conjunction with some scripting functionality to
-# archive the desired aim. Data would be transformed and stored in cosmosdb
-# Steps/Flows
 # ----------
-# 1. Get list of charts in helmrepositories, read and extract chart name and url, filter by admin type namespace
-#    and add charts to helm
-# 2. Use helm whatup to get installed and current version the make a verdict. Update the document with additional data
-# 3. Save document generated to cosmosdb with the aid of a python script
+# 1. Get list of subscriptions matching naming convention above 
+# 2. Use subscriptions to find deployed AKS clusters
+# 3. Find available updates for AKS clusters and build new object with all the available information into a document (json)
+# 3. Save document(s) generated to cosmosdb with the aid of a python script `save-to-cosmos.py`
 #############################################################################
-
-# Suppressing Intellij specific IDE syntax warning
-# -- PLEASE IGNORE BELOW --
-# shellcheck disable=SC2004
-# shellcheck disable=SC2028
-# shellcheck disable=SC2046
-# shellcheck disable=SC2059
-# shellcheck disable=SC2153
-# --
 
 # ---------------------------------------------------------------------------
 # Define environment variables
@@ -58,24 +45,13 @@ echo "Job process start"
 # --------------------------------------------------------------------------
 declare -a subscriptions
 
-sharedServicesSubs=$(az account list --query "[?contains(name,'SHAREDSERVICES')].{SubscriptionName:name, SubscriptionID:id, TenantID:tenantId}" --output json | jq -r '.[].SubscriptionID')
-[[ "$sharedServicesSubs" == "" ]] && echo "Error: cannot get a list of Shared Service subscriptions." && exit 1
-
-for sub in $(echo "$sharedServicesSubs"); do
-  subscriptions+=($sub)
-done
-
-cftSubs=$(az account list --query "[?contains(name,'CFT')].{SubscriptionName:name, SubscriptionID:id, TenantID:tenantId}" --output json | jq -r '.[].SubscriptionID')
-[[ "$cftSubs" == "" ]] && echo "Error: cannot get a list of CFT subscriptions." && exit 1
-
-for sub in $(echo "$cftSubs"); do
-  subscriptions+=($sub)
-done
+subs=$(az account list --query "[?contains(name,'SHAREDSERVICES') || contains(name,'CFT')].{SubscriptionName:name, SubscriptionID:id, TenantID:tenantId}" --output json | jq -r '.[].SubscriptionID')
+[[ "$subs" == "" ]] && echo "Error: cannot get a list of subscriptions." && exit 1
 
 echo "Subscriptions found:"
-for sub in "${subscriptions[@]}"
-do
+for sub in $(echo "$subs"); do
   echo "$sub"
+  subscriptions+=($sub)
 done
 
 # # ---------------------------------------------------------------------------
@@ -133,6 +109,8 @@ for sub in "${subscriptions[@]}"; do
   echo "Completed subscription: $sub"
 done
 
+[[ "$aksClusterInfo" == "" ]] && echo "Error: no clusters added." && exit 1
+
 # # ---------------------------------------------------------------------------
 # # STEP 3:
 # # Store document
@@ -140,8 +118,14 @@ done
 
 aksClusterInfoOutput=$(echo "${aksClusterInfo[*]}" | jq -s)
 aksClusterInfoTemp=$(jq -n '$ARGS.positional' --jsonargs "${aksClusterInfoOutput[@]}")
-documents=$(echo "${aksClusterInfoTemp[*]}"| jq '.[]')
 
+documents=$(echo "${aksClusterInfoTemp[*]}"| jq '.[]')
+[[ "$documents" == "" ]] && echo "Error: no documents ready to save." && exit 1
+
+# Uncomment to view the output before saving to Cosmos.
+# echo "${documents[*]}" | jq
+
+# Comment this out when working locally to avoid saving to Cosmos.
 store_document "$documents"
 
 echo "Job process completed"
