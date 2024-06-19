@@ -117,7 +117,7 @@ for sub in "${subscriptions[@]}"; do
         verdict="Update required"
       else
         upgradeableVersion="Preview Only"
-        color_code=yellow
+        color_code=orange
         verdict="Not ready for update"
       fi
     fi
