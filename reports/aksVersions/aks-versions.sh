@@ -127,7 +127,7 @@ for sub in "${subscriptions[@]}"; do
                                                       --arg color_code "$color_code" \
                                                       --arg currentVersion "$currentVersion" \
                                                       --arg id "$(uuidgen)" \
-                                                      --arg upgradeableVersion "$upgradeableVersion" '{id: $id, clusterName: .Name, powerState: .PowerState, currentVersion: $currentVersion, upgradeableVersion: $upgradeableVersion, colorCode: $color_code,  verdict: $verdict}')  
+                                                      --arg upgradeableVersion "$upgradeableVersion" '{id: $id, clusterName: .Name, powerState: .PowerState, currentVersion: $currentVersion, upgradeableVersion: $upgradeableVersion, colorCode: $color_code,  verdict: $verdict, resourceType: "AKS Cluster"}')  
   done
   unset currentClusters
   echo "Completed subscription: $sub"
