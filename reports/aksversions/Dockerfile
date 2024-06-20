@@ -1,4 +1,4 @@
-FROM alpine/k8s:1.30.0
+FROM alpine/azure_cli:1.5.6
 
 RUN apk update 
 RUN apk add python3 py3-pip openssl uuidgen bash
