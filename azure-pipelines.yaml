@@ -72,6 +72,7 @@ parameters:
     default: "None"
     values:
       - "None"
+      - "aksversions"
       - "docsoutdated"
       - "helmcharts"
       - "paloalto"
@@ -91,6 +92,8 @@ parameters:
     displayName: Report to build
     type: object
     default:
+      - name: "aksversions"
+        type: "bash"
       - name: "helmcharts"
         type: "bash"
       - name: "paloalto"
