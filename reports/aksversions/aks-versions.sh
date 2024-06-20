@@ -10,10 +10,11 @@
 # - CFT
 #
 # ----------
-# 1. Get list of subscriptions matching naming convention above 
-# 2. Use subscriptions to find deployed AKS clusters
-# 3. Find available updates for AKS clusters and build new object with all the available information into a document (json)
-# 3. Save document(s) generated to cosmosdb with the aid of a python script `save-to-cosmos.py`
+# 1. Log into Azure using service principal 
+# 2. Get list of subscriptions matching naming convention above 
+# 3. Use subscriptions to find deployed AKS clusters
+# 4. Find available updates for AKS clusters and build new object with all the available information into a document (json)
+# 5. Save document(s) generated to cosmosdb with the aid of a python script `save-to-cosmos.py`
 #############################################################################
 
 # ---------------------------------------------------------------------------
@@ -41,6 +42,20 @@ echo "Job process start"
 # ---------------------------------------------------------------------------
 # STEP 1:
 # ---------------------------------------------------------------------------
+# Log into Azure
+# --------------------------------------------------------------------------
+#Check env vars are set:
+
+[[ -z "${clientId}" ]] && echo "Client Id not set, cannot authenticate to Azure" && exit 1
+[[ -z "${clientSecret}" ]] && echo "Client secret not set, cannot authenticate to Azure" && exit 1
+[[ -z "${tenantId}" ]] && echo "Tenant Id not set, cannot authenticate to Azure" && exit 1
+
+echo "Authenticating to Azure"
+az login --service-principal -t $tenantId -u $clientId -p $clientSecret --output none
+
+# ---------------------------------------------------------------------------
+# STEP 2:
+# ---------------------------------------------------------------------------
 # Get a list of subscriptions
 # --------------------------------------------------------------------------
 declare -a subscriptions
@@ -55,7 +70,7 @@ for sub in $(echo "$subs"); do
 done
 
 # # ---------------------------------------------------------------------------
-# # STEP 2:
+# # STEP 3:
 # # ---------------------------------------------------------------------------
 # # Use subscription list to search for AKS Clusters and add to aksClusterInfo array
 # # Use the aksClusterInfo array to find available upgrades and build a new object for each cluster containing the version information and status 
@@ -112,7 +127,7 @@ done
 [[ "$aksClusterInfo" == "" ]] && echo "Error: no clusters added." && exit 1
 
 # # ---------------------------------------------------------------------------
-# # STEP 3:
+# # STEP 4:
 # # Store document
 # # ---------------------------------------------------------------------------
 
