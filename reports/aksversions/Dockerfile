@@ -2,7 +2,7 @@ FROM alpine/azure_cli:1.5.6
 
 RUN apk update 
 RUN apk add python3 py3-pip openssl uuidgen bash
-RUN rm /usr/lib/python*/EXTERNALLY-MANAGED && python3 -m ensurepip
+RUN python3 -m ensurepip
 RUN pip3 install azure-cosmos pytz
 
 WORKDIR /app
