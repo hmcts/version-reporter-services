@@ -14,6 +14,11 @@ variable "expiresAfter" {
   default = "3000-01-01"
 }
 
+variable "product" {
+  type    = string
+  default = "version-reporter"
+}
+
 variable "service_name" {
   type    = string
   default = "version-reporter"
