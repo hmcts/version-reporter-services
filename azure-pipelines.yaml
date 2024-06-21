@@ -133,7 +133,7 @@ stages:
               product: ${{ variables.product }}
               overrideAction: ${{ parameters.overrideAction }}
               environment: ${{ variables.env }}
-              component: "versionreporting"
+              component: "storage"
               terraformInitSubscription: ${{ variables.terraformInitSubscription }}
               tfVarsFile: NULL
               initCommandOptions: >
