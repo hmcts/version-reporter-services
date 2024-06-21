@@ -62,6 +62,6 @@ resource "azurerm_cosmosdb_sql_role_assignment" "this" {
   account_name        = azurerm_cosmosdb_account.this.name
   # Cosmos DB Built-in Data Contributor
   role_definition_id = "${azurerm_cosmosdb_account.this.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
-  principal_id       = module.version_reporter_key_vault.managed_identity_objectid
+  principal_id       = module.version_reporter_key_vault.managed_identity_objectid[0]
   scope              = azurerm_cosmosdb_account.this.id
 }
