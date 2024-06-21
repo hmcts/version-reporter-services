@@ -1,11 +1,11 @@
 # The cosmosdb account
 resource "azurerm_cosmosdb_account" "this" {
-  name                      = local.cosmosdb_name
-  location                  = var.location
-  resource_group_name       = azurerm_resource_group.this.name
-  kind                      = "GlobalDocumentDB"
-  offer_type                = "Standard"
-  
+  name                = local.cosmosdb_name
+  location            = var.location
+  resource_group_name = azurerm_resource_group.this.name
+  kind                = "GlobalDocumentDB"
+  offer_type          = "Standard"
+
   enable_automatic_failover = true
 
   consistency_policy {

@@ -1,6 +1,6 @@
 module "version_reporter_key_vault" {
-  source                  = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
-  
+  source = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
+
   product                 = var.service_name
   env                     = var.environment
   object_id               = data.azurerm_client_config.current.object_id
