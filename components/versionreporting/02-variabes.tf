@@ -6,6 +6,10 @@ variable "environment" {
   default = "stg"
 }
 
+variable "env" {
+  default = "stg"
+}
+
 variable "builtFrom" {
   default = "hmcts/version-reporter-services"
 }
