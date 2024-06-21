@@ -1,5 +1,5 @@
 module "version_reporter_key_vault" {
-  source = "git@github.com:hmcts/cnp-module-key-vault?ref=master"
+  source = "github.com/hmcts/cnp-module-key-vault?ref=master"
 
   product                 = var.service_name
   env                     = var.environment
