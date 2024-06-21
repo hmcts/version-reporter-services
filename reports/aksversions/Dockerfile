@@ -13,9 +13,6 @@ COPY . .
 ENV COSMOS_KEY="" \
     COSMOS_DB_NAME="" \
     COSMOS_DB_CONTAINER="" \
-    COSMOS_DB_URI="" \
-    AZURE_TENANT_ID="" \
-    AZURE_CLIENT_ID="" \
-    AZURE_CLIENT_SECRET=""
+    COSMOS_DB_URI=""
 
 CMD [ "python", "./main.py" ]
