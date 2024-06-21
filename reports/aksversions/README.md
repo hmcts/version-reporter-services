@@ -45,6 +45,13 @@ These values can be found via the Azure Portal on the version reporter Cosmos DB
 
 When setup you can simply run the script locally by using `python main.py` from the `reports/aksversions` directory.
 
+### Azure Python SDK
+
+The following links may be useful if changes to the script are required:
+
+[AKS Managed Cluster API (includes examples for Python)](https://learn.microsoft.com/en-us/rest/api/aks/managed-clusters?view=rest-aks-2024-02-01)
+[AKS Managed Cluster class](https://learn.microsoft.com/en-us/python/api/azure-mgmt-containerservice/azure.mgmt.containerservice.v2022_01_01.models.managedcluster?view=azure-python)
+
 ### Making it safer
 
 Its also possible to completely ignore the Cosmos DB update when developing locally by commenting out the following line from the `main.py` script:
