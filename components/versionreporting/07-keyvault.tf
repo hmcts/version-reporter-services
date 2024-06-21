@@ -2,7 +2,7 @@ module "version_reporter_key_vault" {
   source = "github.com/hmcts/cnp-module-key-vault?ref=master"
 
   product                 = var.service_name
-  env                     = var.environment
+  env                     = var.env
   object_id               = data.azurerm_client_config.current.object_id
   resource_group_name     = azurerm_resource_group.this.name
   product_group_name      = "DTS Platform Operations"
