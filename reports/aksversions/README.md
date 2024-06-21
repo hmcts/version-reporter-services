@@ -28,22 +28,17 @@ The Dockerfile does not have any effect on the report process and is simply a wa
 
 As this report utilises Python you will need to have it installed, development was carried out using `Python 3.11.7` so a version greater than `3.11.x` is recommened.
 
-The main python script requires a service principal to run with the values supplied as environment variables:
+The script utilises `DefaultAzureCredential` to access Azure.
+<br>Locally you simply need to log into Azure with the `azure-cli` using `az login` and the script will use your local permissions to access Azure.
 
-- AZURE_CLIENT_ID
-- AZURE_CLIENT_SECRET
-- AZURE_TENANT_ID
-
-The service principal used within AKS can be found as secrets in the `monitoring namespace` and there are documented methods to decrypt these kinds of [secrets](https://stackoverflow.com/questions/56909180/decoding-kubernetes-secret).
-
-The `save-to-cosmos.py` script will also require access to the Cosmos DB account and these should be supplied as environment variables as well:
+The `save-to-cosmos.py` script also requires access to the Cosmos DB account and these should be supplied as environment variables:
 
 - COSMOS_DB_URI
 - COSMOS_KEY
 
 These values can be found via the Azure Portal on the version reporter Cosmos DB instance.
 
-When setup you can simply run the script locally by using `python main.py` from the `reports/aksversions` directory.
+When setup you can run the script locally by using `python main.py` from the `reports/aksversions` directory.
 
 ### Azure Python SDK
 
