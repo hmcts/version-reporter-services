@@ -7,15 +7,26 @@ from Azure for AKS Clusters and calls another script to store in a cosmosdb.
 # --------
 import os
 import json
-import subprocess
 import uuid
 from azure.identity import DefaultAzureCredential
 from azure.mgmt.resource import SubscriptionClient
 from azure.mgmt.containerservice import ContainerServiceClient
+from azure.cosmos import CosmosClient, exceptions
+from cosmos_functions import remove_documents, add_documents
 
 # Define Functions
 def get_minor_version(version_number_str):
     return float(version_number_str[version_number_str.find('.') + 1: version_number_str.rfind('.')])
+
+# Define Environment variables for Cosmos
+endpoint = os.environ.get("COSMOS_DB_URI", None)
+key = os.environ.get("COSMOS_KEY", None)
+database = os.environ.get("COSMOS_DB_NAME", "reports")
+container_name = os.environ.get("COSMOS_DB_CONTAINER", "aksversions")
+
+###############
+# Script start
+###############
 
 # Authenticate to Azure
 print("Logging into Azure...")
@@ -36,6 +47,11 @@ search_terms = ['CFT', 'SHAREDSERVICES']
 # For each subscription, get all AKS clusters
 print("Using available subscriptions to find AKS clusters...")
 print()
+
+########################################################################
+# Use the list of subscriptions to find all AKS Clusters
+# subscriptions are filtered based on the search_terms so we only search for AKS clusters in subscriptions we own
+########################################################################
 
 for sub in subscriptions:
     # Get the subscription details
@@ -114,12 +130,27 @@ print(f"Number of AKS Clusters found: {len(clusters_info)}.")
 print()
 # print(json.dumps(clusters_info, indent=4))
 
-# Define the script and arguments
-script = "save-to-cosmos.py"
-args = [json.dumps(clusters_info)]
+########################################################################
+# We have all the AKS clusters now saved in clusters_info
+# Now we need to store them in CosmosDB and the aksversions container
+########################################################################
 
-# Try to run the script with arguments
+# Establish connection to cosmos db
+cosmosClient = CosmosClient(endpoint, credential=key)
+
+# Save documents to cosmos db
 try:
-    result = subprocess.run(["python", script] + args, check=True)
-except subprocess.CalledProcessError as e:
-    print(f"Script {script} failed with error: {e}")
+    database = cosmosClient.get_database_client(database)
+    db_container = database.get_container_client(container_name)
+
+    remove_documents(db_container)
+    add_documents(db_container, clusters_info)
+
+except AttributeError as attribute_error:
+    print(f"Saving to db failed with AttributeError error: {attribute_error}")
+    raise
+except exceptions.CosmosHttpResponseError as http_response_error:
+    print(f"Saving to db failed with CosmosHttpResponseError error: {http_response_error}")
+    raise
+
+print("Save to database completed.")
