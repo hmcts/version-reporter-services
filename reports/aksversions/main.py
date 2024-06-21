@@ -9,27 +9,17 @@ import os
 import json
 import subprocess
 import uuid
-from azure.identity import ClientSecretCredential
-from azure.mgmt.resource import ResourceManagementClient, SubscriptionClient
+from azure.identity import DefaultAzureCredential
+from azure.mgmt.resource import SubscriptionClient
 from azure.mgmt.containerservice import ContainerServiceClient
 
 # Define Functions
 def get_minor_version(version_number_str):
     return float(version_number_str[version_number_str.find('.') + 1: version_number_str.rfind('.')])
 
-
-# Define your Azure credentials
-client_id = os.getenv('AZURE_CLIENT_ID')
-client_secret = os.getenv('AZURE_CLIENT_SECRET')
-tenant_id = os.getenv('AZURE_TENANT_ID')
-
 # Authenticate to Azure
-print("Logging into Azure using supplied credentials...")
-credential = ClientSecretCredential(
-    tenant_id=tenant_id,
-    client_id=client_id,
-    client_secret=client_secret
-)
+print("Logging into Azure...")
+credential = DefaultAzureCredential()
 
 # Initialize the SubscriptionClient
 subscription_client = SubscriptionClient(credential)
@@ -57,7 +47,7 @@ for sub in subscriptions:
         print("Checking subscription: " + sub_details.display_name)
         print()
         
-        # Initialize the ResourceManagementClient and ContainerServiceClient for the subscription
+        # Initialize the ContainerServiceClient for the subscription
         container_client = ContainerServiceClient(credential, sub.subscription_id)
 
         # Get all AKS clusters in the subscription
