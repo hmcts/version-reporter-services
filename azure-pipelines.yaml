@@ -93,7 +93,7 @@ parameters:
     type: object
     default:
       - name: "aksversions"
-        type: "bash"
+        type: "python"
       - name: "helmcharts"
         type: "bash"
       - name: "paloalto"
@@ -169,12 +169,12 @@ stages:
         dependsOn: BuildArtifact_${{report.name}}
         displayName: Push ${{report.name}} Container
         condition: |
-         or(
+          or(
             and(
               succeeded(), 
               eq(variables['isMain'], true),
               or(eq('${{parameters.publishImage}}', '${{report.name}}'), 
-                 eq('${{parameters.publishImage}}', 'All'))
+                eq('${{parameters.publishImage}}', 'All'))
             ),
             and(succeeded(), eq('${{parameters.prImage}}', true))
           )

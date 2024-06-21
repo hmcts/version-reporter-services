@@ -54,7 +54,7 @@ def get_formatted_datetime(strformat="%Y-%m-%d %H:%M:%S"):
     return datetime_london.strftime(strformat)
 
 # Establish connection to cosmos db
-client = CosmosClient(endpoint, key)
+client = CosmosClient(endpoint, credential=key)
 
 # Save document to cosmos db
 try:

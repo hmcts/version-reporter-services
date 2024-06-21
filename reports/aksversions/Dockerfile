@@ -1,11 +1,12 @@
-FROM alpine/azure_cli:1.5.6
+FROM python:3.12.3-alpine3.18
 
 RUN apk update 
-RUN apk add python3 py3-pip openssl uuidgen bash
-RUN python3 -m ensurepip
-RUN pip3 install azure-cosmos pytz
+RUN apk add curl coreutils yq jq openssl
 
 WORKDIR /app
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
@@ -17,4 +18,4 @@ ENV COSMOS_KEY="" \
     AZURE_CLIENT_ID="" \
     AZURE_CLIENT_SECRET=""
 
-CMD ["/app/aks-versions.sh"]
+CMD [ "python", "./main.py" ]
