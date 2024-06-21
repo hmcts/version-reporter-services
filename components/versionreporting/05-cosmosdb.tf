@@ -6,7 +6,7 @@ resource "azurerm_cosmosdb_account" "this" {
   kind                = "GlobalDocumentDB"
   offer_type          = "Standard"
 
-  enable_automatic_failover = true
+  automatic_failover_enabled = true
 
   consistency_policy {
     consistency_level = "Session"
