@@ -18,7 +18,7 @@ variables:
   - name: product
     value: "cft-platform"
   - name: env
-    value: "ptl-intsvc"
+    value: "ptl"
   - name: terraformServiceConnection
     value: "DTS-CFTPTL-INTSVC"
   - name: terraformInitSubscription
