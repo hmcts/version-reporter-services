@@ -16,21 +16,21 @@ variables:
   - name: project
     value: "versionreporter"
   - name: product
-    value: "sds-platform"
+    value: "cft-platform"
   - name: env
-    value: "ptl"
+    value: "ptl-intsvc"
   - name: terraformServiceConnection
-    value: "DTS-SHAREDSERVICESPTL"
+    value: "DTS-CFTPTL-INTSVC"
   - name: terraformInitSubscription
     value: "04d27a32-7a07-48b3-95b8-3c8691e1a263"
   - name: action
     value: ${{ parameters.action }}
   - name: acrResourceGroup
-    value: "sds-acr-rg"
+    value: "rpe-acr-prod-rg"
   - name: acrName
-    value: "sdshmctspublic"
+    value: "hmctspublic"
   - name: acrServiceConnection
-    value: "DTS-SHAREDSERVICES-PROD"
+    value: "DCD-CNP-Prod"
   - name: acrRepository
     value: "version-reporter-service"
 

@@ -3,7 +3,7 @@ variable "location" {
 }
 
 variable "env" {
-  default = "stg"
+  default = "ptl-intsvc"
 }
 
 variable "builtFrom" {
