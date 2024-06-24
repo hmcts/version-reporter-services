@@ -2,24 +2,21 @@ variable "location" {
   default = "uksouth"
 }
 
-variable "environment" {
-  default = "stg"
-}
-
-variable "product" {
-  default = "sds-platform"
+variable "env" {
+  default = "ptl-intsvc"
 }
 
 variable "builtFrom" {
   default = "hmcts/version-reporter-services"
 }
 
-variable "env" {
-  default = "stg"
-}
-
 variable "expiresAfter" {
   default = "3000-01-01"
+}
+
+variable "product" {
+  type    = string
+  default = "version-reporter"
 }
 
 variable "service_name" {
@@ -45,7 +42,6 @@ variable "containers_partitions" {
     helmcharts   = "/namespace"
     renovate     = "/repository"
     docsoutdated = "/docTitle"
-    netflow      = "/netflow"
     aksversions  = "/clusterName"
   }
 }

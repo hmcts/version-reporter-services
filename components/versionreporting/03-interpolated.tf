@@ -1,6 +1,9 @@
+# Data lookups
+data "azurerm_client_config" "current" {}
+
 # General
 locals {
-  storage_name  = format("%s-%s", var.product, var.service_name)
+  cosmosdb_name = format("%s-%s-cosmos", var.service_name, var.env)
   keyvault_name = format("%s-%s-kv", var.service_name, var.env)
   common_tags   = module.ctags.common_tags
 }
