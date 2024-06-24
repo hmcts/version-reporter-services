@@ -1,8 +1,9 @@
 FROM alpine:3.20.0
 
-RUN apk update && apk add curl coreutils yq jq openssl github-cli uuidgen bash
-RUN apk update && apk add python3 py3-pip
-RUN rm /usr/lib/python*/EXTERNALLY-MANAGED && pip3 install azure-cosmos pytz
+ENV PIP_BREAK_SYSTEM_PACKAGES 1
+
+RUN apk update && apk add curl coreutils yq jq openssl github-cli uuidgen bash python3 py3-pip
+RUN pip3 install azure-cosmos pytz
 
 WORKDIR /app
 
