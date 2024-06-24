@@ -16,19 +16,21 @@ variables:
   - name: project
     value: "versionreporter"
   - name: product
-    value: "sds-platform"
+    value: "cft-platform"
   - name: env
-    value: "stg"
+    value: "ptl"
+  - name: terraformServiceConnection
+    value: "DTS-CFTPTL-INTSVC"
   - name: terraformInitSubscription
     value: "04d27a32-7a07-48b3-95b8-3c8691e1a263"
   - name: action
     value: ${{ parameters.action }}
   - name: acrResourceGroup
-    value: "sds-acr-rg"
+    value: "rpe-acr-prod-rg"
   - name: acrName
-    value: "sdshmctspublic"
+    value: "hmctspublic"
   - name: acrServiceConnection
-    value: "DTS-SHAREDSERVICES-PROD"
+    value: "DCD-CNP-Prod"
   - name: acrRepository
     value: "version-reporter-service"
 
@@ -127,11 +129,11 @@ stages:
           - template: steps/terraform.yaml@cnp-azuredevops-libraries
             parameters:
               location: ${{ parameters.location }}
-              serviceConnection: "DTS-SHAREDSERVICES-STG"
+              serviceConnection: ${{ variables.terraformServiceConnection }}
               product: ${{ variables.product }}
               overrideAction: ${{ parameters.overrideAction }}
               environment: ${{ variables.env }}
-              component: "storage"
+              component: "versionreporting"
               terraformInitSubscription: ${{ variables.terraformInitSubscription }}
               tfVarsFile: NULL
               initCommandOptions: >
@@ -169,12 +171,12 @@ stages:
         dependsOn: BuildArtifact_${{report.name}}
         displayName: Push ${{report.name}} Container
         condition: |
-         or(
+          or(
             and(
               succeeded(), 
               eq(variables['isMain'], true),
               or(eq('${{parameters.publishImage}}', '${{report.name}}'), 
-                 eq('${{parameters.publishImage}}', 'All'))
+                eq('${{parameters.publishImage}}', 'All'))
             ),
             and(succeeded(), eq('${{parameters.prImage}}', true))
           )
