@@ -12,7 +12,7 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
   resource_group_name = data.azurerm_resource_group.cftptl_intsvc.name
   location            = var.location
 
-  name = "${var.service_name}-cftptl-intsvc-mi"
+  name = "monitoring-cftptl-intsvc-mi"
 
   tags = local.common_tags
 }
