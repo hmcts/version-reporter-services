@@ -73,19 +73,15 @@ echo "Job process start"
 # Get all helm repositories
 # Result is filtered by these namespaces: admin, monitoring and flux-system
 # This is iterated over and each chart is added to helm, making it available to helm whatup
-# --------------------------------------------------------------------------
+namespaces=("ccd" "flux-system" "admin" "keda" "kured" "monitoring")
 
-result=$(kubectl get helmrepositories.source.toolkit.fluxcd.io -A -o json | jq '.items[] | select(.metadata.namespace=="admin" or .metadata.namespace=="monitoring" or .metadata.namespace=="flux-system") | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}' | jq -s)
-[[ "$result" == "" ]] && echo "Error: cannot get helm repositories." && exit 1
-
-# Iterate through helm repositories and add them to helm
-for row in $(echo "$result" | jq -c '.[]'); do
-  name=$(get_value "$row" '.name')
-  url=$(get_value "$row" '.url')
-
-  echo "Adding the chart '${name}' at ${url} to helm"
-  helm repo add "$name" "$url"
-
+for ns in "${namespaces[@]}"; do
+result=$(kubectl get helmrepositories -n "$ns" -o json | jq '[.items[] | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}]')
+  if [[ -z "$result" ]]; then
+    echo "Warning: cannot get helm repositories in namespace $ns."
+  else
+    echo "$result"
+  fi
 done
 
 # Update helm repository to get latest versions
