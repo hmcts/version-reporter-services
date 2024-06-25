@@ -14,7 +14,7 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
 
   name = "${var.service_name}-cftptl-intsvc-mi"
 
-  tags  = local.common_tags
+  tags = local.common_tags
 }
 
 resource "azurerm_key_vault_access_policy" "implicit_managed_identity_access_policy" {
