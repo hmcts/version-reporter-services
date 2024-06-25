@@ -73,15 +73,18 @@ echo "Job process start"
 # Get all helm repositories
 # Result is filtered by these namespaces: admin, monitoring and flux-system
 # This is iterated over and each chart is added to helm, making it available to helm whatup
-namespaces=("ccd" "flux-system" "admin" "keda" "kured" "monitoring")
 
-for ns in "${namespaces[@]}"; do
-result=$(kubectl get helmrepositories -n "$ns" -o json | jq '[.items[] | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}]')
-  if [[ -z "$result" ]]; then
-    echo "Warning: cannot get helm repositories in namespace $ns."
-  else
-    echo "$result"
-  fi
+result=$(kubectl get helmrepositories -A -o json | jq '.items[] | select(.metadata.namespace=="admin" or .metadata.namespace=="monitoring" or .metadata.namespace=="flux-system" or .metadata.namespace=="keda" or .metadata.namespace=="kured" or .metadata.namespace=="dynatrace") | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}' | jq -s)
+[[ "$result" == "" ]] && echo "Error: cannot get helm repositories." && exit 1
+
+# Iterate through helm repositories and add them to helm
+for row in $(echo "$result" | jq -c '.[]'); do
+  name=$(get_value "$row" '.name')
+  url=$(get_value "$row" '.url')
+
+  echo "Adding the chart '${name}' at ${url} to helm"
+  helm repo add "$name" "$url"
+
 done
 
 # Update helm repository to get latest versions
@@ -92,7 +95,7 @@ helm repo update
 # ---------------------------------------------------------------------------
 # Use helm whatup to extract installed chart information
 # --------------------------------------------------------------------------
-charts=$(helm whatup -A -q -o json | jq '.releases[] | select(.namespace=="admin" or .namespace=="monitoring" or .namespace=="flux-system") | {chart: .name, namespace: .namespace, installed: .installed_version, latest: .latest_version, appVersion: .app_version, newestRepo: .newest_repo, updated: .updated, deprecated: .deprecated}' | jq -s)
+charts=$(helm whatup -A -q -o json | jq '.releases[] | select(.namespace=="admin" or .namespace=="monitoring" or .namespace=="flux-system" or .namespace=="keda" or .namespace=="kured" or .namespace=="dynatrace") | {chart: .name, namespace: .namespace, installed: .installed_version, latest: .latest_version, appVersion: .app_version, newestRepo: .newest_repo, updated: .updated, deprecated: .deprecated}' | jq -s)
 [[ "$charts" == "" ]] && echo "Error: helm whatup failed." && exit 1
 
 count=$(echo "$charts" | jq '. | length')
