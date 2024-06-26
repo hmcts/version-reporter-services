@@ -10,6 +10,8 @@ endpoint = os.environ.get("COSMOS_DB_URI", None)
 key = os.environ.get("COSMOS_KEY", None)
 database = os.environ.get("COSMOS_DB_NAME", "reports")
 container_name = os.environ.get("COSMOS_DB_CONTAINER", "helmcharts")
+environment = os.environ.get("ENVIRONMENT", None)
+
 
 # Document passing in as arguments from bash script
 documents = json.loads(sys.argv[1])
@@ -22,8 +24,8 @@ def remove_documents(container):
         current_time = get_formatted_datetime()
         print(f"Removing all document added before {current_time}")
         for item in container.query_items(
-                query = f"SELECT * FROM c WHERE c.environment = '{environment}'"
-                enable_cross_partition_query=True):
+                        query = f"SELECT * FROM c WHERE c.environment = '{environment}'",
+                        enable_cross_partition_query=True):
             container.delete_item(item, partition_key=item["namespace"])
 
         print("Removing documents complete")
