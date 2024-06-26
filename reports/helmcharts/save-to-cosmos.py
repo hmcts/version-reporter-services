@@ -22,7 +22,7 @@ def remove_documents(container):
         current_time = get_formatted_datetime()
         print(f"Removing all document added before {current_time}")
         for item in container.query_items(
-                query='SELECT * FROM c',
+                query = f"SELECT * FROM c WHERE c.environment = '{environment}'"
                 enable_cross_partition_query=True):
             container.delete_item(item, partition_key=item["namespace"])
 
