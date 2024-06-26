@@ -19,7 +19,7 @@ ENV VAULT_NAME="" \
     COSMOS_DB_URI="" \
     MAX_DAYS_AWAY=3 \
     MAX_REPOS=300 \
-    GITHUB_TOKEN=""
+    GH_TOKEN=""
 
 RUN chmod +x set_env.sh && source set_env.sh
 
