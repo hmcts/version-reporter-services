@@ -11,6 +11,7 @@ COPY . .
 
 # VAULT NAME is used when sourcing secrets from volume mounts
 # SECRET PATH is used if a custom file path is used for those mounts (default: /mnt/secrets/)
+
 ENV VAULT_NAME="" \
     SECRET_PATH="" \
     COSMOS_KEY="" \
@@ -21,6 +22,6 @@ ENV VAULT_NAME="" \
     MAX_REPOS=300 \
     GH_TOKEN=""
 
-RUN chmod +x set_env.sh && source set_env.sh
+RUN chmod +x /app/set_env.sh
 
-CMD ["/app/renovate-prs.sh"]
+CMD ["/app/entrypoint.sh"]
