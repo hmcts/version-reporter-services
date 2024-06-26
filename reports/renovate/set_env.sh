@@ -28,6 +28,3 @@ if [ -d "$directory_path" ]; then
 else
     echo "Warning: $directory_path does not exist."
 fi
-
-# Print the environment variables
-env
