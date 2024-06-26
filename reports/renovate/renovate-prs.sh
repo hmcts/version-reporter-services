@@ -11,7 +11,6 @@
 # 3. Save document generated to cosmosdb with the aid of a python script
 # NOTE: The renovate table is emptied first the refreshed with new data
 #############################################################################
-
 max_repos=$MAX_REPOS
 
 # Extracts a value from json object
@@ -47,6 +46,9 @@ store_documents() {
 # ---------------------------------------------------------------------------
 # Process Renovate PRs
 # ---------------------------------------------------------------------------
+echo "Print env vars"
+env
+
 echo "Fetching renovate PRs. Maximum of ${max_repos}"
 
 # Get PRs opened by renovate
