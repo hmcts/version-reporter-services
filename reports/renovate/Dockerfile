@@ -9,12 +9,18 @@ WORKDIR /app
 
 COPY . .
 
-ENV COSMOS_KEY="" \
+# VAULT NAME is used when sourcing secrets from volume mounts
+# SECRET PATH is used if a custom file path is used for those mounts (default: /mnt/secrets/)
+ENV VAULT_NAME="" \
+    SECRET_PATH="" \
+    COSMOS_KEY="" \
     COSMOS_DB_NAME="" \
     COSMOS_DB_CONTAINER="" \
     COSMOS_DB_URI="" \
     MAX_DAYS_AWAY=3 \
     MAX_REPOS=300 \
     GITHUB_TOKEN=""
+
+RUN chmod +x set_env.sh && source set_env.sh
 
 CMD ["/app/renovate-prs.sh"]
