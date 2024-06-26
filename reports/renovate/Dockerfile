@@ -21,6 +21,6 @@ ENV VAULT_NAME="" \
     MAX_REPOS=300 \
     GITHUB_TOKEN=""
 
-RUN chmod +x /app/script.sh && source set_env.sh
+RUN chmod +x set_env.sh && source set_env.sh
 
 CMD ["/app/renovate-prs.sh"]
