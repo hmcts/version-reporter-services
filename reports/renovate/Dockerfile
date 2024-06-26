@@ -9,6 +9,8 @@ WORKDIR /app
 
 COPY . .
 
+# VAULT NAME is used when sourcing secrets from volume mounts
+# SECRET PATH is used if a custom file path is used for those mounts (default: /mnt/secrets/)
 ENV VAULT_NAME="" \
     SECRET_PATH="" \
     COSMOS_KEY="" \
