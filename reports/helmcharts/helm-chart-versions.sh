@@ -74,6 +74,16 @@ echo "Job process start"
 # Result is filtered by these namespaces: admin, monitoring and flux-system
 # This is iterated over and each chart is added to helm, making it available to helm whatup
 
+cluster_contexts=("cft-prod-00-aks" "cft-prod-01-aks" "ss-ptl-00-aks")
+environment_name="prod-env" 
+output_dir="./cluster_data_${environment_name}"
+mkdir -p "$output_dir"
+
+# Loop through each cluster context
+for context in "${cluster_contexts[@]}"; do
+  output_file="${output_dir}/${context}.txt"
+  echo "Fetching data for $context" >> "$output_file" && kubectl config use-context "$context"
+  
 result=$(kubectl get helmrepositories -A -o json | jq '.items[] | select(.metadata.namespace=="admin" or .metadata.namespace=="monitoring" or .metadata.namespace=="flux-system" or .metadata.namespace=="keda" or .metadata.namespace=="kured" or .metadata.namespace=="dynatrace" or .metadata.namespace=="neuvector-crds" or .metadata.namespace=="pact-broker") | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}' | jq -s)
 [[ "$result" == "" ]] && echo "Error: cannot get helm repositories." && exit 1
 
@@ -131,12 +141,12 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
   # Enhance document with additional information
   uuid=$(uuidgen)
   created_on=$(date '+%Y-%m-%d %H:%M:%S')
-  composite_key="${environment}_${uuid}"
+  key="${environment}_${uuid}"
 
 
   document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" \
                                 --arg verdict $verdict \
-                                --arg id "$composite_key" \ 
+                                --arg id "$key" \ 
                                 --arg environment "$environment" \
                                 --arg created_on "$created_on" \
                                 --arg report_type "table" \
