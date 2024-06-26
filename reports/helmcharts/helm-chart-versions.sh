@@ -81,8 +81,7 @@ mkdir -p "$output_dir"
 
 # Loop through each cluster context
 for context in "${cluster_contexts[@]}"; do
-  output_file="${output_dir}/${context}.txt"
-  echo "Fetching data for $context" >> "$output_file" && kubectl config use-context "$context"
+  output_file="${output_dir}/${context}.txt" >> "$output_file" && kubectl config use-context "$context"
   
 result=$(kubectl get helmrepositories -A -o json | jq '.items[] | select(.metadata.namespace=="admin" or .metadata.namespace=="monitoring" or .metadata.namespace=="flux-system" or .metadata.namespace=="keda" or .metadata.namespace=="kured" or .metadata.namespace=="dynatrace" or .metadata.namespace=="neuvector-crds" or .metadata.namespace=="pact-broker") | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}' | jq -s)
 [[ "$result" == "" ]] && echo "Error: cannot get helm repositories." && exit 1
