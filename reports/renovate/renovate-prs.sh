@@ -96,7 +96,7 @@ echo "Merged results, ${count} in total"
 
 # Define an array variable to hold all documents
 idx=0
-declare -a documents
+declare -a documents=()
 
 # Loop through merged documents and enhance each
 while [ "$idx" -lt "$count" ]

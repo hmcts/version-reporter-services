@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Get the vault name from the environment variable
-secret_path=${SECRET_PATH:-/mnt/secrets/}
+secret_path=${SECRET_PATH:-/mnt/secrets}
 vault_name=${VAULT_NAME:-vault}
 
 echo "path supplied: $secret_path"
