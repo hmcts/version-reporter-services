@@ -17,10 +17,6 @@ variables:
     value: "versionreporter"
   - name: product
     value: "cft-platform"
-  - name: env
-    value: "ptl"
-  - name: terraformServiceConnection
-    value: "DTS-CFTPTL-INTSVC"
   - name: terraformInitSubscription
     value: "04d27a32-7a07-48b3-95b8-3c8691e1a263"
   - name: action
@@ -107,6 +103,21 @@ parameters:
       - name: "hourlyusage"
         type: "python"
 
+  - name: environments
+    type: object
+    default:
+    - deployment: 'sbox'
+      displayName: 'sbox-terraform'
+      environment: 'sbox'
+      service_connection: 'DTS-CFTSBOX-INTSVC'
+      dependsOn: 'Precheck'
+
+    - deployment: 'ptl'
+      displayName: 'ptl-terraform'
+      environment: 'ptl'
+      service_connection: '"DTS-CFTPTL-INTSVC"'
+      dependsOn: 'Precheck'
+
 stages:
   - stage: Precheck
     jobs:
@@ -120,27 +131,28 @@ stages:
               serviceConnection: 'DCD-CFT-Sandbox'
               overrideAction: ${{ parameters.overrideAction }}
 
-#  - ${{ each environment in parameters.env }}: We could have stg and prod
-  - stage: "Infrastructure"
-    displayName: "Infrastructure"
-    jobs:
-      - job: PlanAndApply
-        steps:
-          - template: steps/terraform.yaml@cnp-azuredevops-libraries
-            parameters:
-              location: ${{ parameters.location }}
-              serviceConnection: ${{ variables.terraformServiceConnection }}
-              product: ${{ variables.product }}
-              overrideAction: ${{ parameters.overrideAction }}
-              environment: ${{ variables.env }}
-              component: "versionreporting"
-              terraformInitSubscription: ${{ variables.terraformInitSubscription }}
-              tfVarsFile: NULL
-              initCommandOptions: >
-                -reconfigure
-              planCommandOptions: >
-                -compact-warnings
-                -lock-timeout=30s
+  - ${{ each deployment in parameters.environments }}:
+    - stage: ${{ deployment.deployment }}
+      dependsOn: ${{ deployment.dependsOn }}
+      displayName: ${{ deployment.displayName }}
+      jobs:
+        - job: PlanAndApply
+          steps:
+            - template: steps/terraform.yaml@cnp-azuredevops-libraries
+              parameters:
+                location: ${{ parameters.location }}
+                serviceConnection: ${{ deployment.service_connection }}
+                product: ${{ variables.product }}
+                overrideAction: ${{ parameters.overrideAction }}
+                environment: ${{ deployment.environment }}
+                component: "versionreporting"
+                terraformInitSubscription: ${{ variables.terraformInitSubscription }}
+                tfVarsFile: NULL
+                initCommandOptions: >
+                  -reconfigure
+                planCommandOptions: >
+                  -compact-warnings
+                  -lock-timeout=30s
 
   - stage: "Reports"
     displayName: "Reports"

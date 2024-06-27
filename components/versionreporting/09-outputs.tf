@@ -1,7 +1,7 @@
 output "cosmosdb_endpoint" {
-  value = azurerm_cosmosdb_account.this.endpoint
+  value = env == "ptl" ? azurerm_cosmosdb_account.this.endpoint : null
 }
 
 output "cosmosdb_url" {
-  value = "${azurerm_cosmosdb_account.this.id}.documents.azure.com"
+  value = env == "ptl" ? "${azurerm_cosmosdb_account.this.id}.documents.azure.com"  : null
 }

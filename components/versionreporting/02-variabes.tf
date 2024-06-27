@@ -3,7 +3,7 @@ variable "location" {
 }
 
 variable "env" {
-  default = "ptl-intsvc"
+  default = "ptl"
 }
 
 variable "builtFrom" {

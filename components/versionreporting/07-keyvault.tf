@@ -1,4 +1,6 @@
 module "version_reporter_key_vault" {
+  count = env == "ptl" ? 1 : 0
+
   source = "github.com/hmcts/cnp-module-key-vault?ref=master"
 
   product                 = var.service_name
@@ -11,18 +13,24 @@ module "version_reporter_key_vault" {
 }
 
 resource "azurerm_key_vault_secret" "cosmos_endpoint" {
+  count = env == "ptl" ? 1 : 0
+
   key_vault_id = module.version_reporter_key_vault.key_vault_id
   name         = "cosmos-endpoint"
   value        = azurerm_cosmosdb_account.this.endpoint
 }
 
 resource "azurerm_key_vault_secret" "cosmos_key" {
+  count = env == "ptl" ? 1 : 0
+
   key_vault_id = module.version_reporter_key_vault.key_vault_id
   name         = "cosmos-key"
   value        = azurerm_cosmosdb_account.this.primary_key
 }
 
 resource "azurerm_key_vault_secret" "cosmosdb_database_name" {
+  count = env == "ptl" ? 1 : 0
+  
   key_vault_id = module.version_reporter_key_vault.key_vault_id
   name         = "cosmos-db-name"
   value        = azurerm_cosmosdb_sql_database.this.name
