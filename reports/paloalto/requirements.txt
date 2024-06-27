@@ -1,7 +1,7 @@
-pytz
+pytz==2024.1
 xmltodict
 pan-os-python>=1.11.0
-azure-identity
+azure-identity==1.17.0
 azure-keyvault-keys
 azure-keyvault-secrets
 azure-mgmt-keyvault>=7.0.0
