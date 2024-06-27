@@ -85,7 +85,7 @@ for row in $(echo "$result" | jq -c '.[]'); do
   echo "Adding the chart '${name}' at ${url} to helm"
   helm repo add "$name" "$url"
 
-  done
+
 done
 # Update helm repository to get latest versions
 helm repo update
