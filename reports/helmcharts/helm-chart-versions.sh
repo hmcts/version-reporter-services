@@ -73,12 +73,6 @@ echo "Job process start"
 # Get all helm repositories
 # Result is filtered by these namespaces: admin, monitoring and flux-system
 # This is iterated over and each chart is added to helm, making it available to helm whatup
-
-cluster_contexts=("cft-prod-00-aks" "cft-prod-01-aks" "ss-ptl-00-aks")
-
-# Loop through each cluster context
-for context in "${cluster_contexts[@]}"; do
-  kubectl config use-context "$context"
   
 result=$(kubectl get helmrepositories -A -o json | jq '.items[] | select(.metadata.namespace=="admin" or .metadata.namespace=="monitoring" or .metadata.namespace=="flux-system" or .metadata.namespace=="keda" or .metadata.namespace=="kured" or .metadata.namespace=="dynatrace" or .metadata.namespace=="neuvector-crds" or .metadata.namespace=="pact-broker") | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}' | jq -s)
 [[ "$result" == "" ]] && echo "Error: cannot get helm repositories." && exit 1
