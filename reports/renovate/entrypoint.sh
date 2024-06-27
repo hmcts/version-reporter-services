@@ -1,4 +1,4 @@
 #!/bin/bash
 
 source set_env.sh
-sh renovate-prs.sh
+/bin/bash renovate-prs.sh
