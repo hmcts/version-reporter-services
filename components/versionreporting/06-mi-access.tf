@@ -1,5 +1,5 @@
 data "azurerm_resource_group" "cft_intsvc" {
-  name = "managed-identities-cft${env}-intsvc-rg"
+  name = "managed-identities-cft${var.env}-intsvc-rg"
 }
 
 resource "azurerm_user_assigned_identity" "managed_identity" {
@@ -7,7 +7,7 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
   resource_group_name = data.azurerm_resource_group.cft_intsvc.name
   location            = var.location
 
-  name = "monitoring-cft${env}-intsvc-mi"
+  name = "monitoring-cft${var.env}-intsvc-mi"
 
   tags = local.common_tags
 }

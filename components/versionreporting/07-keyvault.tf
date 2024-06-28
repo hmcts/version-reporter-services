@@ -6,7 +6,7 @@ module "version_reporter_key_vault" {
   product                 = var.service_name
   env                     = var.env
   object_id               = data.azurerm_client_config.current.object_id
-  resource_group_name     = azurerm_resource_group.this.name
+  resource_group_name     = azurerm_resource_group.this[0].name
   product_group_name      = "DTS Platform Operations"
   create_managed_identity = false
   common_tags             = local.common_tags
