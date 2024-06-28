@@ -15,7 +15,7 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
 resource "azurerm_key_vault_access_policy" "ptl_implicit_managed_identity_access_policy" {
   count = env == "ptl" ? 1 : 0
 
-  key_vault_id = module.version_reporter_key_vault.key_vault_id
+  key_vault_id = module.version_reporter_key_vault[0].key_vault_id
 
   object_id = azurerm_user_assigned_identity.managed_identity.principal_id
   tenant_id = data.azurerm_client_config.current.tenant_id
