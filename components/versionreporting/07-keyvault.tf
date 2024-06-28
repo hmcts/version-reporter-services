@@ -30,7 +30,7 @@ resource "azurerm_key_vault_secret" "cosmos_key" {
 
 resource "azurerm_key_vault_secret" "cosmosdb_database_name" {
   count = env == "ptl" ? 1 : 0
-  
+
   key_vault_id = module.version_reporter_key_vault.key_vault_id
   name         = "cosmos-db-name"
   value        = azurerm_cosmosdb_sql_database.this.name

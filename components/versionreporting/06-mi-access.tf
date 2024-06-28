@@ -13,7 +13,7 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
 }
 
 resource "azurerm_key_vault_access_policy" "ptl_implicit_managed_identity_access_policy" {
-  count = env =="ptl" ? 1 : 0
+  count = env == "ptl" ? 1 : 0
 
   key_vault_id = module.version_reporter_key_vault.key_vault_id
 
@@ -47,7 +47,7 @@ data "azurerm_key_vault" "ptl_kv" {
 
 resource "azurerm_key_vault_access_policy" "sbox_implicit_managed_identity_access_policy" {
   count = env == "sbox" ? 1 : 0
-  
+
   key_vault_id = data.azurerm_key_vault.ptl_kv.id
 
   object_id = azurerm_user_assigned_identity.managed_identity.principal_id
