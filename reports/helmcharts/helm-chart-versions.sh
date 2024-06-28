@@ -148,6 +148,28 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
   
 done
 
+cosmosdb_account_name="sds-platform-version-reporter"
+cosmosdb_database_name="reports"
+cosmosdb_container_name="helmcharts"
+id_to_check="$id"
+
+query_result=$(az cosmosdb sql container execute-query \
+--account-name "$cosmosdb_account_name" \
+--database-name "$cosmosdb_database_name" \
+--name "$cosmosdb_container_name" \
+--query "SELECT * FROM c WHERE c.id = '$id_to_check'" \
+--output json)
+
+if [[ $query_result == "[]" ]]; then
+    store_document "${documents[@]}"
+    echo "Document stored successfully."
+else
+    echo "Document with ID $id_to_check already exists"
+fi
+
+echo "Job process completed"
+
+
 # ---------------------------------------------------------------------------
 # STEP 3:
 # Store document
