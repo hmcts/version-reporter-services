@@ -220,7 +220,7 @@ The Managed Identity is also used to lookup secrets from Key Vault and provide t
 <br>Within this volume there will be a file per secret referenced in the [Flux configuration](https://github.com/hmcts/cnp-flux-config/blob/master/apps/monitoring/version-reporter/renovate/renovate.yaml#L38). These files contain the secret values and for the reports to use them we have created a helper scripts that are built into each container image.
 
 - [entrypoint.sh](./reports/aksversions/entrypoint.sh) - this is a very simple script that allows you to call multiple other scripts, of any language even though the script itself is bash, in a specific order. This means we can setup the environment before running the main reporting script.
-- [set_env.sh](./reports/aksversions/set_env.sh) - this script sets up environment variables for the main script. It is run first as part of `entrypoint.sh` and scans the supplied directory for files then uses the file names and contents to created environment variables.
+- [set_env.sh](./reports/aksversions/set_env.sh) - this script sets up environment variables for the main script. It is run first as part of `entrypoint.sh` and scans the supplied directory for files then uses the file names and contents to create environment variables.
 
 #### entrypoint.sh
 
