@@ -106,9 +106,9 @@ parameters:
   - name: environments
     type: object
     default:
-    - deployment: 'sbox'
-      displayName: 'sbox-terraform'
-      environment: 'sbox'
+    - deployment: 'ptlsbox'
+      displayName: 'ptlsbox-terraform'
+      environment: 'ptlsbox'
       service_connection: 'DTS-CFTSBOX-INTSVC'
       dependsOn: 'Precheck'
 

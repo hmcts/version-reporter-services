@@ -1,6 +1,6 @@
 # The cosmosdb account
 resource "azurerm_cosmosdb_account" "this" {
-  count = env == "ptl" ? 1 : 0
+  count = var.env == "ptl" ? 1 : 0
 
   name                = local.cosmosdb_name
   location            = var.location
@@ -24,7 +24,7 @@ resource "azurerm_cosmosdb_account" "this" {
 
 # The sql database
 resource "azurerm_cosmosdb_sql_database" "this" {
-  count = env == "ptl" ? 1 : 0
+  count = var.env == "ptl" ? 1 : 0
 
   name                = "reports"
   resource_group_name = azurerm_resource_group[0].this.name
@@ -63,7 +63,7 @@ resource "azurerm_cosmosdb_sql_container" "this" {
  * Granting Cosmos DB Built-in Data Contributor to enable read/write permissions to MI
  */
 resource "azurerm_cosmosdb_sql_role_assignment" "this" {
-  count = env == "ptl" ? 1 : 0
+  count = var.env == "ptl" ? 1 : 0
 
   resource_group_name = azurerm_resource_group[0].this.name
   account_name        = azurerm_cosmosdb_account[0].this.name
