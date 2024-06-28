@@ -1,24 +1,27 @@
-FROM alpine/k8s:1.30.0
+FROM alpine:3.20.0
 
-RUN apk update 
-RUN apk add python3 py3-pip openssl uuidgen bash
-RUN rm /usr/lib/python*/EXTERNALLY-MANAGED && python3 -m ensurepip
-RUN pip3 install azure-cosmos pytz
-RUN helm plugin install https://github.com/fabmation-gmbh/helm-whatup
+ENV PIP_BREAK_SYSTEM_PACKAGES 1
+
+RUN apk update && apk add curl coreutils yq jq openssl github-cli uuidgen bash python3 py3-pip
 
 WORKDIR /app
 
+COPY requirements.txt ./
+RUN pip3 install --no-cache-dir -r requirements.txt
+
 COPY . .
 
-ENV COSMOS_KEY="" \
+# VAULT NAME is used when sourcing secrets from volume mounts
+# SECRET PATH is used if a custom file path is used for those mounts (default: /mnt/secrets/)
+
+
+ENV VAULT_NAME="" \
+    SECRET_PATH="" \
+    COSMOS_KEY="" \
     COSMOS_DB_NAME="" \
     COSMOS_DB_CONTAINER="" \
-    COSMOS_DB_URI="" \
-    MAX_VERSIONS_AWAY=2 \
-    AZURE_TENANT_ID="" \
-    AZURE_CLIENT_ID="" \
-    AZURE_CLIENT_SECRET="" \
-    ENVIRONMENT="" \
-    CLUSTER_NAME=""
+    COSMOS_DB_URI=""
 
-CMD ["/app/helm-chart-versions.sh"]
+RUN chmod +x /app/set_env.sh
+
+CMD ["/app/entrypoint.sh"]
