@@ -13,9 +13,7 @@ There are 2 scripts that make this report work:
     - Uses the list of subscriptions to then search for deployed AKS clusters and adds this information to another array
     - Checks the discovered AKS clusters for available updates
     - Builds an new json object containing all the relevant information so it can be added to a Cosmos container
-- `save-to-cosmos.py` - This script is only used to interact with Cosmos DB
-    - Will remove all documents from the chosen container
-    - Will then add all new documents supplied to the script from the `main.py` script
+- `cosmos_functions.py.py` - This script is only used to interact with Cosmos DB and provides functions to do so that are imported to main.py
 
 ## Dockerfile
 
@@ -26,12 +24,12 @@ The Dockerfile does not have any effect on the report process and is simply a wa
 
 ## Local dev
 
-As this report utilises Python you will need to have it installed, development was carried out using `Python 3.11.7` so a version greater than `3.11.x` is recommened.
+As this report utilises Python you will need to have it installed, development was carried out using `Python 3.11.7` so a version greater than `3.11.x` is recommended.
 
 The script utilises `DefaultAzureCredential` to access Azure.
 <br>Locally you simply need to log into Azure with the `azure-cli` using `az login` and the script will use your local permissions to access Azure.
 
-The `save-to-cosmos.py` script also requires access to the Cosmos DB account and these should be supplied as environment variables:
+For access to Cosmos however you will need to set the following environment variables for a successful connection to be made. This values are looked up within `main.py`:
 
 - COSMOS_DB_URI
 - COSMOS_KEY
@@ -49,21 +47,29 @@ The following links may be useful if changes to the script are required:
 
 ### Making it safer
 
-Its also possible to completely ignore the Cosmos DB update when developing locally by commenting out the following line from the `main.py` script:
+Its also possible to completely ignore the Cosmos DB update when developing locally by setting an environment variable:
 
 ```python
-try:
-    result = subprocess.run(["python", script] + args, check=True)
-except subprocess.CalledProcessError as e:
-    print(f"Script {script} failed with error: {e}")
+save_to_cosmos = os.environ.get("SAVE_TO_COSMOS", True)
 ```
 
-This code runs the `save-to-cosmos.py` script and supplies the new documents json object as the argument.
-
-By commenting these lines out and uncommenting the following line you can see the output of the script in your terminal instead:
+Setting `SAVE_TO_COSMOS=False` will disable the interactions with Cosmos DB completely.
 
 ```python
-print(json.dumps(clusters_info, indent=4))
+# Save documents to cosmos db
+if save_to_cosmos:
+# Establish connection to cosmos db
+    cosmosClient = CosmosClient(endpoint, credential=key)
+
+# Save documents to cosmos db
+    try:
+        database = cosmosClient.get_database_client(database)
+        db_container = database.get_container_client(container_name)
+
+        remove_documents(db_container)
+        add_documents(db_container, clusters_info)
+
 ```
 
-This will output the complete object to your terminal and will remove the need to interact with CosmosDB.
+If you disable the save to cosmos features this automatically enables output of the discovered AKS information to the terminal.
+<br>This will aid local development and show all the relevant information as it would have been saved to Cosmos.

@@ -209,3 +209,45 @@ Each of the existing reports is written in a specific language which we've discu
   - [Windows](https://github.com/pyenv-win/pyenv-win)
 
 If you are creating a new report, please try to use one of the current language so we do not end up with too many languages that cannot be maintained by the team. NodeJS, Python and Bash are the preferred options as they are widely known or documented.
+
+### Helper Scripts
+
+Each of the reports has access to a Managed Identity in AKS to authenticate to Azure.
+
+This happens automatically within AKS as the monitoring namespace used for deployment is setup to provide Managed Identity credentials to the deployments within it as environment variables.
+
+The Managed Identity is also used to lookup secrets from Key Vault and provide them as a volume mount in the pod. 
+<br>Within this volume there will be a file per secret referenced in the [Flux configuration](https://github.com/hmcts/cnp-flux-config/blob/master/apps/monitoring/version-reporter/renovate/renovate.yaml#L38). These files contain the secret values and for the reports to use them we have created a helper scripts that are built into each container image.
+
+- [entrypoint.sh](./reports/aksversions/entrypoint.sh) - this is a very simple script that allows you to call multiple other scripts, of any language even though the script itself is bash, in a specific order. This means we can setup the environment before running the main reporting script.
+- [set_env.sh](./reports/aksversions/set_env.sh) - this script sets up environment variables for the main script. It is run first as part of `entrypoint.sh` and scans the supplied directory for files then uses the file names and contents to created environment variables.
+
+#### entrypoint.sh
+
+This is a very simple script, it has no logic or inputs and is only used to make it easier to trigger scripts in a specific order and keep the dockerfile simple to use and read
+
+```dockerfile
+CMD ["/app/entrypoint.sh"]
+```
+
+#### set_env.sh
+
+The set_env script requires 2 inputs which can be supplied as environment variables to the docker image. This means it can be used during local development/testing and in Flux for deployment.
+
+The following code snippet shows the inputs required to customise the path that the script will scan:
+
+```bash
+# Get the vault name from the environment variable
+secret_path=${SECRET_PATH:-/mnt/secrets}
+vault_name=${VAULT_NAME:-vault}
+
+# Construct the directory path
+directory_path="$secret_path/$vault_name"
+```
+
+Every file within this path will have an equivalent environment variable created and the filename is used as the variable name e.g. 
+
+    File name = TOKEN
+    File content = MySecretTokenValue
+
+    Environment variable created: `TOKEN=MySecretTokenValue`
