@@ -115,7 +115,7 @@ parameters:
     - deployment: 'ptl'
       displayName: 'ptl-terraform'
       environment: 'ptl'
-      service_connection: '"DTS-CFTPTL-INTSVC"'
+      service_connection: 'DTS-CFTPTL-INTSVC'
       dependsOn: 'Precheck'
 
 stages:
