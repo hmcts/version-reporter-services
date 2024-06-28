@@ -13,7 +13,7 @@ There are 2 scripts that make this report work:
     - Uses the list of subscriptions to then search for deployed AKS clusters and adds this information to another array
     - Checks the discovered AKS clusters for available updates
     - Builds an new json object containing all the relevant information so it can be added to a Cosmos container
-- `cosmos_functions.py.py` - This script is only used to interact with Cosmos DB and provides functions to do so that are imported to main.py
+- `cosmos_functions.py` - This script is only used to interact with Cosmos DB and provides functions to do so that are imported to main.py
 
 ## Dockerfile
 
