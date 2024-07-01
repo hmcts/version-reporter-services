@@ -60,7 +60,7 @@ resource "azurerm_key_vault_access_policy" "sbox_implicit_managed_identity_acces
 
   certificate_permissions = [
     "Get",
-    "List", module.version_reporter_key_vault.key_vault_id
+    "List", module.version_reporter_key_vault[0].key_vault_id
   ]
 
   secret_permissions = [
