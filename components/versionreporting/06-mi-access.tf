@@ -1,11 +1,11 @@
 data "azurerm_resource_group" "cftptl_intsvc" {
   count = var.env == "ptl" ? 1 : 0
-  name = "managed-identities-cftptl-intsvc-rg"
+  name  = "managed-identities-cftptl-intsvc-rg"
 }
 
 data "azurerm_resource_group" "cftsbox_intsvc" {
   count = var.env == "ptlsbox" ? 1 : 0
-  name = "managed-identities-cftsbox-intsvc-rg"
+  name  = "managed-identities-cftsbox-intsvc-rg"
 }
 
 resource "azurerm_user_assigned_identity" "managed_identity" {
