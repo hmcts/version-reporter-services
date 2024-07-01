@@ -17,7 +17,7 @@ resource "azurerm_key_vault_secret" "cosmos_endpoint" {
 
   key_vault_id = module.version_reporter_key_vault.key_vault_id
   name         = "cosmos-endpoint"
-  value        = azurerm_cosmosdb_account[0].this.endpoint
+  value        = azurerm_cosmosdb_account.this[0].endpoint
 }
 
 resource "azurerm_key_vault_secret" "cosmos_key" {
@@ -25,7 +25,7 @@ resource "azurerm_key_vault_secret" "cosmos_key" {
 
   key_vault_id = module.version_reporter_key_vault[0].key_vault_id
   name         = "cosmos-key"
-  value        = azurerm_cosmosdb_account[0].this.primary_key
+  value        = azurerm_cosmosdb_account.this[0].primary_key
 }
 
 resource "azurerm_key_vault_secret" "cosmosdb_database_name" {
@@ -33,5 +33,5 @@ resource "azurerm_key_vault_secret" "cosmosdb_database_name" {
 
   key_vault_id = module.version_reporter_key_vault[0].key_vault_id
   name         = "cosmos-db-name"
-  value        = azurerm_cosmosdb_sql_database[0].this.name
+  value        = azurerm_cosmosdb_sql_database.this[0].name
 }

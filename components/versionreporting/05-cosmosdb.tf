@@ -28,7 +28,7 @@ resource "azurerm_cosmosdb_sql_database" "this" {
 
   name                = "reports"
   resource_group_name = azurerm_resource_group.this[0].name
-  account_name        = azurerm_cosmosdb_account[0].this.name
+  account_name        = azurerm_cosmosdb_account.this[0].name
 
   autoscale_settings {
     max_throughput = var.max_throughput
@@ -41,8 +41,8 @@ resource "azurerm_cosmosdb_sql_container" "this" {
   for_each              = var.env == "ptl" ? var.containers_partitions : []
   name                  = each.key
   resource_group_name   = azurerm_resource_group.this[0].name
-  account_name          = azurerm_cosmosdb_account[0].this.name
-  database_name         = azurerm_cosmosdb_sql_database[0].this.name
+  account_name          = azurerm_cosmosdb_account.this[0].name
+  database_name         = azurerm_cosmosdb_sql_database.this[0].name
   partition_key_path    = each.value
   partition_key_version = 2
 
@@ -66,9 +66,9 @@ resource "azurerm_cosmosdb_sql_role_assignment" "this" {
   count = var.env == "ptl" ? 1 : 0
 
   resource_group_name = azurerm_resource_group.this[0].name
-  account_name        = azurerm_cosmosdb_account[0].this.name
+  account_name        = azurerm_cosmosdb_account.thisp[0].name
   # Cosmos DB Built-in Data Contributor
-  role_definition_id = "${azurerm_cosmosdb_account[0].this.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  role_definition_id = "${azurerm_cosmosdb_account.this[0].id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
   principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id
-  scope              = azurerm_cosmosdb_account[0].this.id
+  scope              = azurerm_cosmosdb_account.this[0].id
 }
