@@ -128,11 +128,17 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
     color_code=green
   fi
 
+
+  cosmosdb_account_name="$COSMOSDB_ACCOUNT_NAME"
+  cosmosdb_database_name="$COSMOS_DB_NAME"
+  cosmosdb_container_name="$COSMOS_DB_CONTAINER"
+  id_to_check="$id"
+  new_verdict="approved"
+
   # Enhance document with additional information
   helm_chart_name=$(echo "$chart" | jq -r '.name')
   created_on=$(date '+%Y-%m-%d %H:%M:%S')
   id="${cluster_name}-${helm_chart_name}"
-
 
   document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" \
                                 --arg verdict $verdict \
@@ -142,16 +148,6 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
                                 --arg report_type "table" \
                                 --arg display_name "HELM Repositories" \
                                 --arg color_code $color_code '. + {id: $id, environment: $environment, createdOn: $created_on, lastUpdated: $created_on, displayName: $display_name, cluster: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
-
-  documents+=("$document")
-  
-done
-
-cosmosdb_account_name="$COSMOSDB_ACCOUNT_NAME"
-cosmosdb_database_name="$COSMOS_DB_NAME"
-cosmosdb_container_name="$COSMOS_DB_CONTAINER"
-id_to_check="$id"
-new_verdict="approved"
 
 query_result=$(az cosmosdb sql container execute-query \
 --account-name "$cosmosdb_account_name" \
@@ -168,14 +164,13 @@ else
 
     if [[ "$existing_verdict" != "$new_verdict" ]]; then
         echo "Updating document with ID $id_to_check due to verdict change."
-        
         update_document "$id_to_check" "$new_verdict"
 
     else
         echo "Document with ID $id_to_check already exists with the same verdict."
     fi
 fi
-
+done
 echo "Job process completed"
 
 
