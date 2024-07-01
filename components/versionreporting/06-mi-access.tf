@@ -18,38 +18,12 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
   tags = local.common_tags
 }
 
-resource "azurerm_key_vault_access_policy" "ptl_implicit_managed_identity_access_policy" {
-  count = var.env == "ptl" ? 1 : 0
-
-  key_vault_id = module.version_reporter_key_vault[0].key_vault_id
-
-  object_id = azurerm_user_assigned_identity.managed_identity.principal_id
-  tenant_id = data.azurerm_client_config.current.tenant_id
-
-  key_permissions = [
-    "Get",
-    "List",
-  ]
-
-  certificate_permissions = [
-    "Get",
-    "List",
-  ]
-
-  secret_permissions = [
-    "Get",
-    "List",
-  ]
-
-}
-
 data "azurerm_key_vault" "ptl_kv" {
   count = var.env == "ptlsbox" ? 1 : 0
 
   name                = "${var.service_name}-ptl"
   resource_group_name = "${var.product}-${var.service_name}-ptl-rg"
 }
-
 
 resource "azurerm_key_vault_access_policy" "sbox_implicit_managed_identity_access_policy" {
   count = var.env == "ptlsbox" ? 1 : 0
@@ -87,5 +61,5 @@ resource "azurerm_key_vault_access_policy" "sbox_implicit_managed_identity_acces
 
 # resource "azuread_group_member" "group_membership" {
 #   group_object_id  = data.azuread_group.reader_access_group.id
-#   member_object_id = module.version_reporter_key_vault.managed_identity_objectid[0]
+#   member_object_id = azurerm_user_assigned_identity.managed_identity.principal_id
 # }

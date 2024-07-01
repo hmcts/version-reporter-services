@@ -106,18 +106,18 @@ parameters:
   - name: environments
     type: object
     default:
-    - deployment: 'ptlsbox'
-      displayName: 'ptlsbox-terraform'
-      environment: 'ptlsbox'
-      service_connection: 'DTS-CFTSBOX-INTSVC'
-      dependsOn: 'Precheck'
-
     - deployment: 'ptl'
       displayName: 'ptl-terraform'
       environment: 'ptl'
       service_connection: 'DTS-CFTPTL-INTSVC'
       dependsOn: 'Precheck'
 
+    - deployment: 'ptlsbox'
+      displayName: 'ptlsbox-terraform'
+      environment: 'ptlsbox'
+      service_connection: 'DTS-CFTSBOX-INTSVC'
+      dependsOn: 'ptl'
+      
 stages:
   - stage: Precheck
     jobs:
