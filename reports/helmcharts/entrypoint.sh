@@ -1,4 +1,4 @@
 #!/bin/bash
 
 source set_env.sh
-python main.py
+python helm-chart-versions.sh
