@@ -149,8 +149,8 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
 done
 
 cosmosdb_account_name="$COSMOSDB_ACCOUNT_NAME"
-cosmosdb_database_name="${COSMOS_DB_NAME:-reports}"
-cosmosdb_container_name="${COSMOS_DB_CONTAINER:-helmcharts}"
+cosmosdb_database_name="$COSMOS_DB_NAME"
+cosmosdb_container_name="$COSMOS_DB_CONTAINER"
 id_to_check="$id"
 
 query_result=$(az cosmosdb sql container execute-query \
