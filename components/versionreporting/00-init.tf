@@ -16,5 +16,11 @@ provider "azurerm" {
   features {}
 }
 
-provider "azuread" {
+provider "azurerm" {
+  alias           = "ptlsbox"
+  subscription_id = var.ptlsbox_subscription
+  features {}
 }
+
+# provider "azuread" {
+# }
