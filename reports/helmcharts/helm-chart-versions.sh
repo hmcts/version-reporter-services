@@ -170,6 +170,7 @@ else
         echo "Document with ID $id_to_check already exists with the same verdict."
     fi
 fi
+
 done
 echo "Job process completed"
 
