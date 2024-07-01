@@ -1,10 +1,10 @@
 data "azurerm_resource_group" "cftsbox_intsvc" {
-  provider = "ptlsbox"
+  provider = azurerm.ptlsbox
   name     = "managed-identities-cftsbox-intsvc-rg"
 }
 
 resource "azurerm_user_assigned_identity" "ptlsbox_managed_identity" {
-  provider = "ptlsbox"
+  provider = azurerm.ptlsbox
 
   resource_group_name = data.azurerm_resource_group.cftsbox_intsvc.name
   location            = var.location
