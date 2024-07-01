@@ -38,7 +38,9 @@ resource "azurerm_cosmosdb_sql_database" "this" {
 # The report containers. One container per report
 resource "azurerm_cosmosdb_sql_container" "this" {
 
-  for_each              = var.env == "ptl" ? var.containers_partitions : []
+  # for_each              = var.env == "ptl" ? var.containers_partitions : ""
+  for_each = { for k, v in var.containers_partitions : k => v if var.env == "ptl" }
+
   name                  = each.key
   resource_group_name   = azurerm_resource_group.this[0].name
   account_name          = azurerm_cosmosdb_account.this[0].name
@@ -66,7 +68,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "this" {
   count = var.env == "ptl" ? 1 : 0
 
   resource_group_name = azurerm_resource_group.this[0].name
-  account_name        = azurerm_cosmosdb_account.thisp[0].name
+  account_name        = azurerm_cosmosdb_account.this[0].name
   # Cosmos DB Built-in Data Contributor
   role_definition_id = "${azurerm_cosmosdb_account.this[0].id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
   principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id

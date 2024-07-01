@@ -48,7 +48,7 @@ data "azurerm_key_vault" "ptl_kv" {
 resource "azurerm_key_vault_access_policy" "sbox_implicit_managed_identity_access_policy" {
   count = var.env == "sbox" ? 1 : 0
 
-  key_vault_id = data.azurerm_key_vault.ptl_kv.id
+  key_vault_id = data.azurerm_key_vault.ptl_kv[0].id
 
   object_id = azurerm_user_assigned_identity.managed_identity.principal_id
   tenant_id = data.azurerm_client_config.current.tenant_id
@@ -60,7 +60,7 @@ resource "azurerm_key_vault_access_policy" "sbox_implicit_managed_identity_acces
 
   certificate_permissions = [
     "Get",
-    "List",
+    "List", module.version_reporter_key_vault.key_vault_id
   ]
 
   secret_permissions = [

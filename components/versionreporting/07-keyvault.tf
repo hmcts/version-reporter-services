@@ -15,7 +15,7 @@ module "version_reporter_key_vault" {
 resource "azurerm_key_vault_secret" "cosmos_endpoint" {
   count = var.env == "ptl" ? 1 : 0
 
-  key_vault_id = module.version_reporter_key_vault.key_vault_id
+  key_vault_id = module.version_reporter_key_vault[0].key_vault_id
   name         = "cosmos-endpoint"
   value        = azurerm_cosmosdb_account.this[0].endpoint
 }
