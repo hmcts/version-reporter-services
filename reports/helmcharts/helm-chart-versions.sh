@@ -148,9 +148,9 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
   
 done
 
-cosmosdb_account_name="sds-platform-version-reporter"
-cosmosdb_database_name="reports"
-cosmosdb_container_name="helmcharts"
+cosmosdb_account_name="$COSMOSDB_ACCOUNT_NAME"
+cosmosdb_database_name="${COSMOS_DB_NAME:-reports}"
+cosmosdb_container_name="${COSMOS_DB_CONTAINER:-helmcharts}"
 id_to_check="$id"
 
 query_result=$(az cosmosdb sql container execute-query \
@@ -164,7 +164,13 @@ if [[ $query_result == "[]" ]]; then
     store_document "${documents[@]}"
     echo "Document stored successfully."
 else
-    echo "Document with ID $id_to_check already exists"
+    existing_verdict=$(echo $query_result | jq -r '.[].verdict')
+
+    if [[ "$existing_verdict" != "$new_verdict" ]]; then
+        echo "Updating document with ID $id_to_check due to verdict change."
+    else
+        echo "Document with ID $id_to_check already exists with the same verdict."
+    fi
 fi
 
 echo "Job process completed"
