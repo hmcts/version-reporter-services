@@ -18,9 +18,12 @@ COPY . .
 ENV VAULT_NAME="" \
     SECRET_PATH="" \
     COSMOS_KEY="" \
-    COSMOS_DB_NAME="" \
-    COSMOS_DB_CONTAINER="" \
+    COSMOSDB_ACCOUNT_NAME="" \
+    COSMOS_DB_NAME="reports" \
+    COSMOS_DB_CONTAINER="helmcharts" \
     COSMOS_DB_URI=""
+
+
 
 RUN chmod +x /app/set_env.sh
 
