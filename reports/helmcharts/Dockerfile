@@ -21,7 +21,9 @@ ENV VAULT_NAME="" \
     COSMOSDB_ACCOUNT_NAME="" \
     COSMOS_DB_NAME="reports" \
     COSMOS_DB_CONTAINER="helmcharts" \
-    COSMOS_DB_URI=""
+    COSMOS_DB_URI="" \
+    ENVIRONMENT="" \
+    CLUSTER_NAME=""
 
 
 
