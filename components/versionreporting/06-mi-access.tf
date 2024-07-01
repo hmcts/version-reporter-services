@@ -1,14 +1,16 @@
 data "azurerm_resource_group" "cftptl_intsvc" {
+  count = var.env == "ptl" ? 1 : 0
   name = "managed-identities-cftptl-intsvc-rg"
 }
 
 data "azurerm_resource_group" "cftsbox_intsvc" {
+  count = var.env == "ptlsbox" ? 1 : 0
   name = "managed-identities-cftsbox-intsvc-rg"
 }
 
 resource "azurerm_user_assigned_identity" "managed_identity" {
 
-  resource_group_name = var.env == "ptl" ? data.azurerm_resource_group.cftptl_intsvc.name : (var.env == "ptlsbox" ? data.azurerm_resource_group.cftsbox_intsvc.name : null)
+  resource_group_name = var.env == "ptl" ? data.azurerm_resource_group.cftptl_intsvc[0].name : (var.env == "ptlsbox" ? data.azurerm_resource_group.cftsbox_intsvc[0].name : null)
   location            = var.location
 
   name = "monitoring-cft${var.env}-intsvc-mi"
