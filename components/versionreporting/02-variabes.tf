@@ -3,7 +3,7 @@ variable "location" {
 }
 
 variable "env" {
-  default = "ptl-intsvc"
+  default = "ptl"
 }
 
 variable "builtFrom" {
@@ -44,4 +44,9 @@ variable "containers_partitions" {
     docsoutdated = "/docTitle"
     aksversions  = "/clusterName"
   }
+}
+
+variable "ptlsbox_subscription" {
+  default     = "1497c3d7-ab6d-4bb7-8a10-b51d03189ee3"
+  description = "PTLSBOX subscription Id to use for additional Managed Identity"
 }
