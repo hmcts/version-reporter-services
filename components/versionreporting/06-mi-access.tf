@@ -8,7 +8,7 @@ data "azurerm_resource_group" "cftsbox_intsvc" {
 
 resource "azurerm_user_assigned_identity" "managed_identity" {
 
-  resource_group_name = env == "ptl" ? data.azurerm_resource_group.cftptl_intsvc.name : (env == "ptlsbox" ? data.azurerm_resource_group.cftsbox_intsvc.name : null)
+  resource_group_name = var.env == "ptl" ? data.azurerm_resource_group.cftptl_intsvc.name : (var.env == "ptlsbox" ? data.azurerm_resource_group.cftsbox_intsvc.name : null)
   location            = var.location
 
   name = "monitoring-cft${var.env}-intsvc-mi"
