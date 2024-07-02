@@ -1,4 +1,4 @@
-FROM alpine/k8s:1.30.0
+FROM alpine/k8s:1.30.2
 
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
 
