@@ -135,7 +135,7 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
   id_to_check="$id"
   new_verdict="approved"
 
-  # Enhance document with additional information
+  for chart in $(echo "$charts" | jq -c '.[]'); do
   helm_chart_name=$(echo "$chart" | jq -r '.name')
   created_on=$(date '+%Y-%m-%d %H:%M:%S')
   id="${cluster_name}-${helm_chart_name}"
@@ -149,28 +149,26 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
                                 --arg display_name "HELM Repositories" \
                                 --arg color_code $color_code '. + {id: $id, environment: $environment, createdOn: $created_on, lastUpdated: $created_on, displayName: $display_name, cluster: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
 
-query_result=$(az cosmosdb sql container execute-query \
---account-name "$cosmosdb_account_name" \
---database-name "$cosmosdb_database_name" \
---name "$cosmosdb_container_name" \
---query "SELECT * FROM c WHERE c.id = '$id_to_check'" \
---output json)
+  query_result=$(az cosmosdb sql container execute-query \
+  --account-name "$cosmosdb_account_name" \
+  --database-name "$cosmosdb_database_name" \
+  --name "$cosmosdb_container_name" \
+  --query "SELECT * FROM c WHERE c.id = '$id'" \
+  --output json)
 
-if [[ $query_result == "[]" ]]; then
-    store_document "${documents[@]}"
-    echo "Document stored successfully."
-else
-    existing_verdict=$(echo $query_result | jq -r '.[].verdict')
+  if [[ $query_result == "[]" ]]; then
+      store_document "$document"
+      echo "Document stored successfully."
+  else
+      existing_verdict=$(echo $query_result | jq -r '.[].verdict')
 
-    if [[ "$existing_verdict" != "$new_verdict" ]]; then
-        echo "Updating document with ID $id_to_check due to verdict change."
-        update_document "$id_to_check" "$new_verdict"
-
-    else
-        echo "Document with ID $id_to_check already exists with the same verdict."
-    fi
-fi
-
+      if [[ "$existing_verdict" != "$new_verdict" ]]; then
+          echo "Updating document with ID $id due to verdict change."
+          update_document "$id" "$new_verdict"
+      else
+          echo "Document with ID $id already exists with the same verdict."
+      fi
+  fi
 done
 echo "Job process completed"
 
