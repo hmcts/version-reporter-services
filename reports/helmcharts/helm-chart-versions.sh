@@ -73,9 +73,8 @@ echo "Job process start"
 # Get all helm repositories
 # Result is filtered by these namespaces: admin, monitoring and flux-system
 # This is iterated over and each chart is added to helm, making it available to helm whatup
-# --------------------------------------------------------------------------
-
-result=$(kubectl get helmrepositories.source.toolkit.fluxcd.io -A -o json | jq '.items[] | select(.metadata.namespace=="admin" or .metadata.namespace=="monitoring" or .metadata.namespace=="flux-system") | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}' | jq -s)
+  
+result=$(kubectl get helmrepositories -A -o json | jq '.items[] | select(.metadata.namespace=="admin" or .metadata.namespace=="monitoring" or .metadata.namespace=="flux-system" or .metadata.namespace=="keda" or .metadata.namespace=="kured" or .metadata.namespace=="dynatrace" or .metadata.namespace=="neuvector-crds" or .metadata.namespace=="pact-broker") | {name: .metadata.name, url: .spec.url, namespace: .metadata.namespace}' | jq -s)
 [[ "$result" == "" ]] && echo "Error: cannot get helm repositories." && exit 1
 
 # Iterate through helm repositories and add them to helm
@@ -86,8 +85,8 @@ for row in $(echo "$result" | jq -c '.[]'); do
   echo "Adding the chart '${name}' at ${url} to helm"
   helm repo add "$name" "$url"
 
-done
 
+done
 # Update helm repository to get latest versions
 helm repo update
 
@@ -96,7 +95,7 @@ helm repo update
 # ---------------------------------------------------------------------------
 # Use helm whatup to extract installed chart information
 # --------------------------------------------------------------------------
-charts=$(helm whatup -A -q -o json | jq '.releases[] | select(.namespace=="admin" or .namespace=="monitoring" or .namespace=="flux-system") | {chart: .name, namespace: .namespace, installed: .installed_version, latest: .latest_version, appVersion: .app_version, newestRepo: .newest_repo, updated: .updated, deprecated: .deprecated}' | jq -s)
+charts=$(helm whatup -A -q -o json | jq '.releases[] | select(.namespace=="admin" or .namespace=="monitoring" or .namespace=="flux-system" or .namespace=="keda" or .namespace=="kured" or .namespace=="dynatrace" or .namespace=="neuvector-crds" or .namespace=="pact-broker") | {chart: .name, namespace: .namespace, installed: .installed_version, latest: .latest_version, appVersion: .app_version, newestRepo: .newest_repo, updated: .updated, deprecated: .deprecated}' | jq -s)
 [[ "$charts" == "" ]] && echo "Error: helm whatup failed." && exit 1
 
 count=$(echo "$charts" | jq '. | length')
@@ -129,21 +128,50 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
     color_code=green
   fi
 
-  # Enhance document with additional information
-  uuid=$(uuidgen)
+  cosmosdb_account_name="$COSMOSDB_ACCOUNT_NAME"
+  cosmosdb_database_name="$COSMOS_DB_NAME"
+  cosmosdb_container_name="$COSMOS_DB_CONTAINER"
+  id_to_check="$id"
+  new_verdict="approved"
+
+  for chart in $(echo "$charts" | jq -c '.[]'); do
+  helm_chart_name=$(echo "$chart" | jq -r '.name')
   created_on=$(date '+%Y-%m-%d %H:%M:%S')
+  id="${cluster_name}-${helm_chart_name}"
 
   document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" \
                                 --arg verdict $verdict \
-                                --arg id "$uuid" \
+                                --arg id "$id" \
                                 --arg environment "$environment" \
                                 --arg created_on "$created_on" \
                                 --arg report_type "table" \
                                 --arg display_name "HELM Repositories" \
                                 --arg color_code $color_code '. + {id: $id, environment: $environment, createdOn: $created_on, lastUpdated: $created_on, displayName: $display_name, cluster: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
 
-  documents+=("$document")
+  # query_result=$(az cosmosdb sql query  \ need to fix this
+  --account-name "$cosmosdb_account_name" \
+  --database-name "$cosmosdb_database_name" \
+  --name "$cosmosdb_container_name" \
+  --query "SELECT * FROM c WHERE c.id = '$id'" \
+  --output json)
+
+  if [[ $query_result == "[]" ]]; then
+      store_document "$document"
+      echo "Document stored successfully."
+  else
+      existing_verdict=$(echo $query_result | jq -r '.[].verdict')
+
+      if [[ "$existing_verdict" != "$new_verdict" ]]; then
+          echo "Updating document with ID $id due to verdict change."
+          # update_document "$id" "$new_verdict" need to fix this 
+      else
+          echo "Document with ID $id already exists with the same verdict."
+      fi
+  fi
+  done
 done
+echo "Job process completed"
+
 
 # ---------------------------------------------------------------------------
 # STEP 3:
