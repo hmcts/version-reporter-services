@@ -21,10 +21,7 @@ ENV VAULT_NAME="" \
     COSMOS_DB_NAME="reports" \
     COSMOS_DB_CONTAINER="helmcharts" \
     COSMOS_DB_URI="" \
-    ENVIRONMENT="" \
     CLUSTER_NAME=""
-
-
 
 RUN chmod +x /app/set_env.sh
 
