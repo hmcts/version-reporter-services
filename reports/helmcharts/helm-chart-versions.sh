@@ -128,18 +128,12 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
     color_code=green
   fi
 
-
-  cosmosdb_account_name="$COSMOSDB_ACCOUNT_NAME"
-  cosmosdb_database_name="$COSMOS_DB_NAME"
-  cosmosdb_container_name="$COSMOS_DB_CONTAINER"
-  id_to_check="$id"
-  new_verdict="approved"
-
-  for chart in $(echo "$charts" | jq -c '.[]'); do
+  # Enhance document with additional information
   helm_chart_name=$(echo "$chart" | jq -r '.name')
   created_on=$(date '+%Y-%m-%d %H:%M:%S')
   id="${cluster_name}-${helm_chart_name}"
-  
+
+
   document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" \
                                 --arg verdict $verdict \
                                 --arg id "$id" \
@@ -149,29 +143,9 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
                                 --arg display_name "HELM Repositories" \
                                 --arg color_code $color_code '. + {id: $id, environment: $environment, createdOn: $created_on, lastUpdated: $created_on, displayName: $display_name, cluster: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
 
-query_result=$(az cosmosdb sql container execute-query \
-  --account-name "$cosmosdb_account_name" \
-  --database-name "$cosmosdb_database_name" \
-  --name "$cosmosdb_container_name" \
-  --query "SELECT * FROM c WHERE c.id = '$id'" \
-  --output json)
 
-  if [[ $query_result == "[]" ]]; then
-      store_document "$document"
-      echo "Document stored successfully."
-  else
-      existing_verdict=$(echo $query_result | jq -r '.[].verdict')
-
-      if [[ "$existing_verdict" != "$new_verdict" ]]; then
-          echo "Updating document with ID $id due to verdict change."
-      else
-          echo "Document with ID $id already exists with the same verdict."
-      fi
-  fi
-  done
 done
 echo "Job process completed"
-
 
 # ---------------------------------------------------------------------------
 # STEP 3:
