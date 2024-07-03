@@ -136,16 +136,15 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
 
   document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" \
                                 --arg verdict $verdict \
-                                --arg id "$id" \
+                                --arg id "$id" \ 
                                 --arg environment "$environment" \
                                 --arg created_on "$created_on" \
                                 --arg report_type "table" \
                                 --arg display_name "HELM Repositories" \
                                 --arg color_code $color_code '. + {id: $id, environment: $environment, createdOn: $created_on, lastUpdated: $created_on, displayName: $display_name, cluster: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
 
-
+  documents+=("$document")
 done
-echo "Job process completed"
 
 # ---------------------------------------------------------------------------
 # STEP 3:
