@@ -1,6 +1,9 @@
-# AKS Version Report
+# PlatOps Owned Applications
 
-This report is designed to check the deployed versions where applicable of Docmosis, Camunda and Flux.
+This report is designed to check the deployed versions where applicable of:
+  - Camunda
+  - Docmosis
+  - Flux
 
 
 ## Scripts
@@ -28,7 +31,7 @@ For access to Cosmos however you will need to set the following environment vari
 
 These values can be found via the Azure Portal on the version reporter Cosmos DB instance.
 
-When setup you can run the script locally by using `python main.py` from the `reports/aksversions` directory.
+When setup you can run the script locally by using `python main.py` from the `reports/platopsapps` directory.
 
 ### Making it safer
 
@@ -52,9 +55,9 @@ if save_to_cosmos:
         db_container = database.get_container_client(container_name)
 
         remove_documents(db_container)
-        add_documents(db_container, clusters_info)
+        add_documents(db_container, documents)
 
 ```
 
-If you disable the save to cosmos features this automatically enables output of the discovered AKS information to the terminal.
+If you disable the save to cosmos features this automatically enables output of the discovered version information to the terminal.
 <br>This will aid local development and show all the relevant information as it would have been saved to Cosmos.
