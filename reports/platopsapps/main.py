@@ -2,12 +2,21 @@
 from kubernetes import client, config
 from azure.cosmos import CosmosClient, exceptions
 from cosmos_functions import remove_documents, add_documents
+from unittest.mock import patch, MagicMock
 import os
 import sys
 import uuid
 import json
 import logging
 import re
+
+
+# Function to create a mock Kubernetes client so that tests can pass in ADO. Overwritten later in script.
+def get_mock_kube_client():
+    mock_kube_client = MagicMock()
+    return mock_kube_client
+# Used for testing by setting this as the default
+kube_client = get_mock_kube_client()
 
 """
     Function to return logs of a pod within a deployment.
@@ -98,21 +107,6 @@ def get_flux_version(namespace):
         print(f"Error retrieving Flux version: {e}", file=sys.stderr)
         return None
 
-# Load Kubernetes configuration
-try:
-    # Local dev
-    config.load_kube_config()
-except Exception as e:
-    print(f"Error loading kube config: {e}", file=sys.stderr)
-    try:
-        # Uses service account given to pod by k8s to connect to cluster.
-        config.load_incluster_config()
-    except Exception as e:
-        print(f"Error loading in-cluster config: {e}", file=sys.stderr)
-        exit(1)
-# Create Kubernetes API clients
-kube_client = client.CoreV1Api()
-
 if __name__ == "__main__":
     # Set necessary env vars
     save_to_cosmos = os.getenv("SAVE_TO_COSMOS", 'True').lower() in ('true', '1', 't')
@@ -122,6 +116,21 @@ if __name__ == "__main__":
     if not all([cluster_name, environment]):
         logging.error("CLUSTER_NAME and ENVIRONMENT env variables must be set.")
         sys.exit(1)
+
+    # Load Kubernetes configuration for job
+    try:
+        # Local dev
+        config.load_kube_config()
+    except Exception as e:
+        print(f"Error loading kube config: {e}", file=sys.stderr)
+        try:
+            # Uses service account given to pod by k8s to connect to cluster.
+            config.load_incluster_config()
+        except Exception as e:
+            print(f"Error loading in-cluster config: {e}", file=sys.stderr)
+            exit(1)
+    # Create Kubernetes API clients
+    kube_client = client.CoreV1Api()
     
 
     print("Beginning version checker...")
