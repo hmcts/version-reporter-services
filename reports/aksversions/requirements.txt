@@ -1,0 +1,6 @@
+pytz==2024.1
+azure-mgmt-core==1.4.0
+azure-cosmos==4.7.0
+azure-identity==1.17.1
+azure-mgmt-resource==23.1.1
+azure-mgmt-containerservice==30.0.0

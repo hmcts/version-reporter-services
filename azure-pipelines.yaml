@@ -95,7 +95,7 @@ parameters:
     type: object
     default:
       - name: "aksversions"
-        type: "bash"
+        type: "python"
       - name: "helmcharts"
         type: "bash"
       - name: "paloalto"

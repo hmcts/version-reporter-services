@@ -6,7 +6,7 @@ terraform {
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~> 2.15.0"
+      version = "~> 2.53.0"
     }
   }
   backend "azurerm" {}
@@ -16,5 +16,11 @@ provider "azurerm" {
   features {}
 }
 
-provider "azuread" {
+provider "azurerm" {
+  alias           = "ptlsbox"
+  subscription_id = var.ptlsbox_subscription
+  features {}
 }
+
+# provider "azuread" {
+# }
