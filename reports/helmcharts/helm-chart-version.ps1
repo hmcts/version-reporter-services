@@ -19,7 +19,6 @@ function get_major_Version {
     $splitVersion = $version.Split('.')
     return $splitVersion[0]
 }
-
 function get_minor_version {
     param (
         [string]$version
