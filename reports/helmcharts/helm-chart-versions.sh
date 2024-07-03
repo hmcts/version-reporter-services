@@ -131,12 +131,13 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
   # Enhance document with additional information
   helm_chart_name=$(echo "$chart" | jq -r '.name')
   created_on=$(date '+%Y-%m-%d %H:%M:%S')
-  id="${cluster_name}-${helm_chart_name}"
+  uuid=$(uuidgen)
+  id="${cluster_name}-${helm_chart_name}-$(uuidgen)"
 
 
   document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" \
                                 --arg verdict $verdict \
-                                --arg id "$id" \ 
+                                --arg id "$id" \
                                 --arg environment "$environment" \
                                 --arg created_on "$created_on" \
                                 --arg report_type "table" \
