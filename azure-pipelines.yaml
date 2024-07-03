@@ -80,6 +80,7 @@ parameters:
       - "paloalto"
       - "renovate"
       - "hourlyusage"
+      - "platopsapps"
       - "All"
 
   - name: action
@@ -105,6 +106,8 @@ parameters:
       - name: "docsoutdated"
         type: "python"
       - name: "hourlyusage"
+        type: "python"
+      - name: "platopsapps"
         type: "python"
 
 stages:
