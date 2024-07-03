@@ -43,5 +43,6 @@ variable "containers_partitions" {
     renovate     = "/repository"
     docsoutdated = "/docTitle"
     aksversions  = "/clusterName"
+    platopsapps  = "/appName"
   }
 }
