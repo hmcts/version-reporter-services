@@ -141,7 +141,7 @@ $document = $chartObject | ConvertTo-Json
     }
     else {
         $existing_verdict = ($query_result | ConvertFrom-Json | Select-Object -ExpandProperty verdict)
-
+    
         if ($existing_verdict -ne $new_verdict) {
             Write-Host "Updating document with ID $id due to verdict change."
         }
