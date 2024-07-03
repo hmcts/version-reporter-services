@@ -149,7 +149,7 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
                                 --arg display_name "HELM Repositories" \
                                 --arg color_code $color_code '. + {id: $id, environment: $environment, createdOn: $created_on, lastUpdated: $created_on, displayName: $display_name, cluster: $cluster_name, verdict: $verdict, colorCode: $color_code, reportType: $report_type}')
 
-  query_result=$(az cosmosdb sql query  \ #command do not exist need fixing 
+query_result=$(az cosmosdb sql container execute-query \
   --account-name "$cosmosdb_account_name" \
   --database-name "$cosmosdb_database_name" \
   --name "$cosmosdb_container_name" \
