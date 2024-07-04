@@ -3,6 +3,7 @@ from kubernetes import client, config
 from azure.cosmos import CosmosClient, exceptions
 from cosmos_functions import remove_documents, add_documents
 from unittest.mock import patch, MagicMock
+from version_utility import flux_latest_version, camunda_latest_version, docmosis_latest_version, compare_versions, get_semvar
 import os
 import sys
 import uuid
@@ -152,18 +153,24 @@ if __name__ == "__main__":
     for app, version in version_mapping.items():
         data = {}
         if version:
-            print(f"{app} version detected is: {version}")
+            current_version = get_semvar(f'{version}')
+            latest_version = globals()[f'{app.lower()}_latest_version']
+            
+            latest_version = latest_version()
+
+            status = compare_versions(current_version, latest_version, app)
+
             data = {
                 "id": str(uuid.uuid4()) + "_" + cluster_name,
                 "appName": app,
                 "recordType": app,
-                "currentVersion": version,
+                "currentVersion": current_version,
                 "clusterName": cluster_name,
                 "environment": environment,
-                # Green and no update until traffic light system added, these 3 fields needed later on
-                "requiredVersion": version,
-                "colorCode": "Green",
-                "verdict": "No update required"
+                "requiredVersion": latest_version,
+                "colorCode": status['colorCode'],
+                "verdict": status['verdict'],
+                "reason": status['reason'],
             }
         if data:
             # Add to list of documents to upload to cosmos
@@ -196,3 +203,4 @@ if __name__ == "__main__":
         logging.info("Save to database completed.")
     else:
         logging.info(json.dumps(documents, indent=4))
+
