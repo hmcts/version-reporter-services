@@ -46,9 +46,9 @@ def get_pod_logs(deployment_name, namespace):
         - deployment_name: Should be the label given to the deployment you need to see logs of a pod for
         - namespace: The namespace the deployment lives in
 """
-def get_camunda_version(deployment_name, namespace):
+def get_current_camunda_version():
     try:
-        logs = get_pod_logs(deployment_name, namespace)
+        logs = get_pod_logs("camunda-api-java", "camunda")
         if logs:
             # Find camunda version in pod logs
             version_line = next((line for line in logs.splitlines() if "Camunda Platform:" in line), None)
@@ -68,9 +68,9 @@ def get_camunda_version(deployment_name, namespace):
         - deployment_name: Should be the label given to the deployment you need to see logs of a pod for
         - namespace: The namespace the deployment lives in
 """
-def get_docmosis_version(deployment_name, namespace):
+def get_current_docmosis_version():
     try:
-        logs = get_pod_logs(deployment_name, namespace)
+        logs = get_pod_logs("docmosis-base", "docmosis")
         if logs:
             version_line = next((line for line in logs.splitlines() if "Docmosis version" in line), None)
             # Fetches docmosis version from a line in the logs using regex
@@ -94,15 +94,15 @@ def get_docmosis_version(deployment_name, namespace):
     Args:
         - namespace: Namespace to verify version in use
 """
-def get_flux_version(namespace):
+def get_current_flux_version():
     try:
-        namespace_obj = kube_client.read_namespace(namespace)
+        namespace_obj = kube_client.read_namespace("flux-system")
 
         # Extract Flux version from labels
         if namespace_obj.metadata.labels and "app.kubernetes.io/version" in namespace_obj.metadata.labels:
             return namespace_obj.metadata.labels["app.kubernetes.io/version"]
         else:
-            print(f"Version label 'app.kubernetes.io/version' not found in namespace {namespace}", file=sys.stderr)
+            print(f"Version label 'app.kubernetes.io/version' not found in namespace flux-system", file=sys.stderr)
             return None
     except Exception as e:
         print(f"Error retrieving Flux version: {e}", file=sys.stderr)
@@ -133,37 +133,33 @@ if __name__ == "__main__":
     # Create Kubernetes API clients
     kube_client = client.CoreV1Api()
     
+    services = [
+        "Camunda",
+        "Docmosis",
+        "Flux"
+    ]
 
-    print("Beginning version checker...")
-    logging.info("Fetching Camunda...")
-    camunda_version = get_camunda_version("camunda-api-java", "camunda")
-    logging.info("Fetching Docmosis...")
-    docmosis_version = get_docmosis_version("docmosis-base", "docmosis")
-    logging.info("Fetching Flux...")
-    flux_version = get_flux_version("flux-system")
-    
-    version_mapping = {
-        "Camunda": camunda_version,
-        "Docmosis": docmosis_version,
-        "Flux": flux_version
-    }
     documents = []
+ 
+    for service in services:
+        version_function = globals()[f'get_current_{service.lower()}_version']
+        
+        logging.info(f"Fetching {service} current version")
+        current_version = version_function()
 
-    # Iterating over the dictionary to print app names and versions - if a certain one is not found, it will not be included
-    for app, version in version_mapping.items():
         data = {}
-        if version:
-            current_version = get_semvar(f'{version}')
-            latest_version = globals()[f'{app.lower()}_latest_version']
+        if current_version:
+            current_version = get_semvar(f'{current_version}')
+            latest_version = globals()[f'{service.lower()}_latest_version']
             
             latest_version = latest_version()
 
-            status = compare_versions(current_version, latest_version, app)
+            status = compare_versions(current_version, latest_version, service)
 
             data = {
                 "id": str(uuid.uuid4()) + "_" + cluster_name,
-                "appName": app,
-                "recordType": app,
+                "appName": service,
+                "recordType": service,
                 "currentVersion": current_version,
                 "clusterName": cluster_name,
                 "environment": environment,

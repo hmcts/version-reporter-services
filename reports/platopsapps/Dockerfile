@@ -19,7 +19,7 @@ ENV VAULT_NAME="" \
     COSMOS_KEY="" \
     COSMOS_DB_NAME="" \
     COSMOS_DB_CONTAINER="" \
-    COSMOS_DB_URI=""
+    COSMOS_DB_URI="" \
     ENVIRONMENT="" \
     CLUSTER_NAME=""
 
