@@ -72,16 +72,10 @@ def get_current_docmosis_version():
     try:
         logs = get_pod_logs("docmosis-base", "docmosis")
         if logs:
-            version_line = next((line for line in logs.splitlines() if "Docmosis version" in line), None)
+            version_line = next((line for line in logs.splitlines() if "Starting Tornado version:" in line), None)
             # Fetches docmosis version from a line in the logs using regex
-            pattern = r'Docmosis version \[(.*?)\]'
-            match = re.search(pattern, version_line)
-
-            if match:
-                # Extract the version number from the first capture group
-                return match.group(1)
-            else:
-                return None
+            version = version_line.split(" Starting Tornado version:")[-1].strip()
+            return version
         else:
             return None
     except Exception as e:
