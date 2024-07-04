@@ -144,7 +144,7 @@ if __name__ == "__main__":
     for service in services:
         version_function = globals()[f'get_current_{service.lower()}_version']
         
-        logging.info(f"Fetching {service} current version")
+        logging.info(f"Fetching {service} version information...")
         current_version = version_function()
 
         data = {}
