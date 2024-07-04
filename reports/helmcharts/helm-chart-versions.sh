@@ -130,9 +130,7 @@ for chart in $(echo "$charts" | jq -c '.[]'); do
 
   # Enhance document with additional information
   created_on=$(date '+%Y-%m-%d %H:%M:%S')
-  uuid=$(uuidgen)
-  id="$(uuidgen)"
-
+  id=$(uuidgen)
 
   document=$(echo "$chart" | jq --arg cluster_name "$cluster_name" \
                                 --arg verdict $verdict \
