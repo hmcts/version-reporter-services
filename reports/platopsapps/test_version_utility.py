@@ -18,10 +18,26 @@ def test_get_major_version():
     version = get_major_version("7.21.0")
     assert version == 7
 
-def test_compare_versions():
-    result = compare_versions("7.21.0", "7.21.5", "test")
-    assert result == { 'reason': "Patch versions are different", 'colorCode': "orange", 'verdict': "review" }
-    
+def test_compare_versions_success():
+    success = compare_versions("7.21.0", "7.21.5", "test")
+    assert success == { 'reason': "Patch versions are different", 'colorCode': "orange", 'verdict': "review" }
+
+def test_compare_versions_fail(caplog):
+    with pytest.raises(SystemExit) as pytest_current_e:
+        compare_versions("7.21.0", "7.21", "test")
+
+    with pytest.raises(SystemExit) as pytest_latest_e:
+        compare_versions("7.21", "7.21.1", "test")
+
+    assert pytest_current_e.type == SystemExit
+    assert pytest_current_e.value.code == 1
+
+    assert pytest_latest_e.type == SystemExit
+    assert pytest_latest_e.value.code == 1
+
+    # Check the error message
+    assert "One of current_version or latest_version is not a semantic version number" in caplog.text
+
 def test_flux_latest_version():
     semver_regex = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$"
     latest_version = flux_latest_version()

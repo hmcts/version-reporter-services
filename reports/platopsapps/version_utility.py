@@ -1,6 +1,7 @@
 import requests
 import logging
 import re
+import sys
 from bs4 import BeautifulSoup
 
 logging.basicConfig(
@@ -31,6 +32,12 @@ def compare_versions(current_version, latest_version, service_name):
         - service_name - a string containing the name of the service for which the versions are being checked, used in log output only.
     """
 
+    semver_regex = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$"
+
+    if not all([re.match(semver_regex, version) for version in [current_version, latest_version]]):
+        logging.error("One of current_version or latest_version is not a semantic version number.")
+        sys.exit(1)
+
     try:
         logging.info(f"{service_name} current version: {current_version}")
         logging.info(f"{service_name} latest version: {latest_version}\n")
@@ -41,6 +48,10 @@ def compare_versions(current_version, latest_version, service_name):
         current_minor = get_minor_version(current_version)
         latest_patch = get_patch_version(latest_version)
         current_patch = get_patch_version(current_version)
+
+        if not all([[latest_major, latest_minor, latest_patch, current_major, current_minor, current_patch]]):
+            logging.error("It was not possible to set the major, minor or patch version from the inputs supplied.")
+            sys.exit(1)
 
         if latest_major != current_major:
             reason = "Major versions are different" if latest_major > current_major else "Current major version is higher than the latest major version, something went wrong!"

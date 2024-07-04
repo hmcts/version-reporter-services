@@ -74,7 +74,7 @@ def get_current_docmosis_version():
         if logs:
             version_line = next((line for line in logs.splitlines() if "Starting Tornado version:" in line), None)
             # Fetches docmosis version from a line in the logs using regex
-            version = version_line.split(" Starting Tornado version:")[-1].strip()
+            version = version_line.split("Starting Tornado version:")[-1].strip()
             return version
         else:
             return None

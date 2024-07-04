@@ -42,12 +42,12 @@ def test_get_docmosis_version(mock_kube_client):
     ]
     mock_kube_client.read_namespaced_pod_log.return_value = """
         These are my Docmosis pod logs
-        03 Jul 2024 12:30:56,190 [localhost-startStop-1] INFO  SystemManager - Docmosis version [4.4.1_8366] initialising
+        03 Jul 2024 12:30:56,190 [localhost-startStop-1] INFO  SystemManager - Starting Tornado version:2.9.7_c98b448
         They are used for testing this function
     """
     
     version = get_current_docmosis_version()
-    assert version == "4.4.1_8366"
+    assert version == "2.9.7_c98b448"
 
 # Test we can retrieve the version of flux from a namespace label
 def test_get_flux_version(mock_kube_client):
