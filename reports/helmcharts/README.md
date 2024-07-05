@@ -64,6 +64,7 @@ The Helm chart reports work as follows:
 
 1. **helm-chart-versions.sh**:
     - This script scans specified Helm charts and extracts version information.
+    - It filters the Helm charts by namespace to fetch only the relevant charts.
     - It generates a report containing the versions of all Helm charts in a directory.
     - Before generating a new report, it removes any existing reports to ensure that only the latest information is stored.
 
@@ -75,5 +76,3 @@ The Helm chart reports work as follows:
         ```python
         query=f"SELECT * FROM c WHERE c.environment = '{environment}'",
         ```
-
-The script then saves the new report data to Cosmos DB with the latest report.
