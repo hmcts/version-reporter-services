@@ -2,7 +2,7 @@ locals {
   mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env
   mi_cft = {
     # DCD-CNP-Sandbox
-    sbox = {
+    sandbox = {
       subscription_id = "bf308a5c-0624-4334-8ff8-8dca9fd43783"
     }
     # DCD-CNP-DEV
