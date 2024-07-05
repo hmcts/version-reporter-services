@@ -53,15 +53,3 @@ resource "azurerm_cosmosdb_sql_container" "this" {
     }
   }
 }
-
-/*
- * Granting Cosmos DB Built-in Data Contributor to enable read/write permissions to MI
- */
-resource "azurerm_cosmosdb_sql_role_assignment" "this" {
-  resource_group_name = azurerm_resource_group.this.name
-  account_name        = azurerm_cosmosdb_account.this.name
-  # Cosmos DB Built-in Data Contributor
-  role_definition_id = "${azurerm_cosmosdb_account.this.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
-  principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id
-  scope              = azurerm_cosmosdb_account.this.id
-}
