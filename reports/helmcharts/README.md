@@ -45,13 +45,24 @@ Additionally, set the necessary environment variables for your cluster and envir
     ```sh
     ./helm-chart-versions.sh
     ```
-
-    This script will automatically remove old reports before adding any new contents to Cosmos DB.
-
 2. Run the `save-to-cosmos.py` script to save the results to Cosmos DB:
 
     ```sh
     python save-to-cosmos.py
     ```
+
+### How It Works
+
+The Helm chart reports work as follows:
+
+1. **helm-chart-versions.sh**:
+    - This script scans specified Helm charts and extracts version information.
+    - It generates a report containing the versions of all Helm charts in a directory.
+    - Before generating a new report, it removes any existing reports to ensure that only the latest information is stored.
+
+2. **save-to-cosmos.py**:
+    - This script reads the generated Helm chart versions report.
+    - It connects to Cosmos DB using the provided environment variables (`COSMOS_DB_URI` and `COSMOS_KEY`).
+    - The script then saves the report data to Cosmos DB, ensuring that the latest Helm chart versions are stored and accessible.
 
 These steps should help you run the deployment scripts locally and manage your Helm chart versions effectively.
