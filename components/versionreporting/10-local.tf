@@ -19,6 +19,6 @@ data "azuread_service_principal" "service_connection" {
 
 locals {
   service_principal_ids = [
-    for service_principal in data.service_principal.service_connection : service_principal.object_id
+    for service_principal in data.azuread_service_principal.service_connection : service_principal.object_id
   ]
 }
