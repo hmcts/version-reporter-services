@@ -179,7 +179,7 @@ stages:
   - ${{ each component in parameters.environment_components }}:
     - stage: "Managed_Identity_Infrastructure_${{ component.env }}"
       displayName: "Managed Identity Infrastructure ${{ component.env }}"
-      dependsOn: Managed_Identity_Infrastructure_${{ component.env }}
+      dependsOn: Managed_Identity_Infrastructure_${{ component.dependsOn }}
       jobs:
         - job: PlanAndApply
           steps:
