@@ -12,8 +12,14 @@ locals {
   ]
 }
 
+data "azuread_service_principal" "service_connection" {
+  for_each     = toset(local.service_principal_names)
+  display_name = each.value
+}
+
 locals {
   service_principal_ids = [
-    for service_principal in data.service_principal.service_connection : service_principal.object_id
+    for service_principal in data.service_principal.service_connection : 
+service_principal.object_id
   ]
 }
