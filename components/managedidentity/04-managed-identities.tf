@@ -35,6 +35,11 @@ resource "azurerm_key_vault_access_policy" "managed_identity_access_policy" {
   ]
 }
 
+resource "azurerm_role_assignment" "service_connection" {
+  scope                = data.azurerm_key_vault.ptl.id
+  role_definition_name = "Key Vault Contributor"
+  principal_id         =  azurerm_user_assigned_identity.managed_identity.principal_id
+}
 
 # Service connection does not have enough access to grant this via automation
 # The addition of the MI to the group has been completed manually and the code commented here to limit failures
