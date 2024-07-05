@@ -16,12 +16,12 @@ provider "azurerm" {
   features {}
 }
 
-# provider "azurerm" {
-#   alias                      = "managed_identity_infra_subs"
-#   subscription_id            = local.mi_cft[var.env].subscription_id
-#   skip_provider_registration = "true"
-#   features {}
-# }
+provider "azurerm" {
+  alias                      = "managed_identity_infra_subs"
+  subscription_id            = local.mi_cft[var.env].subscription_id
+  skip_provider_registration = "true"
+  features {}
+}
 
 # Used for access to key vault by MIs
 provider "azurerm" {

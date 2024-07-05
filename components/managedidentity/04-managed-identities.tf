@@ -1,8 +1,10 @@
 data "azurerm_resource_group" "managed_identities" {
-  name = "managed-identities-${local.mi_environment}-rg"
+  provider = azurerm.managed_identity_infra_subs
+  name     = "managed-identities-${local.mi_environment}-rg"
 }
 
 resource "azurerm_user_assigned_identity" "managed_identity" {
+  provider            = azurerm.managed_identity_infra_subs
   resource_group_name = data.azurerm_resource_group.managed_identities.name
   location            = var.location
 
