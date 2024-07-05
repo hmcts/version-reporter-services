@@ -18,7 +18,7 @@ provider "azurerm" {
 
 provider "azurerm" {
   alias                      = "managed_identity_infra_subs"
-  subscription_id            = local.mi_cft[var.env].subscription_id
+  subscription_id            = local.mi_cft[local.mi_environment].subscription_id
   skip_provider_registration = "true"
   features {}
 }
