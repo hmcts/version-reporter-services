@@ -35,10 +35,11 @@ resource "azurerm_key_vault_access_policy" "managed_identity_access_policy" {
   ]
 }
 
-resource "azurerm_role_assignment" "service_connection" {
+resource "azurerm_role_assignment" "service_connections" {
+  for_each             = var.service_connections
   scope                = data.azurerm_key_vault.ptl.id
   role_definition_name = "Key Vault Contributor"
-  principal_id         =  azurerm_user_assigned_identity.managed_identity.principal_id
+  principal_id         = each.key
 }
 
 # Service connection does not have enough access to grant this via automation
