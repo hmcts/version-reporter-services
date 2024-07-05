@@ -1,14 +1,14 @@
 locals {
   service_principal_names = [
-    "DCD-CFTAPPS-SBOX",
-    "DCD-CFTAPPS-DEV",
-    "DCD-CFTAPPS-DEMO",
-    "DCD-CFTAPPS-ITHC",
-    "DTS-CFTSBOX-INTSVC",
-    "DCD-CFTAPPS-TEST",
-    "DCD-CFTAPPS-STG",
-    "DTS-CFTPTL-INTSVC",
-    "DCD-CFTAPPS-PROD",
+    "DTS Bootstrap (sub:dcd-cftapps-sbox)",
+    "DTS Bootstrap (sub:dcd-cftapps-dev)",
+    "DTS Bootstrap (sub:dcd-cftapps-demo)",
+    "DTS Bootstrap (sub:dcd-cftapps-ithc)",
+    "DTS Bootstrap (sub:dts-cftsbox-intsvc)",
+    "DTS Bootstrap (sub:dcd-cftapps-test)",
+    "DTS Bootstrap (sub:dcd-cftapps-stg)",
+    "DTS Bootstrap (sub:dts-cftptl-intsvc)",
+    "DTS Bootstrap (sub:dcd-cftapps-prod)",
   ]
 }
 
