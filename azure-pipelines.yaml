@@ -109,7 +109,7 @@ parameters:
       - env: "ptlsbox"
         dependsOn: "sbox"
         serviceConnection: "DTS-CFTSBOX-INTSVC"
-      - env: "perftest"
+      - env: "test"
         dependsOn: "sbox"
         serviceConnection: "DCD-CFTAPPS-TEST"
       - env: "stg"

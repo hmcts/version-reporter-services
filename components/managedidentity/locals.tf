@@ -1,5 +1,5 @@
 locals {
-  mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env
+  mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env
   mi_cft = {
     # DCD-CNP-Sandbox
     sandbox = {
@@ -19,7 +19,7 @@ locals {
     ithc = {
       subscription_id = "7a4e3bd5-ae3a-4d0c-b441-2188fee3ff1c"
     }
-    perftest = {
+    test = {
       subscription_id = "7a4e3bd5-ae3a-4d0c-b441-2188fee3ff1c"
     }
     # DCD-CNP-Prod
@@ -27,7 +27,7 @@ locals {
       subscription_id = "8999dec3-0104-4a27-94ee-6588559729d1"
     }
     # DTS-CFTSBOX-INTSVC
-    ptlsbox = {
+    cftsbox-intsvc = {
       subscription_id = "1497c3d7-ab6d-4bb7-8a10-b51d03189ee3"
     }
     # DTS-CFTPTL-INTSVC
