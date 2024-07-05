@@ -63,6 +63,10 @@ The Helm chart reports work as follows:
 2. **save-to-cosmos.py**:
     - This script reads the generated Helm chart versions report.
     - It connects to Cosmos DB using the provided environment variables (`COSMOS_DB_URI` and `COSMOS_KEY`).
-    - The script then saves the report data to Cosmos DB, ensuring that the latest Helm chart versions are stored and accessible.
+    - Before saving new data, it removes existing documents for the specified environment using the query:
 
-These steps should help you run the deployment scripts locally and manage your Helm chart versions effectively.
+        ```python
+        query=f"SELECT * FROM c WHERE c.environment = '{environment}'",
+        ```
+
+The script then saves the new report data to Cosmos DB with the latest report.
