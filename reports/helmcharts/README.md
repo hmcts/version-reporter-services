@@ -4,7 +4,13 @@ The Version Reporter Service MicroServices Project
 
 ## Helm Charts
 
-This directory contains Helm charts used for deploying various services. Helm is a package manager for Kubernetes that allows you to define, install, and upgrade even the most complex Kubernetes applications.
+This directory contains a script that fetches Helm objects from a Kubernetes cluster by running as a job. Using the `helm whatup` command, it provides information about the latest available versions and the currently deployed versions of various Helm charts. This helps in managing and upgrading Kubernetes applications efficiently.
+
+Examples of applications that this includes are:
+
+- Keda
+- Flux-system
+- Kured
 
 ## Scripts
 
@@ -45,10 +51,16 @@ Additionally, set the necessary environment variables for your cluster and envir
     ```sh
     ./helm-chart-versions.sh
     ```
-2. Run the `save-to-cosmos.py` script to save the results to Cosmos DB:
+2. If you want to save the results to Cosmos DB, run the `save-to-cosmos.py` script:
 
     ```sh
     python save-to-cosmos.py
+    ```
+
+    If you want to run the script locally without sending data to Cosmos DB, set the `SAVE_TO_COSMOS` environment variable to `false`:
+
+    ```sh
+    export SAVE_TO_COSMOS=false
     ```
 
 ### How It Works
