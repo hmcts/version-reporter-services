@@ -154,7 +154,7 @@ stages:
               serviceConnection: 'DCD-CFT-Sandbox'
               overrideAction: ${{ parameters.overrideAction }}
  
-  - stage: "Core Infrastructure"
+  - stage: "Core_Infrastructure"
     displayName: "Core Infrastructure"
     jobs:
       - job: PlanAndApply
@@ -177,7 +177,7 @@ stages:
   
   # Build managed identities in each env
   - ${{ each component in parameters.environment_components }}:
-    - stage: "Managed Identity Infrastructure ${{ component.env }}"
+    - stage: "Managed_Identity_Infrastructure_${{ component.env }}"
       displayName: "Managed Identity Infrastructure ${{ component.env }}"
       dependsOn: ${{ component.dependsOn }}
       jobs:
