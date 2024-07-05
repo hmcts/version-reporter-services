@@ -4,7 +4,7 @@ The Version Reporter Service MicroServices Project
 
 ## Helm Charts
 
-This directory contains a script that fetches Helm objects from a Kubernetes cluster by running as a job. Using the `helm whatup` command, it provides information about the latest available versions and the currently deployed versions of various Helm charts. This helps in managing and upgrading Kubernetes applications efficiently.
+This directory contains a script that fetches Helm objects from a Kubernetes cluster by running as a job. Using the `helm whatup` command, it provides information of various Helm charts.
 
 Examples of applications that this includes are:
 
