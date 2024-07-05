@@ -1,5 +1,5 @@
 data "azurerm_resource_group" "managed_identities" {
-  name     = "managed-identities-${local.mi_environment}-rg"
+  name = "managed-identities-${local.mi_environment}-rg"
 }
 
 resource "azurerm_user_assigned_identity" "managed_identity" {
@@ -12,10 +12,10 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
 }
 
 resource "azurerm_key_vault_access_policy" "ptlsbox_managed_identity_access_policy" {
-  provider = azurerm.ptl
+  provider     = azurerm.ptl
   key_vault_id = data.azurerm_key_vault.ptl
-  object_id = azurerm_user_assigned_identity.managed_identity.principal_id
-  tenant_id = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_user_assigned_identity.managed_identity.principal_id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
 
   key_permissions = [
     "Get",

@@ -3,7 +3,7 @@ data "azurerm_client_config" "current" {}
 
 # General
 locals {
-  common_tags   = module.ctags.common_tags
+  common_tags = module.ctags.common_tags
 }
 
 # Common tags
