@@ -2,12 +2,10 @@ FROM alpine/k8s:1.30.0
 
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
 
-RUN apk update 
-RUN apk add python3 py3-pip openssl uuidgen bash
+RUN apk update && apk add curl coreutils yq jq openssl github-cli uuidgen bash python3 py3-pip
 RUN rm /usr/lib/python*/EXTERNALLY-MANAGED && python3 -m ensurepip
 RUN pip3 install azure-cosmos pytz
 RUN helm plugin install https://github.com/fabmation-gmbh/helm-whatup
-RUN apk update && apk add curl coreutils yq jq openssl github-cli uuidgen bash python3 py3-pip
 
 WORKDIR /app
 
