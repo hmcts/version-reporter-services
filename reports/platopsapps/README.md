@@ -15,7 +15,7 @@ There are 2 scripts that make this report work:
 
 ## Dockerfile
 
-The Dockerfileå will build an image that contains the scripts and will run the `main.py` script when launched.
+The Dockerfile will build an image that contains the scripts and will run the `main.py` script when launched.
 This container image will be run as a cronjob so that it runs on a schedule and when complete the pod will stop and eventually be removed.
 
 The Dockerfile does not have any effect on the report process and is simply a way to make this deployable to AKS.
