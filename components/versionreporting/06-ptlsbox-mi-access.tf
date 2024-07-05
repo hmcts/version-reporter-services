@@ -38,12 +38,12 @@ resource "azurerm_key_vault_access_policy" "ptlsbox_managed_identity_access_poli
 }
 
 data "azuread_service_principal" "service_connection" {
-  for_each     = { for name in local.service_principal_names : name => name }
+  for_each     = toset(local.service_principal_names)
   display_name = each.value
 }
 
 resource "azurerm_role_assignment" "reader" {
-  for_each             = toset(local.service_principal_ids)
+  for_each             = local.service_principal_ids
   scope                = module.version_reporter_key_vault.key_vault_id
   role_definition_name = "Key Vault Contributor"
   principal_id         = each.value
