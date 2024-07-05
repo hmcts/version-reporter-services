@@ -11,7 +11,7 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
   tags = local.common_tags
 }
 
-resource "azurerm_key_vault_access_policy" "ptlsbox_managed_identity_access_policy" {
+resource "azurerm_key_vault_access_policy" "managed_identity_access_policy" {
   provider     = azurerm.ptl
   key_vault_id = data.azurerm_key_vault.ptl
   object_id    = azurerm_user_assigned_identity.managed_identity.principal_id
