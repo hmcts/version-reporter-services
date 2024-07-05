@@ -119,7 +119,7 @@ parameters:
         dependsOn: "ptlsbox"
         serviceConnection: "DTS-CFTPTL-INTSVC"
       - env: "prod"
-        dependsOn: "aat"
+        dependsOn: "stg"
         serviceConnection: "DCD-CFTAPPS-PROD"
 
   - name: reports
