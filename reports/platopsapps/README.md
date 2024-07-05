@@ -12,6 +12,7 @@ There are 2 scripts that make this report work:
 
 - `main.py` - This script has 3 main functions, to fetch the versions of camunda, docmosis and flux. It does this by using the kubernetes client for Python to query a deployment on the cluster the job is running on, based off deployment labels. It then takes the first pod and, depending on the situation, finds the version of the app. When looking for flux version, this is done on the namespace instead.
 - `cosmos_functions.py` - This script is only used to interact with Cosmos DB and provides functions to do so that are imported to main.py
+- `version_utility.py` - A script containing functions that find the latest version of each application for specific sources, also includes functions to find short form semantic version number, patch number, minor number and major number and uses these as part of the comparison function which takes the current and latest version for an application and returns the status e.g. ok, review, upgrade + some additional output
 
 ## Dockerfile
 
@@ -61,3 +62,11 @@ if save_to_cosmos:
 
 If you disable the save to cosmos features this automatically enables output of the discovered version information to the terminal.
 <br>This will aid local development and show all the relevant information as it would have been saved to Cosmos.
+
+## Tests
+
+The report includes test files to test the different Python functions within the main and version_utility scripts.
+
+These tests have been written with PyTest which can be installed using pip `pip install pytest`.
+
+To run the test script you simply need to be inside the same folder as the test file(s) `reports/platopsapps` and trigger PyTest `pytest -v` (adding -v gives verbose output for each test in the file).
