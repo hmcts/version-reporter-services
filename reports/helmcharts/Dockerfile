@@ -31,4 +31,3 @@ ENV VAULT_NAME="" \
 RUN chmod +x /app/set_env.sh
 
 CMD ["/app/entrypoint.sh"]
-
