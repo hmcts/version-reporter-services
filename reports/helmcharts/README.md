@@ -16,7 +16,7 @@ Examples of applications that this includes are:
 
 ### Running the Deployment Scripts
 
-The Helm charts use two scripts: `helm-chart-versions.sh` and `save-to-cosmos.py`.
+The Helm Charts reporting service uses two main scripts: `helm-chart-versions.sh` and `save-to-cosmos.py`.
 
 #### Prerequisites
 
