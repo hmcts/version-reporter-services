@@ -51,11 +51,6 @@ Additionally, set the necessary environment variables for your cluster and envir
     ```sh
     ./helm-chart-versions.sh
     ```
-2. If you want to save the results to Cosmos DB, run the `save-to-cosmos.py` script:
-
-    ```sh
-    python save-to-cosmos.py
-    ```
 
     If you want to run the script locally without sending data to Cosmos DB, set the `SAVE_TO_COSMOS` environment variable to `false`:
 
