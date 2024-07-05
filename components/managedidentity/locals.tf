@@ -1,5 +1,5 @@
 locals {
-  mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env
+  mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" :var.env == "dev" ? "preview" : var.env
   mi_cft = {
     # DCD-CNP-Sandbox
     sbox = {
