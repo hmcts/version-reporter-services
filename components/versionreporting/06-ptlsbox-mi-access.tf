@@ -37,7 +37,7 @@ resource "azurerm_key_vault_access_policy" "ptlsbox_managed_identity_access_poli
 
 }
 
-resource "azurerm_role_assignment" "reader" {
+resource "azurerm_role_assignment" "key_vault_contributor" {
   for_each             = local.service_principal_ids
   scope                = module.version_reporter_key_vault.key_vault_id
   role_definition_name = "Key Vault Contributor"
