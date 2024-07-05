@@ -92,7 +92,7 @@ parameters:
       - apply
 
   # Used for building MI infrastructure across the environments
-  - name: environment_components
+  - name: environments
     type: object
     default:
       - env: "sbox"
@@ -176,12 +176,12 @@ stages:
                 -lock-timeout=30s
   
   # Build managed identities in each env
-  - ${{ each component in parameters.environment_components }}:
-    - stage: "Managed_Identity_Infrastructure_${{ component.env }}"
-      displayName: "Managed Identity Infrastructure ${{ component.env }}"
+  - ${{ each object in parameters.environments }}:
+    - stage: "Managed_Identity_Infrastructure_${{ object.env }}"
+      displayName: "Managed Identity Infrastructure ${{ object.env }}"
       dependsOn: 
-        - ? ${{ if ne(component.env, 'sbox') }}
-          : - Managed_Identity_Infrastructure_${{ component.dependsOn }}
+        - ? ${{ if ne(object.env, 'sbox') }}
+          : - Managed_Identity_Infrastructure_${{ object.dependsOn }}
         - ${{ else }}:
           - Core_Infrastructure
       jobs:
@@ -190,10 +190,10 @@ stages:
             - template: steps/terraform.yaml@cnp-azuredevops-libraries
               parameters:
                 location: ${{ parameters.location }}
-                serviceConnection: ${{ component.serviceConnection }}
+                serviceConnection: ${{ object.serviceConnection }}
                 product: ${{ variables.product }}
                 overrideAction: ${{ parameters.overrideAction }}
-                environment:  ${{ component.env }}
+                environment:  ${{ object.env }}
                 component: "managedidentity"
                 terraformInitSubscription: ${{ variables.terraformInitSubscription }}
                 tfVarsFile: NULL
