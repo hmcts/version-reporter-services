@@ -8,7 +8,6 @@ module "version_reporter_key_vault" {
   product_group_name         = "DTS Platform Operations"
   create_managed_identity    = false
   common_tags                = local.common_tags
-  managed_identity_object_id = azurerm_user_assigned_identity.managed_identity.principal_id
 }
 
 resource "azurerm_key_vault_secret" "cosmos_endpoint" {

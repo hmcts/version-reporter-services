@@ -1,23 +1,20 @@
-data "azurerm_resource_group" "cftsbox_intsvc" {
-  provider = azurerm.ptlsbox
-  name     = "managed-identities-cftsbox-intsvc-rg"
+data "azurerm_resource_group" "managed_identities" {
+  name     = "managed-identities-${local.mi_environment}-rg"
 }
 
-resource "azurerm_user_assigned_identity" "ptlsbox_managed_identity" {
-  provider = azurerm.ptlsbox
-
-  resource_group_name = data.azurerm_resource_group.cftsbox_intsvc.name
+resource "azurerm_user_assigned_identity" "managed_identity" {
+  resource_group_name = data.azurerm_resource_group.managed_identities.name
   location            = var.location
 
-  name = "monitoring-cftsbox-intsvc-mi"
+  name = "monitoring-${local.mi_environment}-mi"
 
   tags = local.common_tags
 }
 
 resource "azurerm_key_vault_access_policy" "ptlsbox_managed_identity_access_policy" {
-  key_vault_id = module.version_reporter_key_vault.key_vault_id
-
-  object_id = azurerm_user_assigned_identity.ptlsbox_managed_identity.principal_id
+  provider = azurerm.ptl
+  key_vault_id = data.azurerm_key_vault.ptl
+  object_id = azurerm_user_assigned_identity.managed_identity.principal_id
   tenant_id = data.azurerm_client_config.current.tenant_id
 
   key_permissions = [
@@ -34,7 +31,6 @@ resource "azurerm_key_vault_access_policy" "ptlsbox_managed_identity_access_poli
     "Get",
     "List",
   ]
-
 }
 
 # Service connection does not have enough access to grant this via automation
