@@ -38,7 +38,7 @@ resource "azurerm_key_vault_access_policy" "ptlsbox_managed_identity_access_poli
 }
 
 data "azuread_service_principal" "service_connection" {
-  for_each = { for name in local.service_principal_names : name => name }
+  for_each     = { for name in local.service_principal_names : name => name }
   display_name = each.value
 }
 
