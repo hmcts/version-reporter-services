@@ -91,6 +91,37 @@ parameters:
       - plan
       - apply
 
+  # Used for building MI infrastructure across the environments
+  - name: environments
+    type: object
+    default:
+      - env: "sbox"
+        serviceConnection: "DCD-CFTAPPS-SBOX"
+      - env: "dev"
+        dependsOn: "sbox"
+        serviceConnection: "DCD-CFTAPPS-DEV"
+      - env: "demo"
+        dependsOn: "sbox"
+        serviceConnection: "DCD-CFTAPPS-DEMO"
+      - env: "ithc"
+        dependsOn: "sbox"
+        serviceConnection: "DCD-CFTAPPS-ITHC"
+      - env: "ptlsbox"
+        dependsOn: "sbox"
+        serviceConnection: "DTS-CFTSBOX-INTSVC"
+      - env: "test"
+        dependsOn: "sbox"
+        serviceConnection: "DCD-CFTAPPS-TEST"
+      - env: "stg"
+        dependsOn: "sbox"
+        serviceConnection: "DCD-CFTAPPS-STG"
+      - env: "ptl"
+        dependsOn: "ptlsbox"
+        serviceConnection: "DTS-CFTPTL-INTSVC"
+      - env: "prod"
+        dependsOn: "stg"
+        serviceConnection: "DCD-CFTAPPS-PROD"
+
   - name: reports
     displayName: Report to build
     type: object
@@ -122,10 +153,9 @@ stages:
               keyvaultSecret: 'azure-devops-sp-token'
               serviceConnection: 'DCD-CFT-Sandbox'
               overrideAction: ${{ parameters.overrideAction }}
-
-#  - ${{ each environment in parameters.env }}: We could have stg and prod
-  - stage: "Infrastructure"
-    displayName: "Infrastructure"
+ 
+  - stage: "Core_Infrastructure"
+    displayName: "Core Infrastructure"
     jobs:
       - job: PlanAndApply
         steps:
@@ -144,6 +174,34 @@ stages:
               planCommandOptions: >
                 -compact-warnings
                 -lock-timeout=30s
+  
+  # Build managed identities in each env
+  - ${{ each object in parameters.environments }}:
+    - stage: "Managed_Identity_Infrastructure_${{ object.env }}"
+      displayName: "Managed Identity Infrastructure ${{ object.env }}"
+      dependsOn: 
+        - ? ${{ if ne(object.env, 'sbox') }}
+          : - Managed_Identity_Infrastructure_${{ object.dependsOn }}
+        - ${{ else }}:
+          - Core_Infrastructure
+      jobs:
+        - job: PlanAndApply
+          steps:
+            - template: steps/terraform.yaml@cnp-azuredevops-libraries
+              parameters:
+                location: ${{ parameters.location }}
+                serviceConnection: ${{ object.serviceConnection }}
+                product: ${{ variables.product }}
+                overrideAction: ${{ parameters.overrideAction }}
+                environment:  ${{ object.env }}
+                component: "managedidentity"
+                terraformInitSubscription: ${{ variables.terraformInitSubscription }}
+                tfVarsFile: NULL
+                initCommandOptions: >
+                  -reconfigure
+                planCommandOptions: >
+                  -compact-warnings
+                  -lock-timeout=30s
 
   - stage: "Reports"
     displayName: "Reports"
