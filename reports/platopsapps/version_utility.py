@@ -59,7 +59,7 @@ def compare_versions(current_version, latest_version, service_name):
             verdict = "Upgrade" if latest_major > current_major else "error during evaluation"
         elif latest_minor != current_minor:
             reason = "Minor versions are different" if latest_minor > current_minor else "Current minor version is higher than the latest minor version, something went wrong!"
-            colorCode = "red"
+            colorCode = "orange"
             verdict = "review" if latest_minor > current_minor else "error during evaluation"
         elif latest_patch != current_patch:
             reason = "Patch versions are different" if latest_patch > current_patch else "Current patch version is higher than the latest patch version, something went wrong!"
