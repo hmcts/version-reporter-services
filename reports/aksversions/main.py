@@ -101,7 +101,7 @@ def main():
                         if upgrade.is_preview:
                             available_updates = upgrade.kubernetes_version
                             verdict = "Preview only, wait for general availability"
-                            color_code = "orange"
+                            color_code = "green"
                         elif ((get_minor_version(upgrade.kubernetes_version) - get_minor_version(current_version)) < 1 ):
                             available_updates = upgrade.kubernetes_version
                             verdict = "Patch version update only"
