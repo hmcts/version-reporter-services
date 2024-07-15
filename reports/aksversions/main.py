@@ -121,7 +121,7 @@ def main():
                     "currentVersion": current_version,
                     "upgradeableVersion": max(available_updates) if type(available_updates) is list else available_updates,
                     "colorCode": color_code,
-                    "resourceType": "CFT Cluster" if "cft" in cluster.name else "SS Cluster",
+                    "resourceType": "CFT Cluster" if "cft" in cluster.name else "SDS Cluster",
                     "powerState": cluster.power_state.code if cluster.power_state else "Unknown",
                     "verdict": verdict
                 }
