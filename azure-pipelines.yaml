@@ -140,61 +140,61 @@ stages:
                 -compact-warnings
                 -lock-timeout=30s
 
-  - stage: "Reports"
-    displayName: "Reports"
-    jobs:
-    - ${{ each report in parameters.reports }}:
-      - job: BuildArtifact_${{report.name}}
-        displayName: Build ${{report.name}} Artifact
-        steps:
-        - ${{ if eq( report['type'], 'nodejs') }}:
-          - template: "pipeline-templates/build-nodejs.yaml"
-            parameters:
-              prImage: ${{ parameters.prImage }}
-              versionSpec: "18.x"
-              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
-        - ${{ elseif eq( report['type'], 'python')  }}:
-          - template: "pipeline-templates/build-python.yaml"
-            parameters:
-              prImage: ${{ parameters.prImage }}
-              versionSpec: "3.11"
-              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
-        - ${{ else }}:
-          - template: "reports/${{report.name}}/build.yaml"
-            parameters:
-              prImage: ${{ parameters.prImage }}
-              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+  # - stage: "Reports"
+  #   displayName: "Reports"
+  #   jobs:
+  #   - ${{ each report in parameters.reports }}:
+  #     - job: BuildArtifact_${{report.name}}
+  #       displayName: Build ${{report.name}} Artifact
+  #       steps:
+  #       - ${{ if eq( report['type'], 'nodejs') }}:
+  #         - template: "pipeline-templates/build-nodejs.yaml"
+  #           parameters:
+  #             prImage: ${{ parameters.prImage }}
+  #             versionSpec: "18.x"
+  #             workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+  #       - ${{ elseif eq( report['type'], 'python')  }}:
+  #         - template: "pipeline-templates/build-python.yaml"
+  #           parameters:
+  #             prImage: ${{ parameters.prImage }}
+  #             versionSpec: "3.11"
+  #             workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+  #       - ${{ else }}:
+  #         - template: "reports/${{report.name}}/build.yaml"
+  #           parameters:
+  #             prImage: ${{ parameters.prImage }}
+  #             workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
 
-      - job: PushContainer_${{report.name}}
-        dependsOn: BuildArtifact_${{report.name}}
-        displayName: Push ${{report.name}} Container
-        condition: |
-          or(
-            and(
-              succeeded(), 
-              eq(variables['isMain'], true),
-              or(eq('${{parameters.publishImage}}', '${{report.name}}'), 
-                eq('${{parameters.publishImage}}', 'All'))
-            ),
-            and(succeeded(), eq('${{parameters.prImage}}', true))
-          )
-        steps:
-          - script: |
-              repo_sha=$(git rev-parse --verify HEAD)
-              image_tag_sha=${repo_sha:0:7}
-              last_commit_time=$(date +'%Y%m%d%H%M%S')
-              image_tag=$(echo ${image_tag_sha}-${last_commit_time})
+  #     - job: PushContainer_${{report.name}}
+  #       dependsOn: BuildArtifact_${{report.name}}
+  #       displayName: Push ${{report.name}} Container
+  #       condition: |
+  #         or(
+  #           and(
+  #             succeeded(), 
+  #             eq(variables['isMain'], true),
+  #             or(eq('${{parameters.publishImage}}', '${{report.name}}'), 
+  #               eq('${{parameters.publishImage}}', 'All'))
+  #           ),
+  #           and(succeeded(), eq('${{parameters.prImage}}', true))
+  #         )
+  #       steps:
+  #         - script: |
+  #             repo_sha=$(git rev-parse --verify HEAD)
+  #             image_tag_sha=${repo_sha:0:7}
+  #             last_commit_time=$(date +'%Y%m%d%H%M%S')
+  #             image_tag=$(echo ${image_tag_sha}-${last_commit_time})
               
-              echo "##vso[task.setvariable variable=tag]${{variables.acrRepository}}/${{report.name}}:prod-${image_tag}"
-            displayName: "ACR: Tag ${{report.name}}"
+  #             echo "##vso[task.setvariable variable=tag]${{variables.acrRepository}}/${{report.name}}:prod-${image_tag}"
+  #           displayName: "ACR: Tag ${{report.name}}"
 
-          - task: AzureCLI@1
-            displayName: 'ACR: Build ${{report.name}}'
-            enabled: true
-            inputs:
-              azureSubscription: ${{ variables.acrServiceConnection }}
-              workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
-              scriptType: bash
-              scriptPath: $(System.DefaultWorkingDirectory)/pipeline-scripts/publish-image.sh
-              arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}}
+  #         - task: AzureCLI@1
+  #           displayName: 'ACR: Build ${{report.name}}'
+  #           enabled: true
+  #           inputs:
+  #             azureSubscription: ${{ variables.acrServiceConnection }}
+  #             workingDirectory: $(System.DefaultWorkingDirectory)/reports/${{report.name}}
+  #             scriptType: bash
+  #             scriptPath: $(System.DefaultWorkingDirectory)/pipeline-scripts/publish-image.sh
+  #             arguments: ${{report.name}} $(tag) ${{variables.acrResourceGroup}} ${{variables.acrName}}
 
