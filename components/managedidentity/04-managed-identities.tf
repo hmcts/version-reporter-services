@@ -35,6 +35,15 @@ resource "azurerm_key_vault_access_policy" "managed_identity_access_policy" {
   ]
 }
 
+
+resource "azurerm_role_assignment" "cosmosdb_read_metadata" {
+  provider             = azurerm.managed_identity_infra_subs
+  scope                = azurerm_cosmosdb_account.this.id
+  role_definition_name = "Microsoft.DocumentDB/databaseAccounts/readMetadata"
+  principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
+}
+
+
 # Service connection does not have enough access to grant this via automation
 # The addition of the MI to the group has been completed manually and the code commented here to limit failures
 # The code is being left here for reference and understand if required in future
