@@ -3,6 +3,11 @@ data "azurerm_resource_group" "managed_identities" {
   name     = "managed-identities-${local.mi_environment}-rg"
 }
 
+# data "azurerm_cosmosdb_account" "example" {
+#   name                = "tfex-cosmosdb-account"
+#   resource_group_name = "tfex-cosmosdb-account-rg"
+# }
+
 resource "azurerm_user_assigned_identity" "managed_identity" {
   provider            = azurerm.managed_identity_infra_subs
   resource_group_name = data.azurerm_resource_group.managed_identities.name
@@ -34,6 +39,15 @@ resource "azurerm_key_vault_access_policy" "managed_identity_access_policy" {
     "List",
   ]
 }
+
+
+resource "azurerm_role_assignment" "cosmosdb_read_metadata" {
+  provider             = azurerm.managed_identity_infra_subs
+  scope                = azurerm_cosmosdb_account.this.id
+  role_definition_name = "Microsoft.DocumentDB/databaseAccounts/readMetadata"
+  principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
+}
+
 
 # Service connection does not have enough access to grant this via automation
 # The addition of the MI to the group has been completed manually and the code commented here to limit failures
