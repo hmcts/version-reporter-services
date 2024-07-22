@@ -3,6 +3,11 @@ data "azurerm_resource_group" "managed_identities" {
   name     = "managed-identities-${local.mi_environment}-rg"
 }
 
+# data "azurerm_cosmosdb_account" "example" {
+#   name                = "tfex-cosmosdb-account"
+#   resource_group_name = "tfex-cosmosdb-account-rg"
+# }
+
 resource "azurerm_user_assigned_identity" "managed_identity" {
   provider            = azurerm.managed_identity_infra_subs
   resource_group_name = data.azurerm_resource_group.managed_identities.name
