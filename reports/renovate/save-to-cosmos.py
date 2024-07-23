@@ -7,7 +7,6 @@ from azure.cosmos import CosmosClient, exceptions
 
 # Environment variables passed in via sds flux configuration
 endpoint = os.environ.get("COSMOS_DB_URI", None)
-key = os.environ.get("COSMOS_KEY", None)
 database = os.environ.get("COSMOS_DB_NAME", "reports")
 container_name = os.environ.get("COSMOS_DB_CONTAINER", "renovate")
 max_days_away = int(os.environ.get("MAX_DAYS_AWAY", 3))
@@ -88,11 +87,12 @@ documents = json.loads(sys.argv[1])
 
 # Establish connection to cosmos db
 print("Connection to database...")
-client = CosmosClient(endpoint, key)
+client = CosmosClient(endpoint, credential=credential)
 
 # Save documents to cosmos db
 try:
     print("Setting of connectivity to database")
+    credential = DefaultAzureCredential()
     database = client.get_database_client(database)
     db_container = database.get_container_client(container_name)
 
