@@ -45,7 +45,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
   resource_group_name = data.azurerm_cosmosdb_account.version_reporter.resource_group_name
   account_name        = data.azurerm_cosmosdb_account.version_reporter.name
   # Cosmos DB Built-in Data Contributor
-  role_definition_id = "${azurerm_cosmosdb_account.cosmosdb.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  role_definition_id = "${data.azurerm_cosmosdb_account.version_reporter.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
   principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id
   scope              = data.azurerm_cosmosdb_account.version_reporter.id
 }
