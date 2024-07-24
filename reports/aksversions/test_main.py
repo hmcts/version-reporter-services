@@ -37,7 +37,7 @@ def test_main_script(mock_cosmos_client, mock_container_service_client, mock_sub
 
     # Call your main script function here
     main()
-
+    mock_default_credential.assert_called()
     mock_subscription_client.assert_called_once_with(mock_default_credential.return_value)
     mock_subscription_client.return_value.subscriptions.get.assert_called_once_with(mock_subscription_client.return_value.subscription_id)
     assert 'CFT' in mock_subscription_client.return_value.subscriptions.get.return_value.display_name
