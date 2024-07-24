@@ -42,6 +42,7 @@ data "azurerm_cosmosdb_account" "version_reporter" {
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
+  provider            = azurerm.ptl
   resource_group_name = data.azurerm_cosmosdb_account.version_reporter.resource_group_name
   account_name        = data.azurerm_cosmosdb_account.version_reporter.name
   # Cosmos DB Built-in Data Contributor
