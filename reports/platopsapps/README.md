@@ -28,7 +28,6 @@ As this report utilises Python you will need to have it installed, development w
 For access to Cosmos however you will need to set the following environment variables for a successful connection to be made. This values are looked up within `main.py`:
 
 - COSMOS_DB_URI
-- COSMOS_KEY
 
 These values can be found via the Azure Portal on the version reporter Cosmos DB instance.
 
@@ -48,7 +47,7 @@ Setting `SAVE_TO_COSMOS=False` will disable the interactions with Cosmos DB comp
 # Save documents to cosmos db
 if save_to_cosmos:
 # Establish connection to cosmos db
-    cosmosClient = CosmosClient(endpoint, credential=key)
+    cosmosClient = CosmosClient(endpoint, credential=credential)
 
 # Save documents to cosmos db
     try:

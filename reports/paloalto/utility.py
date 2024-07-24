@@ -54,7 +54,6 @@ def logger(message):
 def db_config():
     return {
         "uri": os.environ.get("COSMOS_DB_URI", None),
-        "key": os.environ.get("COSMOS_KEY", None),
         "database": os.environ.get("COSMOS_DB_NAME", "reports"),
         "container": os.environ.get("COSMOS_DB_CONTAINER", "paloalto"),
         "desired_version": os.environ.get("DESIRED_VERSION", None),

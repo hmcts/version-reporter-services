@@ -16,7 +16,6 @@ COPY . .
 
 ENV VAULT_NAME="" \
     SECRET_PATH="" \
-    COSMOS_KEY="" \
     COSMOS_DB_NAME="" \
     COSMOS_DB_CONTAINER="" \
     COSMOS_DB_URI=""

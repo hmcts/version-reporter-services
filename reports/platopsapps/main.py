@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from kubernetes import client, config
 from azure.cosmos import CosmosClient, exceptions
+from azure.identity import DefaultAzureCredential
 from cosmos_functions import remove_documents, add_documents
 from unittest.mock import patch, MagicMock
 from version_utility import flux_latest_version, camunda_latest_version, docmosis_latest_version, compare_versions, get_semvar
@@ -168,18 +169,19 @@ if __name__ == "__main__":
 
     if save_to_cosmos:
         endpoint = os.getenv("COSMOS_DB_URI", None)
-        key = os.getenv("COSMOS_KEY", None)
         database = os.getenv("COSMOS_DB_NAME", "reports")
         container_name = os.getenv("COSMOS_DB_CONTAINER", "platopsapps")
         
 
-        if not all([endpoint, key, database, container_name]):
-            logging.error("COSMOS_DB_URI, COSMOS_KEY, COSMOS_DB_NAME, and COSMOS_DB_CONTAINER environment variables must be set.")
+        if not all([endpoint, database, container_name]):
+            logging.error("COSMOS_DB_URI, COSMOS_DB_NAME, and COSMOS_DB_CONTAINER environment variables must be set.")
             sys.exit(1)
 
         # Save documents to cosmos db
         try:
-            cosmosClient = CosmosClient(endpoint, credential=key)
+            print("Setting of connectivity to database")
+            credential = DefaultAzureCredential()
+            cosmosClient = CosmosClient(endpoint, credential=credential)
             database = cosmosClient.get_database_client(database)
             db_container = database.get_container_client(container_name)
             remove_documents(db_container, environment)
