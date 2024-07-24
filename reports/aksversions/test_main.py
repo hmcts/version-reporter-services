@@ -17,7 +17,7 @@ def test_main_script(mock_cosmos_client, mock_container_service_client, mock_sub
     os.environ['COSMOS_DB_URI'] = 'URI'
 
     # Mock the Azure credential
-    mock_default_credential.return_value = MagicMock()    
+    mock_default_credential.return_value = MagicMock()
 
     # Mock the SubscriptionClient
     mock_subscription = MagicMock()
