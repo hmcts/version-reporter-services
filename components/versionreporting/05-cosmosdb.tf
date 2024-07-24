@@ -58,6 +58,7 @@ data "azuread_service_principals" "pipeline" {
   display_names = [
     "DTS Bootstrap (sub:dcd-cftapps-sbox)",
     "DTS Bootstrap (sub:dcd-cftapps-dev)",
+    "DTS Bootstrap (sub:dcd-cftapps-ithc)",
     "DTS Bootstrap (sub:dcd-cftapps-demo)",
     "DTS Bootstrap (sub:dcd-cftapps-stg)",
     "DTS Bootstrap (sub:dcd-cftapps-test)",
