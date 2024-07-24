@@ -70,8 +70,8 @@ data "azuread_service_principals" "pipeline" {
 
 resource "azurerm_role_assignment" "rbac_admin" {
   for_each = { for sp in data.azuread_service_principals.pipeline.service_principals : sp.object_id => sp }
-  # Permission to Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments/write
-  role_definition_name = "Cosmos DB Operator"
+  # Needs to have permission to Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments/write
+  role_definition_name = "DocumentDB Account Contributor"
   principal_id         = each.key
   scope                = azurerm_cosmosdb_account.this.id
 }
