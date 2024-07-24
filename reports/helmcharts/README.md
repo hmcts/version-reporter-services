@@ -37,7 +37,6 @@ The Helm Charts reporting service uses two main scripts: `helm-chart-versions.sh
 You will need to set the following environment variables before the scripts can connect to Cosmos DB:
 
 - `COSMOS_DB_URI`
-- `COSMOS_KEY`
 
 Additionally, set the necessary environment variables for your cluster and environment:
 

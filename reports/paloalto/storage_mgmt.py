@@ -1,4 +1,5 @@
 from azure.cosmos import CosmosClient, exceptions
+from azure.identity import DefaultAzureCredential
 from utility import logger
 
 
@@ -6,7 +7,6 @@ class Storage:
 
     def __init__(self, config):
         self.db_uri = config.get("uri")
-        self.db_key = config.get("key")
         self.db_database = config.get("database")
         self.db_container = config.get("container")
         self.client = None
@@ -16,7 +16,8 @@ class Storage:
 
     def connect_to_db(self):
         logger("Establishing connection to cosmos db")
-        self.client = CosmosClient(self.db_uri, self.db_key)
+        credential = DefaultAzureCredential()
+        self.client = CosmosClient(self.db_uri, credential=credential)
         logger("Connection established")
 
     def save_document(self, document):

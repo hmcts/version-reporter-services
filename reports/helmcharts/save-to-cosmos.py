@@ -4,10 +4,10 @@ import json
 import pytz
 from datetime import datetime
 from azure.cosmos import CosmosClient, exceptions
+from azure.identity import DefaultAzureCredential
 
 # Environment variables passed in via sds flux configuration
 endpoint = os.environ.get("COSMOS_DB_URI", None)
-key = os.environ.get("COSMOS_KEY", None)
 database = os.environ.get("COSMOS_DB_NAME", "reports")
 container_name = os.environ.get("COSMOS_DB_CONTAINER", "helmcharts")
 environment = os.environ.get("ENVIRONMENT", None)
@@ -61,7 +61,8 @@ def get_formatted_datetime(strformat="%Y-%m-%d %H:%M:%S"):
 
 
 # Establish connection to cosmos db
-client = CosmosClient(endpoint, key)
+credential = DefaultAzureCredential()
+client = CosmosClient(endpoint, credential=credential)
 
 # Save document to cosmos db
 try:

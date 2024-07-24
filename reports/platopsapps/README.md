@@ -28,7 +28,6 @@ As this report utilises Python you will need to have it installed, development w
 For access to Cosmos however you will need to set the following environment variables for a successful connection to be made. This values are looked up within `main.py`:
 
 - COSMOS_DB_URI
-- COSMOS_KEY
 
 These values can be found via the Azure Portal on the version reporter Cosmos DB instance.
 

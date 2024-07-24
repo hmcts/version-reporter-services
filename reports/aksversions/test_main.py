@@ -1,6 +1,8 @@
 import pytest
 import os
 from unittest.mock import patch, MagicMock
+from azure.identity import DefaultAzureCredential
+
 from main import get_minor_version, main
 
 def test_get_minor_version():
@@ -14,10 +16,9 @@ def test_get_minor_version():
 def test_main_script(mock_cosmos_client, mock_container_service_client, mock_subscription_client, mock_default_credential):
 
     os.environ['COSMOS_DB_URI'] = 'URI'
-    os.environ['COSMOS_KEY'] = 'KEY'
 
     # Mock the Azure credential
-    mock_default_credential.return_value = MagicMock()
+    mock_default_credential.return_value = MagicMock()    
 
     # Mock the SubscriptionClient
     mock_subscription = MagicMock()
@@ -48,5 +49,5 @@ def test_main_script(mock_cosmos_client, mock_container_service_client, mock_sub
     mock_container_service_client.assert_called_once_with(mock_default_credential.return_value, mock_subscription_client.return_value.subscription_id)
     mock_container_service.managed_clusters.list.assert_called_once()
 
-    mock_cosmos_client.assert_called_once_with(os.environ['COSMOS_DB_URI'], credential=os.environ['COSMOS_KEY'])
+    mock_cosmos_client.assert_called_once_with(os.environ['COSMOS_DB_URI'], credential=mock_default_credential_instance)
     mock_cosmos.get_database_client.assert_called_once()

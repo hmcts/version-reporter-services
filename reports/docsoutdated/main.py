@@ -12,7 +12,6 @@ from azure.cosmos import CosmosClient, exceptions
 
 # Environment variables passed in via sds flux configuration
 endpoint = os.environ.get("COSMOS_DB_URI", None)
-key = os.environ.get("COSMOS_KEY", None)
 database = os.environ.get("COSMOS_DB_NAME", "reports")
 container_name = os.environ.get("COSMOS_DB_CONTAINER", "docsoutdated")
 
@@ -170,7 +169,8 @@ def build_report():
 
 try:
     print("Connection to database...")
-    client = CosmosClient(endpoint, key)
+    credential = DefaultAzureCredential()
+    client = CosmosClient(endpoint, credential=credential)
 
     print("Setting of connectivity to database")
     database = client.get_database_client(database)

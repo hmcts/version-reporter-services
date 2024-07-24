@@ -33,12 +33,11 @@ def main():
     # Define Environment variables for Cosmos
     if save_to_cosmos: 
         endpoint = os.getenv("COSMOS_DB_URI", None)
-        key = os.getenv("COSMOS_KEY", None)
         database = os.getenv("COSMOS_DB_NAME", "reports")
         container_name = os.getenv("COSMOS_DB_CONTAINER", "aksversions")
 
-        if not all([endpoint, key]):
-            logging.error("COSMOS_DB_URI and COSMOS_KEY environment variables must be set.")
+        if not all([endpoint]):
+            logging.error("COSMOS_DB_URI environment variables must be set.")
             return
 
     # Authenticate to Azure
@@ -139,7 +138,8 @@ def main():
     # Now we need to store them in CosmosDB and the aksversions container
     if save_to_cosmos:
         # Establish connection to cosmos db
-        cosmosClient = CosmosClient(endpoint, credential=key)
+        credential = DefaultAzureCredential()
+        cosmosClient = CosmosClient(endpoint, credential=credential)
 
         # Save documents to cosmos db
         try:
