@@ -35,6 +35,21 @@ resource "azurerm_key_vault_access_policy" "managed_identity_access_policy" {
   ]
 }
 
+data "azurerm_cosmosdb_account" "version_reporter" {
+  provider            = azurerm.ptl
+  name                = "version-reporter-ptl-cosmos"
+  resource_group_name = "cft-platform-version-reporter-ptl-rg"
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
+  resource_group_name = data.azurerm_cosmosdb_account.version_reporter.resource_group_name
+  account_name        = data.azurerm_cosmosdb_account.version_reporter.name
+  # Cosmos DB Built-in Data Contributor
+  role_definition_id = "${data.azurerm_cosmosdb_account.version_reporter.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id
+  scope              = data.azurerm_cosmosdb_account.version_reporter.id
+}
+
 # Service connection does not have enough access to grant this via automation
 # The addition of the MI to the group has been completed manually and the code commented here to limit failures
 # The code is being left here for reference and understand if required in future
