@@ -47,7 +47,7 @@ Setting `SAVE_TO_COSMOS=False` will disable the interactions with Cosmos DB comp
 # Save documents to cosmos db
 if save_to_cosmos:
 # Establish connection to cosmos db
-    cosmosClient = CosmosClient(endpoint, credential=key)
+    cosmosClient = CosmosClient(endpoint, credential=credential)
 
 # Save documents to cosmos db
     try:
