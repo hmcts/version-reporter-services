@@ -35,7 +35,7 @@ locals {
     }
   }
 
-  valid_envs = ["sbox", "prod", "jenkins_sbox", "jenkins_prod"]
+  valid_envs   = ["sbox", "prod", "jenkins_sbox", "jenkins_prod"]
   selected_env = contains(local.valid_envs, var.env) ? var.env : "sbox"
 
   cosmosdb_accounts = {
