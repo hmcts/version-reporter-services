@@ -54,13 +54,12 @@ resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
 
 data "azurerm_cosmosdb_account" "pipeline_metrics" {
   provider            = azurerm.managed_identity_infra_subs
-  name                = local.cosmosdb_accounts[local.mi_environment].name
-  resource_group_name = local.cosmosdb_accounts[local.mi_environment].resource_group_name
+  name                = local.cosmosdb_accounts[local.selected_env].name
+  resource_group_name = local.cosmosdb_accounts[local.selected_env].resource_group_name
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
   provider            = azurerm.ptl
-  count               = 1
   resource_group_name = data.azurerm_cosmosdb_account.pipeline_metrics.resource_group_name
   account_name        = data.azurerm_cosmosdb_account.pipeline_metrics.name
   # Cosmos DB Built-in Data Contributor
@@ -83,7 +82,6 @@ data "azuread_service_principals" "pipeline" {
   ]
 }
 
-
 resource "azurerm_role_assignment" "rbac_admin" {
   for_each = { for sp in data.azuread_service_principals.pipeline.service_principals : sp.object_id => sp }
   # Needs to have permission to Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments/write
@@ -92,6 +90,19 @@ resource "azurerm_role_assignment" "rbac_admin" {
   scope                = data.azurerm_cosmosdb_account.pipeline_metrics.id
 }
 
+# Service connection does not have enough access to grant this via automation
+# The addition of the MI to the group has been completed manually and the code commented here to limit failures
+# The code is being left here for reference and understand if required in future
+
+# data "azuread_group" "reader_access_group" {
+#   display_name     = "DTS Readers (mg:HMCTS)"
+#   security_enabled = true
+# }
+
+# resource "azuread_group_member" "group_membership" {
+#   group_object_id  = data.azuread_group.reader_access_group.id
+#   member_object_id = azurerm_user_assigned_identity.ptlsbox_managed_identity.principal_id
+# }
 
 
 # Service connection does not have enough access to grant this via automation

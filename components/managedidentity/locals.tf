@@ -13,7 +13,6 @@ locals {
       subscription_id = "1c4f0704-a29e-403d-b719-b90c34ef14c9"
     }
     preview = {
-      subscription_id = "1c4f0704-a29e-403d-b719-b90c34ef14c9"
     }
     # DCD-CNP-QA
     ithc = {
@@ -36,8 +35,11 @@ locals {
     }
   }
 
+  valid_envs = ["sbox", "prod", "jenkins_sbox", "jenkins_prod"]
+  selected_env = contains(local.valid_envs, var.env) ? var.env : "sbox"
+
   cosmosdb_accounts = {
-    "sandbox" = {
+    "sbox" = {
       name                = "sandbox-pipeline-metrics"
       resource_group_name = "pipelinemetrics-database-sandbox"
     }
