@@ -70,7 +70,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
 resource "azurerm_role_assignment" "rbac_admin" {
   for_each = { for sp in data.terraform_remote_state.version_reporting.outputs.pipeline_service_principals : sp.object_id => sp }
   # Needs to have permission to Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments/write
-  role_definition_name = "Contributor"
+  role_definition_name = "DocumentDB Account Contributor"
   principal_id         = each.key
   scope                = data.azurerm_cosmosdb_account.pipeline_metrics.id
 }
