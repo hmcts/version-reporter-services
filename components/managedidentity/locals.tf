@@ -36,3 +36,24 @@ locals {
     }
   }
 }
+
+locals {
+  cosmosdb_accounts = {
+    "sbox" = {
+      name                = "sandbox-pipeline-metrics"
+      resource_group_name = "pipelinemetrics-database-sandbox"
+    }
+    "prod" = {
+      name                = "pipeline-metrics"
+      resource_group_name = "pipelinemetrics-database-prod"
+    }
+    "jenkins_sbox" = {
+      name                = "sds-jenkins-pipeline-metrics"
+      resource_group_name = "sds-jenkins-ptl-rg"
+    }
+    "jenkins_prod" = {
+      name                = "sds-jenkins-pipeline-metrics"
+      resource_group_name = "sds-jenkins-ptl-rg"
+    }
+  }
+}
