@@ -67,8 +67,23 @@ resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
   scope              = data.azurerm_cosmosdb_account.pipeline_metrics.id
 }
 
+data "azuread_service_principals" "pipeline" {
+  display_names = [
+    "DTS Bootstrap (sub:dcd-cftapps-sbox)",
+    "DTS Bootstrap (sub:dcd-cftapps-dev)",
+    "DTS Bootstrap (sub:dcd-cftapps-ithc)",
+    "DTS Bootstrap (sub:dcd-cftapps-demo)",
+    "DTS Bootstrap (sub:dcd-cftapps-stg)",
+    "DTS Bootstrap (sub:dcd-cftapps-test)",
+    "DTS Bootstrap (sub:dcd-cftapps-prod)",
+    "DTS Bootstrap (sub:dts-cftsbox-intsvc)",
+    "DTS Bootstrap (sub:dts-cftptl-intsvc)"
+  ]
+}
+
+
 resource "azurerm_role_assignment" "rbac_admin" {
-  for_each = { for sp in data.terraform_remote_state.version_reporting.outputs.pipeline_service_principals : sp.object_id => sp }
+  for_each = { for sp in data.azuread_service_principals.pipeline.service_principals : sp.object_id => sp }
   # Needs to have permission to Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments/write
   role_definition_name = "DocumentDB Account Contributor"
   principal_id         = each.key
