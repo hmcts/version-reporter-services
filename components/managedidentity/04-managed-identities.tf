@@ -41,11 +41,6 @@ data "azurerm_cosmosdb_account" "version_reporter" {
   resource_group_name = "cft-platform-version-reporter-ptl-rg"
 }
 
-data "azurerm_cosmosdb_account" "pipeline_metrics" {
-  provider            = azurerm.managed_identity_infra_subs
-  name                = local.mi_environment == "sandbox" ? "sandbox-pipeline-metrics" : "pipeline-metrics"
-  resource_group_name = local.mi_environment == "sandbox" ? "pipelinemetrics-database-sandbox" : "pipelinemetrics-database-prod"
-}
 
 resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
   provider            = azurerm.ptl
@@ -57,8 +52,16 @@ resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
   scope              = data.azurerm_cosmosdb_account.version_reporter.id
 }
 
+data "azurerm_cosmosdb_account" "pipeline_metrics" {
+  provider            = azurerm.managed_identity_infra_subs
+  count               = local.mi_environment == "sbox" || local.mi_environment == "prod" ? 1 : 0
+  name                = local.mi_environment == "sbox" ? "sandbox-pipeline-metrics" : "pipeline-metrics"
+  resource_group_name = local.mi_environment == "sbox" ? "pipelinemetrics-database-sandbox" : "pipelinemetrics-database-prod"
+}
+
 resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
   provider            = azurerm.ptl
+  count               = local.mi_environment == "sandbox" || local.mi_environment == "prod" ? 1 : 0
   resource_group_name = data.azurerm_cosmosdb_account.pipeline_metrics.resource_group_name
   account_name        = data.azurerm_cosmosdb_account.pipeline_metrics.name
   # Cosmos DB Built-in Data Contributor
