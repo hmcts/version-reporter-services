@@ -55,8 +55,8 @@ resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
 data "azurerm_cosmosdb_account" "pipeline_metrics" {
   count               = local.valid_envs ? 1 : 0
   provider            = azurerm.managed_identity_infra_subs
-  name                = local.mi_cft[local.mi_environment].cosmosdb_name
-  resource_group_name = local.mi_cft[local.mi_environment].resource_group_name
+  name                = local.mi_cft[local.new_mi_environment].cosmosdb_name
+  resource_group_name = local.mi_cft[local.new_mi_environment].resource_group_name
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
