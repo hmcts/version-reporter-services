@@ -1,6 +1,6 @@
 locals {
   mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env
-  jenkins_mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env == "prod" ? "jenkins_prod" : var.env == "sandbox" ? "jenkins_sbox" : var.env
+  jenkins_mi_environment = var.env == "sbox" ? "sandbox" : var.env == "prod" ? "jenkins_prod" : var.env == "sandbox" ? "jenkins_sbox" : var.env
   mi_cft = {
     # DCD-CNP-Sandbox
     sandbox = {
