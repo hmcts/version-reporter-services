@@ -41,6 +41,12 @@ data "azurerm_cosmosdb_account" "version_reporter" {
   resource_group_name = "cft-platform-version-reporter-ptl-rg"
 }
 
+data "azurerm_cosmosdb_account" "pipeline_metrics" {
+  provider            = azurerm.ptl
+  name                = "${local.mi_environment == "sandbox" ? "sandbox-pipeline-metrics" : "pipeline-metrics"}"
+  resource_group_name = "${local.mi_environment == "sandbox" ? "DCD-CFT-Sandbox" : "DCD-CNP-Prod"}"
+}
+
 resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
   provider            = azurerm.ptl
   resource_group_name = data.azurerm_cosmosdb_account.version_reporter.resource_group_name
@@ -50,6 +56,43 @@ resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
   principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id
   scope              = data.azurerm_cosmosdb_account.version_reporter.id
 }
+
+resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
+  provider            = azurerm.ptl
+  resource_group_name = data.azurerm_cosmosdb_account.pipeline_metrics.resource_group_name
+  account_name        = data.azurerm_cosmosdb_account.pipeline_metrics.name
+  # Cosmos DB Built-in Data Contributor
+  role_definition_id = "${azurerm_cosmosdb_account.cosmosdb.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id
+  scope              = azurerm_cosmosdb_account.cosmosdb.id
+}
+
+
+data "azuread_service_principals" "pipeline" {
+  display_names = [
+    "DTS Bootstrap (sub:dcd-cftapps-sbox)",
+    "DTS Bootstrap (sub:dcd-cftapps-dev)",
+    "DTS Bootstrap (sub:dcd-cftapps-ithc)",
+    "DTS Bootstrap (sub:dcd-cftapps-demo)",
+    "DTS Bootstrap (sub:dcd-cftapps-stg)",
+    "DTS Bootstrap (sub:dcd-cftapps-test)",
+    "DTS Bootstrap (sub:dcd-cftapps-prod)",
+    "DTS Bootstrap (sub:dts-cftsbox-intsvc)",
+    "DTS Bootstrap (sub:dts-cftptl-intsvc)"
+  ]
+}
+
+
+resource "azurerm_role_assignment" "rbac_admin" {
+  for_each = { for sp in data.azuread_service_principals.pipeline.service_principals : sp.object_id => sp }
+  # Needs to have permission to Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments/write
+  role_definition_name = "Contributor"
+  principal_id         = each.key
+  scope                = data.azurerm_cosmosdb_account.pipeline_metrics.id
+}
+
+
+
 
 # Service connection does not have enough access to grant this via automation
 # The addition of the MI to the group has been completed manually and the code commented here to limit failures
