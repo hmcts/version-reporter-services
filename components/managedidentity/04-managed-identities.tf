@@ -67,7 +67,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
   # Cosmos DB Built-in Data Contributor
   role_definition_id = "${data.azurerm_cosmosdb_account.pipeline_metrics.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
   principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id
-  scope               = data.azurerm_cosmosdb_account.pipeline_metrics[0].id
+  scope              = data.azurerm_cosmosdb_account.pipeline_metrics[0].id
 }
 
 data "azuread_service_principals" "pipeline" {
