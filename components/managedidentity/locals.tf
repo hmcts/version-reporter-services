@@ -1,14 +1,12 @@
 locals {
-  mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env
-
+  mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env == "jenkins_prod" ? "prod" : var.env == "jenkins_sbox" ? "sandbox" : var.env
   mi_cft = {
     # DCD-CNP-Sandbox
     sandbox = {
       subscription_id     = "bf308a5c-0624-4334-8ff8-8dca9fd43783"
       cosmosdb_name       = "sandbox-pipeline-metrics"
-      resource_group_name = "pipelinemetrics-database-sandbox"
+      resource_group_name = "pipelinemetrics-database-sandbox"  # Ensure this is the correct resource group
     }
-
     # DCD-CNP-Prod
     prod = {
       subscription_id     = "8999dec3-0104-4a27-94ee-6588559729d1"
@@ -50,7 +48,8 @@ locals {
       subscription_id = "7a4e3bd5-ae3a-4d0c-b441-2188fee3ff1c"
     }
   }
+}
 
-  valid_envs   = ["sandbox", "prod", "jenkins_sbox", "jenkins_prod"]
-  selected_env = contains(local.valid_envs, var.env) ? var.env : "sandbox"
+locals {
+  valid_envs = contains(["sandbox", "prod"], local.mi_environment)
 }
