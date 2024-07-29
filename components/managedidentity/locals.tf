@@ -35,11 +35,9 @@ locals {
       subscription_id = "1baf5470-1c3e-40d3-a6f7-74bfbce4b348"
     }
   }
-}
 
-locals {
   cosmosdb_accounts = {
-    "sbox" = {
+    "sandbox" = {
       name                = "sandbox-pipeline-metrics"
       resource_group_name = "pipelinemetrics-database-sandbox"
     }
