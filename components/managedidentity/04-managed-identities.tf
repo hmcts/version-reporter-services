@@ -65,7 +65,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
   resource_group_name = data.azurerm_cosmosdb_account.pipeline_metrics[0].resource_group_name
   account_name        = data.azurerm_cosmosdb_account.pipeline_metrics[0].name
   # Cosmos DB Built-in Data Contributor
-  role_definition_id = "${data.azurerm_cosmosdb_account.pipeline_metrics.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  role_definition_id  = "${data.azurerm_cosmosdb_account.pipeline_metrics[count.index].id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
   principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id
   scope              = data.azurerm_cosmosdb_account.pipeline_metrics[0].id
 }
@@ -90,7 +90,7 @@ resource "azurerm_role_assignment" "rbac_admin" {
   # Needs to have permission to Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments/write
   role_definition_name = "DocumentDB Account Contributor"
   principal_id         = each.key
-  scope                = data.azurerm_cosmosdb_account.pipeline_metrics.id
+  scope              = data.azurerm_cosmosdb_account.pipeline_metrics[0].id
 }
 
 
