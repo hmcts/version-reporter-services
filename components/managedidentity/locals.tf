@@ -5,7 +5,7 @@ locals {
     sandbox = {
       subscription_id     = "bf308a5c-0624-4334-8ff8-8dca9fd43783"
       cosmosdb_name       = "sandbox-pipeline-metrics"
-      resource_group_name = "pipelinemetrics-database-sandbox"  # Ensure this is the correct resource group
+      resource_group_name = "pipelinemetrics-database-sandbox" # Ensure this is the correct resource group
     }
     # DCD-CNP-Prod
     prod = {
