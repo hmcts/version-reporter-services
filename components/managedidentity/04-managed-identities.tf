@@ -43,8 +43,8 @@ data "azurerm_cosmosdb_account" "version_reporter" {
 
 data "azurerm_cosmosdb_account" "pipeline_metrics" {
   provider            = azurerm.ptl
-  name                = "${local.mi_environment == "sandbox" ? "sandbox-pipeline-metrics" : "pipeline-metrics"}"
-  resource_group_name = "${local.mi_environment == "sandbox" ? "DCD-CFT-Sandbox" : "DCD-CNP-Prod"}"
+  name                = local.mi_environment == "sandbox" ? "sandbox-pipeline-metrics" : "pipeline-metrics"
+  resource_group_name = local.mi_environment == "sandbox" ? "DCD-CFT-Sandbox" : "DCD-CNP-Prod"
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
@@ -84,7 +84,7 @@ data "azuread_service_principals" "pipeline" {
 
 
 resource "azurerm_role_assignment" "rbac_admin" {
-  for_each = { for sp in data.azuread_service_principals.pipeline.service_principals : sp.object_id => sp }
+  for_each = { for sp in data.terraform_remote_state.version_reporting.outputs.pipeline_service_principals : sp.object_id => sp }
   # Needs to have permission to Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments/write
   role_definition_name = "Contributor"
   principal_id         = each.key

@@ -30,3 +30,14 @@ provider "azurerm" {
   skip_provider_registration = "true"
   features {}
 }
+
+
+data "terraform_remote_state" "version_reporting" {
+  backend = "azurerm"
+  config = {
+    resource_group_name  = "azure-control-ptl-rg"
+    storage_account_name = "c1baf547074bfbce4b348sa"
+    container_name       = "subscription-tfstate"
+    key                  = "UK South/cft-platform/version-reporter-services/${var.environment}/versionreporting/terraform.tfstate"
+  }
+}
