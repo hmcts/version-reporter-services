@@ -64,7 +64,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
   # Cosmos DB Built-in Data Contributor
   role_definition_id = "${azurerm_cosmosdb_account.cosmosdb.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
   principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id
-  scope              = azurerm_cosmosdb_account.cosmosdb.id
+  scope              = data.azurerm_cosmosdb_account.pipeline_metrics.id
 }
 
 resource "azurerm_role_assignment" "rbac_admin" {
