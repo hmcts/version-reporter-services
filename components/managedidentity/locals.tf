@@ -1,6 +1,9 @@
 locals {
   mi_environment         = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env
-  jenkins_mi_environment = var.env == "sbox" ? "sandbox" : var.env == "prod" ? "prod" : var.env == "prod" ? "jenkins_prod" : var.env == "sandbox" ? "jenkins_sbox" : var.env
+  jenkins_mi_environment = var.env == "prod" ? "jenkins_prod" : var.env == "sbox" ? "jenkins_sbox" : var.env
+  excluded_envs          = ["ptl", "sbox", "ptlsbox"]
+  valid_env              = !contains(local.excluded_envs, var.env)
+
   mi_cft = {
     # DCD-CNP-Sandbox
     sandbox = {
@@ -49,7 +52,4 @@ locals {
       subscription_id = "7a4e3bd5-ae3a-4d0c-b441-2188fee3ff1c"
     }
   }
-
-  valid_envs = !contains(["ptl", "sbox", "ptlsbox"], local.jenkins_mi_environment
-  )
 }
