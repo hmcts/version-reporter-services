@@ -69,28 +69,6 @@ resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
   scope               = data.azurerm_cosmosdb_account.pipeline_metrics[count.index].id
 }
 
-data "azuread_service_principals" "pipeline" {
-  display_names = [
-    "DTS Bootstrap (sub:dcd-cftapps-sbox)",
-    "DTS Bootstrap (sub:dcd-cftapps-dev)",
-    "DTS Bootstrap (sub:dcd-cftapps-ithc)",
-    "DTS Bootstrap (sub:dcd-cftapps-demo)",
-    "DTS Bootstrap (sub:dcd-cftapps-stg)",
-    "DTS Bootstrap (sub:dcd-cftapps-test)",
-    "DTS Bootstrap (sub:dcd-cftapps-prod)",
-    "DTS Bootstrap (sub:dts-cftsbox-intsvc)",
-    "DTS Bootstrap (sub:dts-cftptl-intsvc)"
-  ]
-}
-
-resource "azurerm_role_assignment" "rbac_admin" {
-  provider             = azurerm.ptl
-  for_each             = length(data.azurerm_cosmosdb_account.pipeline_metrics) > 0 ? { for sp in data.azuread_service_principals.pipeline.service_principals : sp.object_id => sp } : {}
-  role_definition_name = "DocumentDB Account Contributor"
-  principal_id         = each.value.object_id
-  scope                = length(data.azurerm_cosmosdb_account.pipeline_metrics) > 0 ? data.azurerm_cosmosdb_account.pipeline_metrics[0].id : null
-}
-
 # Service connection does not have enough access to grant this via automation
 # The addition of the MI to the group has been completed manually and the code commented here to limit failures
 # The code is being left here for reference and understand if required in future
