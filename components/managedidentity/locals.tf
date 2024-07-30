@@ -1,31 +1,24 @@
 locals {
   mi_environment         = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env
   jenkins_mi_environment = var.env == "prod" ? "jenkins_prod" : var.env == "sbox" ? "jenkins_sbox" : var.env
-  excluded_envs          = ["ptl", "sbox", "ptlsbox"]
-  valid_env              = !contains(local.excluded_envs, var.env)
-
   mi_cft = {
     # DCD-CNP-Sandbox
     sandbox = {
-      subscription_id     = "bf308a5c-0624-4334-8ff8-8dca9fd43783"
       cosmosdb_name       = "sandbox-pipeline-metrics"
       resource_group_name = "pipelinemetrics-database-sandbox"
     }
     # DCD-CNP-Prod
     prod = {
-      subscription_id     = "8999dec3-0104-4a27-94ee-6588559729d1"
       cosmosdb_name       = "pipeline-metrics"
       resource_group_name = "pipelinemetrics-database-prod"
     }
     # Jenkins Sbox
     jenkins_sbox = {
-      subscription_id     = "64b1c6d6-1481-44ad-b620-d8fe26a2c768"
       cosmosdb_name       = "sds-jenkins-pipeline-metrics"
       resource_group_name = "sds-jenkins-ptl-rg"
     }
     # Jenkins Prod
     jenkins_prod = {
-      subscription_id     = "6c4d2513-a873-41b4-afdd-b05a33206631"
       cosmosdb_name       = "sds-jenkins-pipeline-metrics"
       resource_group_name = "sds-jenkins-ptl-rg"
     }

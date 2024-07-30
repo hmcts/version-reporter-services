@@ -53,20 +53,20 @@ resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
 }
 
 data "azurerm_cosmosdb_account" "pipeline_metrics" {
-  count               = local.valid_env ? 1 : 0
+  count               = var.env == "prod" || var.env == "sandbox" ? 1 : 0
   provider            = azurerm.managed_identity_infra_subs
   name                = local.mi_cft[local.jenkins_mi_environment].cosmosdb_name
   resource_group_name = local.mi_cft[local.jenkins_mi_environment].resource_group_name
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
+  count               = var.env == "prod" || var.env == "sandbox" ? 1 : 0
   provider            = azurerm.ptl
-  count               = local.valid_env ? 1 : 0
-  resource_group_name = data.azurerm_cosmosdb_account.pipeline_metrics[0].resource_group_name
-  account_name        = data.azurerm_cosmosdb_account.pipeline_metrics[0].name
-  role_definition_id  = "${data.azurerm_cosmosdb_account.pipeline_metrics[0].id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  resource_group_name = data.azurerm_cosmosdb_account.pipeline_metrics[count.index].resource_group_name
+  account_name        = data.azurerm_cosmosdb_account.pipeline_metrics[count.index].name
+  role_definition_id  = "${data.azurerm_cosmosdb_account.pipeline_metrics[count.index].id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
   principal_id        = azurerm_user_assigned_identity.managed_identity.principal_id
-  scope               = data.azurerm_cosmosdb_account.pipeline_metrics[0].id
+  scope               = data.azurerm_cosmosdb_account.pipeline_metrics[count.index].id
 }
 
 data "azuread_service_principals" "pipeline" {
@@ -84,13 +84,13 @@ data "azuread_service_principals" "pipeline" {
 }
 
 resource "azurerm_role_assignment" "rbac_admin" {
-  provider = azurerm.ptl
-  for_each = local.valid_env && length(data.azurerm_cosmosdb_account.pipeline_metrics) > 0 ? { for sp in data.azuread_service_principals.pipeline.service_principals : sp.object_id => sp } : {}
-  # Needs to have permission to Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments/write
+  provider             = azurerm.ptl
+  for_each             = length(data.azurerm_cosmosdb_account.pipeline_metrics) > 0 ? { for sp in data.azuread_service_principals.pipeline.service_principals : sp.object_id => sp } : {}
   role_definition_name = "DocumentDB Account Contributor"
   principal_id         = each.value.object_id
-  scope                = data.azurerm_cosmosdb_account.pipeline_metrics[0].id
+  scope                = length(data.azurerm_cosmosdb_account.pipeline_metrics) > 0 ? data.azurerm_cosmosdb_account.pipeline_metrics[0].id : null
 }
+
 # Service connection does not have enough access to grant this via automation
 # The addition of the MI to the group has been completed manually and the code commented here to limit failures
 # The code is being left here for reference and understand if required in future
