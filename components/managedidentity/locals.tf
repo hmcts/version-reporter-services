@@ -3,7 +3,7 @@ locals {
   jenkins_mi_environment = var.env == "prod" ? "jenkins_prod" : var.env == "sbox" ? "jenkins_sbox" : var.env
   mi_cft = {
     # DCD-CNP-Sandbox
-    sandbox = {
+    sbox = {
       cosmosdb_name       = "sandbox-pipeline-metrics"
       resource_group_name = "pipelinemetrics-database-sandbox"
     }
