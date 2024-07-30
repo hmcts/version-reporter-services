@@ -1,11 +1,36 @@
 locals {
   mi_environment         = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env
   jenkins_mi_environment = var.env == "prod" ? "jenkins_prod" : var.env == "sbox" ? "jenkins_sbox" : var.env
+  
+  cosmos_account_mapping = {
+    sbox = {
+      name             = "sandbox-pipeline-metrics"
+      resource_group   = "sandbox-resource-group"
+    },
+    prod = {
+      name              = "pipeline-metrics"
+      resource_group    = "prod-resource-group"
+    },
+    jenkins_sbox = {
+      name             = "sds-jenkins-pipeline-metrics-sbox"
+      resource_group   = "jenkins-sbox-resource-group"
+    },
+    jenkins_prod = {
+      name              = "sds-jenkins-pipeline-metrics-prod"
+      resource_group   = "jenkins-prod-resource-group"
+    }
+  }
+
+    mi_cosmos = {
+    monitoring_mi = ["sbox", "prod"]
+    sds_mi        = ["jenkins_sbox", "jenkins_prod"]
+  }
+
+
   mi_cft = {
+    # DCD-CNP-Sandbox
     sandbox = {
-      subscription_id     = "bf308a5c-0624-4334-8ff8-8dca9fd43783"
-      cosmosdb_name       = "sandbox-pipeline-metrics"
-      resource_group_name = "pipelinemetrics-database-sandbox"
+      subscription_id = "bf308a5c-0624-4334-8ff8-8dca9fd43783"
     }
     # DCD-CNP-DEV
     aat = {
@@ -26,9 +51,7 @@ locals {
     }
     # DCD-CNP-Prod
     prod = {
-      subscription_id     = "8999dec3-0104-4a27-94ee-6588559729d1"
-      cosmosdb_name       = "pipeline-metrics"
-      resource_group_name = "pipelinemetrics-database-prod"
+      subscription_id = "8999dec3-0104-4a27-94ee-6588559729d1"
     }
     # DTS-CFTSBOX-INTSVC
     cftsbox-intsvc = {
@@ -38,18 +61,13 @@ locals {
     cftptl-intsvc = {
       subscription_id = "1baf5470-1c3e-40d3-a6f7-74bfbce4b348"
     }
-
     # Jenkins Sbox
     jenkins_sbox = {
       subscription_id     = "64b1c6d6-1481-44ad-b620-d8fe26a2c768"
-      cosmosdb_name       = "sds-jenkins-pipeline-metrics"
-      resource_group_name = "sds-jenkins-ptl-rg"
     }
     # Jenkins Prod
     jenkins_prod = {
       subscription_id     = "6c4d2513-a873-41b4-afdd-b05a33206631"
-      cosmosdb_name       = "sds-jenkins-pipeline-metrics"
-      resource_group_name = "sds-jenkins-ptl-rg"
     }
 
   }

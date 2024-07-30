@@ -45,7 +45,7 @@ data "azurerm_cosmosdb_account" "version_reporter" {
 resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
   provider            = azurerm.ptl
   resource_group_name = data.azurerm_cosmosdb_account.version_reporter.resource_group_name
-  account_name        = data.azurerm_cosmosdb_account.version_reporter.name
+  account_name        = data.azurerm_cosmosdb_account.cosmosdb.name
   # Cosmos DB Built-in Data Contributor
   role_definition_id = "${data.azurerm_cosmosdb_account.version_reporter.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
   principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id
@@ -53,20 +53,30 @@ resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
 }
 
 data "azurerm_cosmosdb_account" "pipeline_metrics" {
-  count               = var.env == "prod" || var.env == "sandbox" ? 1 : 0
+  for_each            = local.cosmos_account_mapping
   provider            = azurerm.managed_identity_infra_subs
-  name                = local.mi_cft[local.jenkins_mi_environment].cosmosdb_name
-  resource_group_name = local.mi_cft[local.jenkins_mi_environment].resource_group_name
+  name                = each.value.name
+  resource_group_name = each.value.resource_group
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
-  count               = var.env == "prod" || var.env == "sandbox" ? 1 : 0
+  for_each            = data.azurerm_cosmosdb_account.pipeline_metrics
   provider            = azurerm.ptl
-  resource_group_name = data.azurerm_cosmosdb_account.pipeline_metrics[count.index].resource_group_name
-  account_name        = data.azurerm_cosmosdb_account.pipeline_metrics[count.index].name
-  role_definition_id  = "${data.azurerm_cosmosdb_account.pipeline_metrics[count.index].id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
-  principal_id        = azurerm_user_assigned_identity.managed_identity.principal_id
-  scope               = data.azurerm_cosmosdb_account.pipeline_metrics[count.index].id
+  resource_group_name = each.value.resource_group_name
+  account_name        = each.value.name
+  role_definition_id  = "${each.value.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  principal_id        = azurerm_user_assigned_identity.monitoring_mi.principal_id
+  scope               = each.value.id
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "sds_mi_assignment" {
+  for_each            = data.azurerm_cosmosdb_account.pipeline_metrics
+  provider            = each.key == "jenkins_prod" ? azurerm.sds_jenkins_pipeline_metrics : azurerm.sds_jenkins_pipeline_metrics_sbox
+  resource_group_name = each.value.resource_group_name
+  account_name        = each.value.name
+  role_definition_id  = "${each.value.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  principal_id        = azurerm_user_assigned_identity.sds_mi.principal_id
+  scope               = each.value.id
 }
 
 # Service connection does not have enough access to grant this via automation
