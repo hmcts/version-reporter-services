@@ -75,4 +75,3 @@ resource "azurerm_role_assignment" "rbac_admin" {
   principal_id         = each.key
   scope                = azurerm_cosmosdb_account.this.id
 }
-
