@@ -53,7 +53,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
 }
 
 data "azurerm_cosmosdb_account" "pipeline_metrics" {
-  count               = local.valid_envs ? 1 : 0
+  count               = local.jenkins_mi_environment == "jenkins_sbox" || local.jenkins_mi_environment == "jenkins_prod" ? 1 : 0
   provider            = azurerm.managed_identity_infra_subs
   name                = local.mi_cft[local.jenkins_mi_environment].cosmosdb_name
   resource_group_name = local.mi_cft[local.jenkins_mi_environment].resource_group_name
@@ -61,7 +61,7 @@ data "azurerm_cosmosdb_account" "pipeline_metrics" {
 
 resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
   provider            = azurerm.ptl
-  count               = local.valid_envs ? 1 : 0
+  count               = local.jenkins_mi_environment == "jenkins_sbox" || local.jenkins_mi_environment == "jenkins_prod" ? 1 : 0
   resource_group_name = data.azurerm_cosmosdb_account.pipeline_metrics[0].resource_group_name
   account_name        = data.azurerm_cosmosdb_account.pipeline_metrics[0].name
   role_definition_id  = "${data.azurerm_cosmosdb_account.pipeline_metrics[0].id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
