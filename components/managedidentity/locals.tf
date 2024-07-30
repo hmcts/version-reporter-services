@@ -1,31 +1,17 @@
 locals {
-  mi_environment         = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env
-  jenkins_mi_environment = var.env == "prod" ? "jenkins_prod" : var.env == "sbox" ? "jenkins_sbox" : var.env
-  
-  cosmos_account_mapping = {
+  mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env
+  cosmosdb_name  = contains(["sandbox", "aat", "preview", "perftest"], local.mi_environment) ? "sandbox-pipeline-metrics" : "cft-platform-version-reporter-rg"
+  cosmosdb_rg    = contains(["prod", "stg"], local.mi_environment) ? "pipelinemetrics-database-prod" : "pipelinemetrics-database-sandbox"
+  cosmosdb_env   = contains(["sbox", "dev", "demo", "ithc", "ptlsbox", "test", "sandbox"], var.env) ? local.cosmos_account.sbox : local.cosmos_account.prod
+
+  cosmos_account = {
     sbox = {
-      name             = "sandbox-pipeline-metrics"
-      resource_group   = "sandbox-resource-group"
+      subscription_id = local.mi_environment.mi_cft.sandbox
     },
     prod = {
-      name              = "pipeline-metrics"
-      resource_group    = "prod-resource-group"
-    },
-    jenkins_sbox = {
-      name             = "sds-jenkins-pipeline-metrics-sbox"
-      resource_group   = "jenkins-sbox-resource-group"
-    },
-    jenkins_prod = {
-      name              = "sds-jenkins-pipeline-metrics-prod"
-      resource_group   = "jenkins-prod-resource-group"
+      subscription_id = local.mi_environment.mi_cft.prod
     }
   }
-
-    mi_cosmos = {
-    monitoring_mi = ["sbox", "prod"]
-    sds_mi        = ["jenkins_sbox", "jenkins_prod"]
-  }
-
 
   mi_cft = {
     # DCD-CNP-Sandbox
@@ -61,14 +47,5 @@ locals {
     cftptl-intsvc = {
       subscription_id = "1baf5470-1c3e-40d3-a6f7-74bfbce4b348"
     }
-    # Jenkins Sbox
-    jenkins_sbox = {
-      subscription_id     = "64b1c6d6-1481-44ad-b620-d8fe26a2c768"
-    }
-    # Jenkins Prod
-    jenkins_prod = {
-      subscription_id     = "6c4d2513-a873-41b4-afdd-b05a33206631"
-    }
-
   }
 }

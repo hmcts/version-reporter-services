@@ -1,3 +1,4 @@
+
 terraform {
   required_providers {
     azurerm = {
@@ -23,30 +24,18 @@ provider "azurerm" {
   features {}
 }
 
+# Used for access to key vault by MIs
 provider "azurerm" {
-  alias                      = "pipeline_metrics"
-  subscription_id            = local.mi_cft["prod"].subscription_id
+  alias                      = "ptl"
+  subscription_id            = "1baf5470-1c3e-40d3-a6f7-74bfbce4b348"
   skip_provider_registration = "true"
   features {}
 }
 
-provider "azurerm" {
-  alias                      = "sandbox_pipeline_metrics"
-  subscription_id            = local.mi_cft["sandbox"].subscription_id
-  skip_provider_registration = "true"
-  features {}
-}
 
 provider "azurerm" {
-  alias                      = "sds_jenkins_pipeline_metrics"
-  subscription_id            = local.mi_cft["jenkins_prod"].subscription_id
-  skip_provider_registration = "true"
-  features {}
-}
-
-provider "azurerm" {
-  alias                      = "sds_jenkins_pipeline_metrics_sbox"
-  subscription_id            = local.mi_cft["jenkins_sbox"].subscription_id
+  alias                      = "pipeline-metrics"
+  subscription_id            = local.cosmos_account[local.mi_environment].subscription_id
   skip_provider_registration = "true"
   features {}
 }
