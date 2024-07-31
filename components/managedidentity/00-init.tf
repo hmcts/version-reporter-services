@@ -35,7 +35,7 @@ provider "azurerm" {
 
 provider "azurerm" {
   alias                      = "pipeline-metrics"
-  subscription_id            = local.cosmos_account[local.mi_environment].subscription_id
+  subscription_id            = local.cosmos_account[local.cosmosdb_env].subscription_id
   skip_provider_registration = "true"
   features {}
 }

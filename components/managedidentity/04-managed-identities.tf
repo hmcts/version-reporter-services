@@ -53,7 +53,7 @@ resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
 }
 
 data "azurerm_cosmosdb_account" "pipeline_metrics" {
-  provider            = azurerm.ptl
+  provider            = azurerm.pipeline-metrics
   name                = local.cosmosdb_name
   resource_group_name = local.cosmosdb_rg
 }
