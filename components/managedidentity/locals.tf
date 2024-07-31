@@ -1,8 +1,8 @@
 locals {
   mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env
-  cosmosdb_name  = contains(["sbox", "dev", "demo", "ithc", "ptlsbox", "test"], var.env) ? "sandbox-pipeline-metrics" : "pipeline-metrics"
-  cosmosdb_rg    = contains(["sbox", "dev", "demo", "ithc", "ptlsbox", "test"], var.env) ? "pipelinemetrics-database-sandbox" : "pipelinemetrics-database-prod"
-  cosmosdb_env   = contains(["sbox", "dev", "demo", "ithc", "ptlsbox", "test"], var.env) ? "sandbox" : "prod"
+  cosmosdb_name  = var.sbox_metrics_cosmosdb ? "sandbox-pipeline-metrics" : "pipeline-metrics"
+  cosmosdb_rg    = var.sbox_metrics_cosmosdb ? "pipelinemetrics-database-sandbox" : "pipelinemetrics-database-prod"
+  cosmosdb_env   = var.sbox_metrics_cosmosdb ? "sandbox" : "prod"
 
   cosmos_account = {
     sandbox = {
@@ -12,6 +12,7 @@ locals {
       subscription_id = local.mi_cft.prod.subscription_id
     }
   }
+
 
   mi_cft = {
     # DCD-CNP-Sandbox

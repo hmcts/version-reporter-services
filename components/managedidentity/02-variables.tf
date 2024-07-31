@@ -31,3 +31,9 @@ variable "service_name" {
   type    = string
   default = "version-reporter"
 }
+
+variable "sbox_metrics_cosmosdb" {
+  description = "Flag to determine if the sandbox CosmosDB should be used"
+  type        = bool
+  default     = false
+}
