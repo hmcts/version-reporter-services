@@ -41,7 +41,6 @@ data "azurerm_cosmosdb_account" "version_reporter" {
   resource_group_name = "cft-platform-version-reporter-ptl-rg"
 }
 
-
 resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
   provider            = azurerm.ptl
   resource_group_name = data.azurerm_cosmosdb_account.version_reporter.resource_group_name
