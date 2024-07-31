@@ -1,3 +1,4 @@
+
 terraform {
   required_providers {
     azurerm = {
@@ -27,6 +28,14 @@ provider "azurerm" {
 provider "azurerm" {
   alias                      = "ptl"
   subscription_id            = "1baf5470-1c3e-40d3-a6f7-74bfbce4b348"
+  skip_provider_registration = "true"
+  features {}
+}
+
+
+provider "azurerm" {
+  alias                      = "pipeline-metrics"
+  subscription_id            = local.cosmos_account[local.cosmosdb_env].subscription_id
   skip_provider_registration = "true"
   features {}
 }

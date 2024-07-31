@@ -51,6 +51,21 @@ resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
   scope              = data.azurerm_cosmosdb_account.version_reporter.id
 }
 
+data "azurerm_cosmosdb_account" "pipeline_metrics" {
+  provider            = azurerm.pipeline-metrics
+  name                = local.cosmosdb_name
+  resource_group_name = local.cosmosdb_rg
+}
+
+resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
+  provider            = azurerm.pipeline-metrics
+  resource_group_name = data.azurerm_cosmosdb_account.pipeline_metrics.resource_group_name
+  account_name        = data.azurerm_cosmosdb_account.pipeline_metrics.name
+  role_definition_id  = "${data.azurerm_cosmosdb_account.pipeline_metrics.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  principal_id        = azurerm_user_assigned_identity.managed_identity.principal_id
+  scope               = data.azurerm_cosmosdb_account.pipeline_metrics.id
+}
+
 # Service connection does not have enough access to grant this via automation
 # The addition of the MI to the group has been completed manually and the code commented here to limit failures
 # The code is being left here for reference and understand if required in future
