@@ -1,5 +1,7 @@
 FROM python:3.12-slim
 
+RUN apk update && apk add git
+
 WORKDIR /app
 
 ENV VIRTUAL_ENV=/opt/venv
@@ -16,9 +18,8 @@ ENV COSMOS_KEY="" \
     COSMOS_DB_NAME="" \
     COSMOS_DB_CONTAINER="" \
     COSMOS_DB_URI="" \
-    AZURE_TENANT_ID="" \
-    AZURE_CLIENT_ID="" \
-    AZURE_CLIENT_SECRET="" \
+    SECRET_PATH="" \
+    VAULT_NAME=""
 
 RUN chmod +x /app/set_env.sh
 
