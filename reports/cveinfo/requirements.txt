@@ -1,0 +1,5 @@
+pytest
+GitPython
+azure-identity
+azure-cosmos
+humanfriendly
