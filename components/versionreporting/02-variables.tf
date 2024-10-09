@@ -44,6 +44,7 @@ variable "containers_partitions" {
     docsoutdated = "/docTitle"
     aksversions  = "/clusterName"
     platopsapps  = "/appName"
+    cveinfo      = "/dateReserved"
   }
 }
 
