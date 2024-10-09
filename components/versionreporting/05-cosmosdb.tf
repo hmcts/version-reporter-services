@@ -38,7 +38,7 @@ resource "azurerm_cosmosdb_sql_container" "this" {
   resource_group_name   = azurerm_resource_group.this.name
   account_name          = azurerm_cosmosdb_account.this.name
   database_name         = azurerm_cosmosdb_sql_database.this.name
-  partition_key_paths = [each.value]
+  partition_key_paths   = [each.value]
   partition_key_version = 2
 
   autoscale_settings {
