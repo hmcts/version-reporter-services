@@ -2,20 +2,22 @@ import asyncio
 import json
 import os
 import pathlib
+import shutil
 import time
 import uuid
-import shutil
-
-from git import Repo
 from pathlib import Path
-from azure.identity import DefaultAzureCredential
+
+from azure.cosmos import exceptions
 from azure.cosmos.aio import CosmosClient
+from azure.identity import DefaultAzureCredential
+from git import Repo
 from humanfriendly import format_timespan
 
 MAX_BATCH_SIZE = 500
 DB_URL = os.environ.get("COSMOS_DB_URI", None)
 DATABASE_NAME = os.environ.get("COSMOS_DB_NAME", "reports")
 CONTAINER_NAME = os.environ.get("COSMOS_DB_CONTAINER", "cveinfo")
+
 
 # Utility used to cherry pick cve object
 def extract_cve_data(cve_data):
@@ -26,12 +28,19 @@ def extract_cve_data(cve_data):
     data['dataVersion'] = cve_data.get('dataVersion')
     data['assignerShortName'] = cve_data.get('cveMetadata').get('assignerShortName')
     data['datePublished'] = cve_data.get('cveMetadata').get('datePublished')
-    data['dateReserved'] = cve_data.get('cveMetadata').get('dateReserved') # used as partition key
+    data['dateReserved'] = cve_data.get('cveMetadata').get('dateReserved')  # used as partition key
     data['dateUpdated'] = cve_data.get('cveMetadata').get('dateUpdated')
     data['descriptions'] = cve_data.get('containers').get('cna').get('descriptions')
     data['affected'] = cve_data.get('containers').get('cna').get('affected')
     data['metrics'] = cve_data.get('containers').get('cna').get('metrics')
     return data
+
+
+async def create_all_the_items(container, batch, resource_id):
+    await asyncio.wait(
+        [asyncio.create_task(container.create_item(item)) for item in batch]
+    )
+    print(f"[{resource_id}][DB] Batch of {len(batch)} items done!")
 
 
 async def main():
@@ -65,29 +74,41 @@ async def main():
         # Setup Azure credential
         credential = DefaultAzureCredential()
 
-        # Setup cosmosdb client for asynchronous write
-        async with CosmosClient(DB_URL, credential=credential) as client:
-            db = client.get_database_client(DATABASE_NAME)
-            container = db.get_container_client(CONTAINER_NAME)
+        try:
+            # Setup cosmosdb client for asynchronous write
+            async with CosmosClient(DB_URL, credential=credential) as client:
+                db = client.get_database_client(DATABASE_NAME)
+                container = db.get_container_client(CONTAINER_NAME)
 
-            for file in files:
-                with open(file, 'r') as cve:
-                    content = json.load(cve)
-                    # Pick a few properties out, we don't need the whole lot
-                    # Add to a batch list of MAX_BATCH_SIZE
-                    data = extract_cve_data(content)
-                    batch.append(data)
-                    batch_size += 1
+                for file in files:
+                    with open(file, 'r') as cve:
+                        content = json.load(cve)
+                        # Pick a few properties out, we don't need the whole lot
+                        # Add to a batch list of MAX_BATCH_SIZE
+                        data = extract_cve_data(content)
+                        batch.append(data)
+                        batch_size += 1
 
-                    # When batch is 'full' save to db and resent counters
-                    # Sending in batches reduces payload volume of writes to db
-                    if batch_size == MAX_BATCH_SIZE:
-                        print(f"Reached batch of {batch_size}")
-                        await asyncio.wait([asyncio.create_task(container.create_item(item) for item in batch)])
-                        print(f"Saved batch of {batch_size}")
-                        batch_size = 0
-                        batch = []
-                        print(f"Reset batch to {len(batch)}")
+                        # When batch is 'full' save to db and resent counters
+                        # Sending in batches reduces payload volume of writes to db
+                        if batch_size == MAX_BATCH_SIZE:
+                            print(f"Reached batch of {batch_size}")
+                            await asyncio.wait(
+                                [asyncio.create_task(container.create_item(item) for item in batch)]
+                            )
+                            print(f"Saved batch of {batch_size}")
+                            batch_size = 0
+                            batch = []
+                            print(f"Reset batch to {len(batch)}")
+
+        except exceptions.CosmosResourceNotFoundError as e:
+            print(f"Error adding batch: {e}")
+        except exceptions.CosmosResourceExistsError as e:
+            print(f"Error adding batch: {e}")
+        except exceptions.CosmosHttpResponseError as e:
+            print(f"Error adding batch: {e}")
+        except exceptions.CosmosClientTimeoutError as e:
+            print(f"Error adding batch: {e}")
 
     else:
         print(f"The cve repository ar {cve_dir} does not exit")

@@ -3,3 +3,5 @@ GitPython
 azure-identity
 azure-cosmos
 humanfriendly
+asyncio
+aiohttp
