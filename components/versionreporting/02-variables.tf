@@ -45,6 +45,7 @@ variable "containers_partitions" {
     aksversions  = "/clusterName"
     platopsapps  = "/appName"
     cveinfo      = "/dateReserved"
+    netflow      = "/netflow"
   }
 }
 
