@@ -16,6 +16,7 @@ from humanfriendly import format_timespan
 MAX_BATCH_SIZE = 500
 DB_URL = os.environ.get("COSMOS_DB_URI", None)
 DATABASE_NAME = os.environ.get("COSMOS_DB_NAME", "reports")
+KEY = os.environ.get("COSMOS_KEY")
 CONTAINER_NAME = os.environ.get("COSMOS_DB_CONTAINER", "cveinfo")
 
 
@@ -76,7 +77,7 @@ async def main():
 
         try:
             # Setup cosmosdb client for asynchronous write
-            async with CosmosClient(DB_URL, credential=credential) as client:
+            async with CosmosClient(url=DB_URL, credential=KEY) as client:
                 db = client.get_database_client(DATABASE_NAME)
                 container = db.get_container_client(CONTAINER_NAME)
 
