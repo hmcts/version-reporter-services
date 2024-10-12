@@ -1,7 +1,7 @@
 pytest
 GitPython
 azure-identity
-azure-cosmos
-humanfriendly
 asyncio
 aiohttp
+azure-cosmos
+humanfriendly
