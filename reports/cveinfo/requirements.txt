@@ -5,3 +5,4 @@ asyncio
 aiohttp
 azure-cosmos
 humanfriendly
+aiofiles
