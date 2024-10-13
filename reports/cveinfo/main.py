@@ -13,7 +13,7 @@ from humanfriendly import format_timespan
 
 from save_to_db import add_batch
 
-MAX_BATCH_SIZE = 1000
+MAX_BATCH_SIZE = 500
 
 
 # Utility used to cheery pick cve object

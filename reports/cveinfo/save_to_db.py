@@ -35,8 +35,23 @@ async def add_batch(batch):
         print(f"Error adding batch: Error: {e}")
 
 
+def create_or_update(container, item):
+    cve_id = item.get('cveId')
+    document = container.query_items(
+        query='SELECT * FROM c WHERE c.cveId = @cveId',
+        parameters=[dict(name='@cveId', value=cve_id)],
+        enable_cross_partition_query=True)
+
+    if document:
+        item.pop('id', None)
+        document.update(item)
+        container.upsert_item(body=document)
+    else:
+        container.upsert_item(body=document)
+
+
 async def create_all_the_items(container, batch):
     await asyncio.wait(
-        [asyncio.create_task(container.create_item(item)) for item in batch]
+        [asyncio.create_task(create_or_update(container, item)) for item in batch]
     )
     print(f"Batch of {len(batch)} items done!")
