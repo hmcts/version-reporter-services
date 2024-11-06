@@ -128,7 +128,7 @@ class Graph:
     def add_timestamp(result, start_time):
         runtime = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
         date = runtime.strftime("%Y-%m-%d")
-        hour = runtime.strftime("%H")
+        hour_minute = runtime.strftime("%H%M")
         for row in result:
             row['date'] = date
-            row['time'] = hour
+            row['time'] = hour_minute
