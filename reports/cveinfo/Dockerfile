@@ -19,7 +19,8 @@ ENV COSMOS_KEY="" \
     COSMOS_DB_CONTAINER="" \
     COSMOS_DB_URI="" \
     SECRET_PATH="" \
-    VAULT_NAME=""
+    VAULT_NAME="" \
+    MAX_BATCH_SIZE=1000
 
 RUN chmod +x /app/set_env.sh
 
