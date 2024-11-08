@@ -1,6 +1,6 @@
 FROM python:3.13-slim
 
-RUN apt-get update && apt-get add git
+RUN apt-get update && apt-get install git
 
 WORKDIR /app
 
