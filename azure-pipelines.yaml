@@ -81,6 +81,7 @@ parameters:
       - "renovate"
       - "hourlyusage"
       - "platopsapps"
+      - "cveinfo"
       - "All"
 
   - name: action
@@ -139,6 +140,8 @@ parameters:
       - name: "hourlyusage"
         type: "python"
       - name: "platopsapps"
+        type: "python"
+      - name: "cveinfo"
         type: "python"
 
 stages:
