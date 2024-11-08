@@ -1,6 +1,6 @@
 FROM python:3.13-slim
 
-RUN apk update && apk add git
+RUN apt-get update && apt-get add git
 
 WORKDIR /app
 
