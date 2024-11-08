@@ -21,6 +21,7 @@ def extract_cve_data(cve_data):
     data = dict()
     data['id'] = f'{uuid.uuid4()}'
     data['cveId'] = cve_data.get('cveMetadata').get('cveId')
+    data['state'] = cve_data.get('cveMetadata').get('state')
     data['dataType'] = cve_data.get('dataType')
     data['dataVersion'] = cve_data.get('dataVersion')
     data['assignerShortName'] = cve_data.get('cveMetadata').get('assignerShortName')
@@ -54,11 +55,14 @@ async def load_cve():
 
     # CVE project repo. Publicly accessible for use
     repo_url = "https://github.com/CVEProject/cvelistV5.git"
-    print(f"Cloning repo: {repo_url}")
+    print(f'Cloning repo: {repo_url}')
 
     # Clone the cve repo to local_dir
-    repo = Repo.clone_from(repo_url, local_dir)
-    print(f"Successfully cloned repo: {repo_url}")
+    envs = dict()
+    envs['sb'] = "--single-branch"
+    repo = Repo.clone_from(repo_url, local_dir, env=envs)
+    if repo:
+        print(f'Successfully cloned repo: {repo_url}')
 
     # Get path to cve files
     cve_dir = os.path.join(current_working_directory, "cverepo", "cves")
