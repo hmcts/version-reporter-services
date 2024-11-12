@@ -4,6 +4,12 @@ RUN apt-get -y update && apt-get -y install git
 
 WORKDIR /app
 
+RUN chmod 777 /app
+RUN chown -R admin:admin /app
+
+RUN chmod 755 /app
+USER admin
+
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
