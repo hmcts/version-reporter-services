@@ -1,24 +1,21 @@
-FROM python:3.13-slim
+FROM alpine/k8s:1.31.2
 
-RUN apt-get -y update && apt-get -y install git
+ENV PIP_BREAK_SYSTEM_PACKAGES 1
+
+RUN apk update && apk add git github-cli bash python3 py3-pip
+RUN pip3 install azure-cosmos pytz
 
 WORKDIR /app
 
-RUN chmod 777 /app
-RUN chown -R admin:admin /app
-
 RUN chmod 755 /app
-USER admin
 
-ENV VIRTUAL_ENV=/opt/venv
-RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+COPY requirements.txt ./
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Install dependencies:
 COPY . .
-RUN pip install -r requirements.txt
 
-# Run the application:
+# VAULT NAME is used when sourcing secrets from volume mounts
+# SECRET PATH is used if a custom file path is used for those mounts (default: /mnt/secrets/)
 
 ENV COSMOS_KEY="" \
     COSMOS_DB_NAME="" \
@@ -27,6 +24,7 @@ ENV COSMOS_KEY="" \
     SECRET_PATH="" \
     VAULT_NAME="" \
     MAX_BATCH_SIZE=1000
+
 
 RUN chmod +x /app/set_env.sh
 
