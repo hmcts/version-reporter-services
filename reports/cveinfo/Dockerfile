@@ -1,12 +1,13 @@
-FROM alpine/k8s:1.31.2
+FROM python:3
 
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
 
-RUN apk update && apk add git github-cli bash python3 py3-pip
-RUN pip3 install azure-cosmos pytz
+RUN apt-get update && apt-get install git
+RUN useradd cveinfo
 
 WORKDIR /app
 
+RUN chown -R cveinfo:cveinfo /app
 RUN chmod 755 /app
 
 COPY requirements.txt ./
@@ -25,7 +26,8 @@ ENV COSMOS_KEY="" \
     VAULT_NAME="" \
     MAX_BATCH_SIZE=1000
 
-
 RUN chmod +x /app/set_env.sh
+
+USER cveinfo
 
 CMD ["/app/entrypoint.sh"]
