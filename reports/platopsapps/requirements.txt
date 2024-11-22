@@ -1,6 +1,6 @@
 pytz==2024.2
 azure-mgmt-core==1.5.0
-azure-cosmos==4.8.0
+azure-cosmos==4.9.0
 azure-identity==1.19.0
 azure-mgmt-resource==23.2.0
 azure-mgmt-containerservice==33.0.0
