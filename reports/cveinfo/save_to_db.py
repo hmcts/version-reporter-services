@@ -30,7 +30,7 @@ async def add_batch(batch):
 
             concurrent_batch_time = time.time() - timer
             print(f"Time taken: {concurrent_batch_time:.2f} sec")
-            time.sleep(2.5)
+            time.sleep(1)
     except exceptions.CosmosResourceNotFoundError as e:
         print(f"Error adding batch: Error: {e}")
     except exceptions.CosmosResourceExistsError as e:
@@ -46,3 +46,7 @@ async def create_all_the_items(container, batch):
         [asyncio.create_task(container.create_item(item)) for item in batch]
     )
     print(f"Batch of {len(batch)} items done!")
+
+async def remove_old_batch(job_time):
+  print("Removing old doc")
+  # call custom function on cosmosdb
