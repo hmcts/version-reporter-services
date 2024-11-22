@@ -17,7 +17,7 @@ MAX_BATCH_SIZE = os.getenv("MAX_BATCH_SIZE", 1000)
 
 
 # Utility used to cheery pick cve object
-def extract_cve_data(cve_data):
+def extract_cve_data(job_time, cve_data):
     data = dict()
     data['id'] = f'{uuid.uuid4()}'
     data['cveId'] = cve_data.get('cveMetadata').get('cveId')
@@ -31,12 +31,18 @@ def extract_cve_data(cve_data):
     data['descriptions'] = cve_data.get('containers').get('cna').get('descriptions')
     data['affected'] = cve_data.get('containers').get('cna').get('affected')
     data['metrics'] = cve_data.get('containers').get('cna').get('metrics')
+    data['runTime'] = job_time
     return data
 
 
 def get_year():
     today = datetime.datetime.now()
     return today.strftime("%Y")
+
+
+def get_job_run_time():
+    today = datetime.datetime.now()
+    return today.strftime("%H:%M:%S")
 
 
 def filter_by_year(cve_filename):
@@ -46,7 +52,7 @@ def filter_by_year(cve_filename):
     return False
 
 
-async def load_cve():
+async def load_cve(job_time):
     start_time = time.time()
 
     # get the current working directory
@@ -73,17 +79,11 @@ async def load_cve():
             batch = []
 
             # Recursively walk through all json files in cve file name format
-            files = [f for f in pathlib.Path(cve_dir).glob("**/CVE-*.json")]
-            print(f"Total of {len(files)} cve files")
-
-            # files = list(filter(filter_by_year, files))
-            # print(f"Total of {len(files)} cve files after filter")
-
-            for file in files:
+            for file in pathlib.Path(cve_dir).glob("**/CVE-*.json"):
                 with open(file, mode='r') as cve:
                     # Pick a few properties out, we don't need the whole lot
                     data = json.load(cve)
-                    data = extract_cve_data(data)
+                    data = extract_cve_data(job_time, data)
 
                     # Add to a batch
                     batch.append(data)
@@ -101,6 +101,9 @@ async def load_cve():
                 await add_batch(batch)
                 # Free allocated space for batch
                 batch = []
+
+            # TODO: Clean old data
+            # await remove_old_batch(job_time)
         else:
             print(f"The cve repository ar {cve_dir} does not exit")
     finally:
@@ -114,7 +117,8 @@ async def load_cve():
 
 
 async def main():
-    await load_cve()
+    job_time = get_job_run_time()
+    await load_cve(job_time)
 
 
 if __name__ == "__main__":
