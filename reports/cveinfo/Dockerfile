@@ -26,7 +26,7 @@ ENV COSMOS_KEY="" \
     VAULT_NAME="" \
     MAX_BATCH_SIZE=1000
 
-RUN chmod +x /app/set_env.sh
+# RUN chmod +x /app/set_env.sh
 
 USER cveinfo
 
