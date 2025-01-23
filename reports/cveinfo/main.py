@@ -118,6 +118,7 @@ async def load_cve(job_time):
 
 async def main():
     job_time = get_job_run_time()
+    print(f"Starting job at {job_time}")
     await load_cve(job_time)
 
 
