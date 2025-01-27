@@ -2,7 +2,7 @@ FROM python:3
 
 ENV PIP_BREAK_SYSTEM_PACKAGES 1
 
-RUN apt-get update && apt-get install git
+RUN apt-get update && apt-get install -y git
 RUN useradd cveinfo
 
 WORKDIR /app
