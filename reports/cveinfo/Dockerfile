@@ -24,8 +24,6 @@ ENV COSMOS_KEY="" \
     COSMOS_DB_URI="" \
     MAX_BATCH_SIZE=1000
 
-# RUN chmod +x /app/set_env.sh
-
 USER cveinfo
 
 CMD ["/app/entrypoint.sh"]
