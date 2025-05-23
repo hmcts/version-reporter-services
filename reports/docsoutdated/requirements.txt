@@ -2,6 +2,6 @@ pytz
 pytest
 beautifulsoup4
 azure-cosmos>=4.4.0
-azure-identity==1.21.0
+azure-identity==1.23.0
 requests
 datefinder
