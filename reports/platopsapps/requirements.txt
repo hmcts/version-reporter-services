@@ -3,7 +3,7 @@ azure-mgmt-core==1.5.0
 azure-cosmos==4.9.0
 azure-identity==1.21.0
 azure-mgmt-resource==23.3.0
-azure-mgmt-containerservice==34.2.0
+azure-mgmt-containerservice==37.0.0
 kubernetes==32.0.1
 bs4==0.0.2
 lxml==5.4.0
