@@ -30,7 +30,8 @@ async def add_batch(batch):
 
             concurrent_batch_time = time.time() - timer
             print(f"Time taken: {concurrent_batch_time:.2f} sec")
-            time.sleep(1)
+            # Use asyncio.sleep instead of time.sleep in async context
+            await asyncio.sleep(1)
     except exceptions.CosmosResourceNotFoundError as e:
         print(f"Error adding batch: Error: {e}")
     except exceptions.CosmosResourceExistsError as e:
@@ -39,6 +40,8 @@ async def add_batch(batch):
         print(f"Error adding batch: Error: {e}")
     except exceptions.CosmosClientTimeoutError as e:
         print(f"Error adding batch: Error: {e}")
+    except Exception as e:
+        print(f"Unexpected error adding batch: {e}")
 
 
 async def create_all_the_items(container, batch):
