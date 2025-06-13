@@ -15,7 +15,7 @@ from save_to_db import add_batch
 
 import logging
 
-MAX_BATCH_SIZE = int(os.getenv("MAX_BATCH_SIZE", 500))
+MAX_BATCH_SIZE = int(os.getenv("MAX_BATCH_SIZE", 1000))
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
