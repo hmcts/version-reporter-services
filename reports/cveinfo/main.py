@@ -13,25 +13,46 @@ from humanfriendly import format_timespan
 
 from save_to_db import add_batch
 
-MAX_BATCH_SIZE = os.getenv("MAX_BATCH_SIZE", 1000)
+import logging
+
+MAX_BATCH_SIZE = int(os.getenv("MAX_BATCH_SIZE", 500))
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
+# Reduce Azure SDK logging noise
+logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.ERROR)
+logging.getLogger("azure.cosmos").setLevel(logging.ERROR)
 
 
 # Utility used to cheery pick cve object
 def extract_cve_data(job_time, cve_data):
-    data = dict()
-    data['id'] = f'{uuid.uuid4()}'
-    data['cveId'] = cve_data.get('cveMetadata').get('cveId')
-    data['state'] = cve_data.get('cveMetadata').get('state')
-    data['dataType'] = cve_data.get('dataType')
-    data['dataVersion'] = cve_data.get('dataVersion')
-    data['assignerShortName'] = cve_data.get('cveMetadata').get('assignerShortName')
-    data['datePublished'] = cve_data.get('cveMetadata').get('datePublished')
-    data['dateReserved'] = cve_data.get('cveMetadata').get('dateReserved')  # used as partition key
-    data['dateUpdated'] = cve_data.get('cveMetadata').get('dateUpdated')
-    data['descriptions'] = cve_data.get('containers').get('cna').get('descriptions')
-    data['affected'] = cve_data.get('containers').get('cna').get('affected')
-    data['metrics'] = cve_data.get('containers').get('cna').get('metrics')
-    data['runTime'] = job_time
+    """
+    Safely extract relevant fields from a CVE JSON object for database insertion.
+    Handles missing keys gracefully.
+    """
+    def get_nested(d, *keys, default=None):
+        for key in keys:
+            if isinstance(d, dict):
+                d = d.get(key, default)
+            else:
+                return default
+        return d
+
+    data = {
+        'id': str(uuid.uuid4()),
+        'cveId': get_nested(cve_data, 'cveMetadata', 'cveId'),
+        'state': get_nested(cve_data, 'cveMetadata', 'state'),
+        'dataType': cve_data.get('dataType'),
+        'dataVersion': cve_data.get('dataVersion'),
+        'assignerShortName': get_nested(cve_data, 'cveMetadata', 'assignerShortName'),
+        'datePublished': get_nested(cve_data, 'cveMetadata', 'datePublished'),
+        'dateReserved': get_nested(cve_data, 'cveMetadata', 'dateReserved'),
+        'dateUpdated': get_nested(cve_data, 'cveMetadata', 'dateUpdated'),
+        'descriptions': get_nested(cve_data, 'containers', 'cna', 'descriptions'),
+        'affected': get_nested(cve_data, 'containers', 'cna', 'affected'),
+        'metrics': get_nested(cve_data, 'containers', 'cna', 'metrics'),
+        'runTime': job_time
+    }
     return data
 
 
@@ -52,6 +73,18 @@ def filter_by_year(cve_filename):
     return False
 
 
+def iter_cve_json_files(path):
+    """
+    Recursively yield all files matching 'CVE-*.json' under the given path.
+    """
+    path = pathlib.Path(path)
+    for entry in path.iterdir():
+        if entry.is_file() and entry.name.startswith("CVE-") and entry.suffix == ".json":
+            yield entry
+        elif entry.is_dir():
+            yield from iter_cve_json_files(entry)
+
+
 async def load_cve(job_time):
     start_time = time.time()
 
@@ -61,64 +94,71 @@ async def load_cve(job_time):
 
     # CVE project repo. Publicly accessible for use
     repo_url = "https://github.com/CVEProject/cvelistV5.git"
-    print(f'Cloning repo: {repo_url}')
+    logger.info(f'Cloning repo: {repo_url}')
 
-    # Clone the cve repo to local_dir
+    # Clone the cve repo to local_dir (shallow clone, only latest commit)
     envs = dict()
     envs['sb'] = "--single-branch"
-    repo = Repo.clone_from(repo_url, local_dir, env=envs)
+    repo = Repo.clone_from(repo_url, local_dir, env=envs, depth=1)
     if repo:
-        print(f'Successfully cloned repo: {repo_url}')
+        logger.info(f'Successfully cloned repo: {repo_url}')
 
     # Get path to cve files
     cve_dir = os.path.join(current_working_directory, "cverepo", "cves")
     try:
         # Sanity check there is a cves folder
         if os.path.isdir(cve_dir):
-            print(f"The cve repository at {cve_dir} does exit")
+            logger.info(f"The cve repository at {cve_dir} exists")
             batch = []
-
-            # Recursively walk through all json files in cve file name format
-            for file in pathlib.Path(cve_dir).glob("**/CVE-*.json"):
-                with open(file, mode='r') as cve:
-                    # Pick a few properties out, we don't need the whole lot
-                    data = json.load(cve)
-                    data = extract_cve_data(job_time, data)
-
-                    # Add to a batch
-                    batch.append(data)
-
-                    # When batch is 'full' save to db and reset counter
-                    # Sending in batches reduces payload volume of writes to db
-                    if len(batch) == MAX_BATCH_SIZE:
-                        await add_batch(batch)
-                        print(f"Saved batch of {MAX_BATCH_SIZE}")
-                        batch = []
-
-            # Save remaining batched items, at some point it would be less than MAX_BATCH_SIZE
-            if len(batch) > 0:
-                print(f"Saved remaining batch of {len(batch)}")
-                await add_batch(batch)
-                # Free allocated space for batch
-                batch = []
-
+            total_files = 0
+            # Process one subfolder at a time to reduce memory usage
+            for year_folder in sorted(os.listdir(cve_dir)):
+                year_path = os.path.join(cve_dir, year_folder)
+                if not os.path.isdir(year_path):
+                    continue
+                logger.info(f"Processing folder: {year_path}")
+                folder_file_count = 0
+                for file in iter_cve_json_files(year_path):
+                    with open(file, mode='r') as cve:
+                        data = json.load(cve)
+                        data = extract_cve_data(job_time, data)
+                        batch.append(data)
+                        folder_file_count += 1
+                        total_files += 1
+                        if len(batch) == MAX_BATCH_SIZE:
+                            logger.info(f"Saving batch of {MAX_BATCH_SIZE} items from folder {year_folder}")
+                            await save_and_reset_batch(batch)
+                if batch:
+                    logger.info(f"Saving batch of {len(batch)} items after folder {year_folder}")
+                    await save_and_reset_batch(batch)
+                logger.info(f"Finished processing folder: {year_path} ({folder_file_count} files)")
+            if batch:
+                logger.info(f"Saving remaining batch of {len(batch)} items after all folders")
+                await save_and_reset_batch(batch, is_final=True)
+            logger.info(f"Total files processed: {total_files}")
             # TODO: Clean old data
             # await remove_old_batch(job_time)
         else:
-            print(f"The cve repository ar {cve_dir} does not exit")
+            logger.error(f"The cve repository at {cve_dir} does not exist")
     finally:
         # Removing directory, not massively relevant as job will exist, just due diligence
         shutil.rmtree(local_dir, ignore_errors=True)
-        print(f"Removed the cve repository")
+        logger.info(f"Removed the cve repository")
 
     # Log how log it took
     elapsed_time = time.time() - start_time
-    print(f'Elapsed time: {format_timespan(elapsed_time)}')
+    logger.info(f'Elapsed time: {format_timespan(elapsed_time)}')
+
+
+async def save_and_reset_batch(batch, is_final=False):
+    await add_batch(batch)
+    # Logging is now handled in load_cve
+    batch.clear()
 
 
 async def main():
     job_time = get_job_run_time()
-    print(f"Starting job at {job_time}")
+    logger.info(f"Starting job at {job_time}")
     await load_cve(job_time)
 
 
