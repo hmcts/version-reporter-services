@@ -4,6 +4,6 @@ azure-cosmos==4.9.0
 azure-identity==1.23.0
 azure-mgmt-resource==23.4.0
 azure-mgmt-containerservice==34.2.0
-kubernetes==32.0.1
+kubernetes==33.1.0
 bs4==0.0.2
 lxml==5.4.0
