@@ -15,10 +15,13 @@ from save_to_db import add_batch
 
 import logging
 
-MAX_BATCH_SIZE = int(os.getenv("MAX_BATCH_SIZE", 200))
+MAX_BATCH_SIZE = int(os.getenv("MAX_BATCH_SIZE", 500))
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger(__name__)
+# Reduce Azure SDK logging noise
+logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.ERROR)
+logging.getLogger("azure.cosmos").setLevel(logging.ERROR)
 
 
 # Utility used to cheery pick cve object
@@ -70,6 +73,18 @@ def filter_by_year(cve_filename):
     return False
 
 
+def iter_cve_json_files(path):
+    """
+    Recursively yield all files matching 'CVE-*.json' under the given path.
+    """
+    path = pathlib.Path(path)
+    for entry in path.iterdir():
+        if entry.is_file() and entry.name.startswith("CVE-") and entry.suffix == ".json":
+            yield entry
+        elif entry.is_dir():
+            yield from iter_cve_json_files(entry)
+
+
 async def load_cve(job_time):
     start_time = time.time()
 
@@ -81,10 +96,10 @@ async def load_cve(job_time):
     repo_url = "https://github.com/CVEProject/cvelistV5.git"
     logger.info(f'Cloning repo: {repo_url}')
 
-    # Clone the cve repo to local_dir
+    # Clone the cve repo to local_dir (shallow clone, only latest commit)
     envs = dict()
     envs['sb'] = "--single-branch"
-    repo = Repo.clone_from(repo_url, local_dir, env=envs)
+    repo = Repo.clone_from(repo_url, local_dir, env=envs, depth=1)
     if repo:
         logger.info(f'Successfully cloned repo: {repo_url}')
 
@@ -103,7 +118,7 @@ async def load_cve(job_time):
                     continue
                 logger.info(f"Processing folder: {year_path}")
                 folder_file_count = 0
-                for file in pathlib.Path(year_path).glob("CVE-*.json"):
+                for file in iter_cve_json_files(year_path):
                     with open(file, mode='r') as cve:
                         data = json.load(cve)
                         data = extract_cve_data(job_time, data)
