@@ -19,7 +19,7 @@
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
     "@testdeck/mocha": "^0.3.3",
-    "@types/jest": "^29.5.2",
+    "@types/jest": "^30.0.0",
     "@types/redis-mock": "^0.17.0",
     "@types/supertest": "^6.0.0",
     "chai": "^5.0.0",
