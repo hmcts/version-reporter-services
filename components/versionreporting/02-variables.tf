@@ -46,6 +46,7 @@ variable "containers_partitions" {
     platopsapps  = "/appName"
     cveinfo      = "/dateReserved"
     netflow      = "/netflow"
+    npmpackages  = "/repository"
   }
 }
 
