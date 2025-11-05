@@ -82,6 +82,7 @@ parameters:
       - "hourlyusage"
       - "platopsapps"
       - "cveinfo"
+      - "npmpackages"
       - "All"
 
   - name: action
@@ -142,6 +143,8 @@ parameters:
       - name: "platopsapps"
         type: "python"
       - name: "cveinfo"
+        type: "python"
+      - name: "npmpackages"
         type: "python"
 
 stages:
