@@ -145,7 +145,7 @@ parameters:
       - name: "cveinfo"
         type: "python"
       - name: "npmpackages"
-        type: "python"
+        type: "bash"
 
 stages:
   - stage: Precheck
