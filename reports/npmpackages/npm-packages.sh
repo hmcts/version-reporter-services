@@ -52,7 +52,7 @@ echo "Fetching npm repos. Maximum of ${max_repos}"
 npm_repos=$(gh api \
   -H "Accept: application/vnd.github+json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  "/search/code?q=org:hmcts+filename:package.json&per_page=$max_repos" | jq -r '[.items[].repository.name]')
+  "/search/code?q=org:hmcts+filename:package.json+OR+filename:package-lock.json&per_page=$max_repos" | jq -r '[.items[].repository.name]')
 
 [[ "$npm_repos" == "" ]] && echo "Job process existed: Cannot get npm repositories." && exit 0
 
@@ -76,12 +76,18 @@ do
     -H "Accept: application/vnd.github.object" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
     /repos/hmcts/${npm_repo}/contents/package.json | jq -r '.content' | base64 -d | jq '.devDependencies')
+
+  peer_dependencies=$(gh api \
+    -H "Accept: application/vnd.github.object" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    /repos/hmcts/${npm_repo}/contents/package.json | jq -r '.content' | base64 -d | jq '.peerDependencies')
   
   repo_entry=$(jq -n \
     --arg repo "$npm_repo" \
     --argjson dependencies "$dependencies" \
     --argjson devDependencies "$dev_dependencies" \
-    '{repository: $repo, dependencies: $dependencies, devDependencies: $devDependencies}')
+    --argjson peerDependencies "$peer_dependencies" \
+    '{repository: $repo, dependencies: $dependencies, devDependencies: $devDependencies, peerDependencies: $peerDependencies}')
 
   # Append to accumulator array
   all_dependencies=$(jq -n --argjson acc "$all_dependencies" --argjson item "$repo_entry" '$acc + [ $item ]')
@@ -95,44 +101,31 @@ done
 # Process Results
 # ---------------------------------------------------------------------------
 
-count=$(echo "$npm_repos" | jq '. | length')
+echo "Transforming to per-package documents"
 
-# Define an array variable to hold all documents
-idx=0
-declare -a documents=()
+# Build one document per package per repo (dependencies + devDependencies + peerDependencies)
+documents=$(echo "$all_dependencies" | jq -c '
+  map(
+    ( .repository as $repo |
+      (
+        ( .dependencies // {} | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "dependency"}) ) +
+        ( .devDependencies // {} | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "devDependency"}) ) +
+        ( .peerDependencies // {} | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "peerDependency"}) )
+      )
+    )
+  ) | add
+')
 
-# Loop through merged documents and enhance each
-while [ "$idx" -lt "$count" ]
-do
-  npm_repo=$(echo "$npm_repos" | jq -r ".[$idx]")
-  echo "npm_repo is $npm_repo"
-
-  # The document id
+# Add a UUID per item
+echo "Adding UUID to each item"
+documents=$(echo "$documents" | jq -c '.[]' | while read -r item; do
   uuid=$(uuidgen)
-
-  repo_dependencies=$(echo $all_dependencies | jq -c '.[].dependencies')
-  repo_devDependencies=$(echo $all_dependencies | jq -c '.[].devDependencies')
-
-  # Enhance document with additional information
-  document=$(jq -n \
-    --arg repo "$npm_repo" \
-    --arg dependencies "$repo_dependencies" \
-    --arg devDependencies "$repo_devDependencies" \
-    --arg id "$uuid" \
-    --arg report_type "table" \
-    --arg display_name "NPM packages and dependencies" \
-    '{repository: $repo, dependencies: $dependencies, devDependencies: $devDependencies, id: $id, displayName: $display_name, reportType: $report_type}')
-
-  documents+=("$document")
-  idx=$((idx + 1))
-done
+  echo "$item" | jq --arg id "$uuid" '. + {id: $id}'
+done | jq -s '.')
 
 # ---------------------------------------------------------------------------
 # Store results to database
 # ---------------------------------------------------------------------------
-
-# Convert bash array to json array
-documents=$(jq -c -n '$ARGS.positional' --jsonargs "${documents[@]}")
 
 # Pass documents to python for database storage
 echo "Send documents for storage"
