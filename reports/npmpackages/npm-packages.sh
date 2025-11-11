@@ -67,12 +67,11 @@ do
   npm_repo=$(echo "$npm_repos" | jq -r ".[$idx1].repository.name")
   # Collect all paths for this repo (package.json or package-lock.json entries)
   paths=$(echo "$npm_repos" | jq -r --arg repo "$npm_repo" '.[] | select(.repository.name == $repo) | .path')
-
   echo "Processing $npm_repo"
-  # Aggregators per repository (start empty objects)
-  all_dependencies='{}'
-  all_dev_dependencies='{}'
-  all_peer_dependencies='{}'
+  # Per-repo aggregators (distinct from global all_dependencies array)
+  repo_dependencies='{}'
+  repo_dev_dependencies='{}'
+  repo_peer_dependencies='{}'
 
   for path in $paths; do
     json_output=$(gh api \
@@ -86,20 +85,20 @@ do
     dev_dependencies=$(echo "$json_output" | jq '.devDependencies // {}')
     peer_dependencies=$(echo "$json_output" | jq '.peerDependencies // {}')
 
-    # Merge preserving first seen version (existing keys win)
-    all_dependencies=$(jq -n --argjson a "$dependencies" --argjson b "$all_dependencies" '$a + $b')
-    all_dev_dependencies=$(jq -n --argjson a "$dev_dependencies" --argjson b "$all_dev_dependencies" '$a + $b')
-    all_peer_dependencies=$(jq -n --argjson a "$peer_dependencies" --argjson b "$all_peer_dependencies" '$a + $b')
+    # Merge preserving first seen version (existing keys win): new + existing
+    repo_dependencies=$(jq -n --argjson new "$dependencies" --argjson existing "$repo_dependencies" '$new + $existing')
+    repo_dev_dependencies=$(jq -n --argjson new "$dev_dependencies" --argjson existing "$repo_dev_dependencies" '$new + $existing')
+    repo_peer_dependencies=$(jq -n --argjson new "$peer_dependencies" --argjson existing "$repo_peer_dependencies" '$new + $existing')
   done
 
   repo_entry=$(jq -n \
     --arg repo "$npm_repo" \
-    --argjson dependencies "$all_dependencies" \
-    --argjson devDependencies "$all_dev_dependencies" \
-    --argjson peerDependencies "$all_peer_dependencies" \
+    --argjson dependencies "$repo_dependencies" \
+    --argjson devDependencies "$repo_dev_dependencies" \
+    --argjson peerDependencies "$repo_peer_dependencies" \
     '{repository: $repo, dependencies: $dependencies, devDependencies: $devDependencies, peerDependencies: $peerDependencies}')
 
-  all_dependencies=$(jq -n --argjson acc "$all_dependencies" --argjson item "$repo_entry" '$acc + [ $item ]')
+  all_dependencies=$(jq -n --argjson arr "$all_dependencies" --argjson item "$repo_entry" '$arr + [ $item ]')
 
   idx1=$((idx1 + 1))
 done
