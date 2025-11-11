@@ -52,7 +52,7 @@ echo "Fetching npm repos. Maximum of ${max_repos}"
 npm_repos=$(gh api \
   -H "Accept: application/vnd.github+json" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
-  "/search/code?q=org:hmcts+filename:package.json+OR+filename:package-lock.json&per_page=$max_repos" | jq -r '[.items[].repository.name]')
+  "/search/code?q=org:hmcts+filename:package.json+OR+filename:package-lock.json&per_page=$max_repos" | jq -r '[.items[]]')
 
 [[ "$npm_repos" == "" ]] && echo "Job process existed: Cannot get npm repositories." && exit 0
 
@@ -64,32 +64,41 @@ all_dependencies='[]'
 
 while [ "$idx1" -lt "$count1" ]
 do
-  npm_repo=$(echo "$npm_repos" | jq -r ".[$idx1]")
+  npm_repo=$(echo "$npm_repos" | jq -r ".[$idx1].repository.name")
+  # Collect all paths for this repo (package.json or package-lock.json entries)
+  paths=$(echo "$npm_repos" | jq -r --arg repo "$npm_repo" '.[] | select(.repository.name == $repo) | .path')
+
   echo "Processing $npm_repo"
-  
-  dependencies=$(gh api \
-    -H "Accept: application/vnd.github.object" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    /repos/hmcts/${npm_repo}/contents/package.json | jq -r '.content' | base64 -d | jq '.dependencies')
+  # Aggregators per repository (start empty objects)
+  all_dependencies='{}'
+  all_dev_dependencies='{}'
+  all_peer_dependencies='{}'
 
-  dev_dependencies=$(gh api \
-    -H "Accept: application/vnd.github.object" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    /repos/hmcts/${npm_repo}/contents/package.json | jq -r '.content' | base64 -d | jq '.devDependencies')
+  for path in $paths; do
+    json_output=$(gh api \
+      -H "Accept: application/vnd.github.object" \
+      -H "X-GitHub-Api-Version: 2022-11-28" \
+      /repos/hmcts/${npm_repo}/contents/$path 2>/dev/null | jq -r '.content' | base64 -d 2>/dev/null || echo '')
 
-  peer_dependencies=$(gh api \
-    -H "Accept: application/vnd.github.object" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    /repos/hmcts/${npm_repo}/contents/package.json | jq -r '.content' | base64 -d | jq '.peerDependencies')
-  
+    [[ -z "$json_output" ]] && continue
+
+    dependencies=$(echo "$json_output" | jq '.dependencies // {}')
+    dev_dependencies=$(echo "$json_output" | jq '.devDependencies // {}')
+    peer_dependencies=$(echo "$json_output" | jq '.peerDependencies // {}')
+
+    # Merge preserving first seen version (existing keys win)
+    all_dependencies=$(jq -n --argjson a "$dependencies" --argjson b "$all_dependencies" '$a + $b')
+    all_dev_dependencies=$(jq -n --argjson a "$dev_dependencies" --argjson b "$all_dev_dependencies" '$a + $b')
+    all_peer_dependencies=$(jq -n --argjson a "$peer_dependencies" --argjson b "$all_peer_dependencies" '$a + $b')
+  done
+
   repo_entry=$(jq -n \
     --arg repo "$npm_repo" \
-    --argjson dependencies "$dependencies" \
-    --argjson devDependencies "$dev_dependencies" \
-    --argjson peerDependencies "$peer_dependencies" \
+    --argjson dependencies "$all_dependencies" \
+    --argjson devDependencies "$all_dev_dependencies" \
+    --argjson peerDependencies "$all_peer_dependencies" \
     '{repository: $repo, dependencies: $dependencies, devDependencies: $devDependencies, peerDependencies: $peerDependencies}')
 
-  # Append to accumulator array
   all_dependencies=$(jq -n --argjson acc "$all_dependencies" --argjson item "$repo_entry" '$acc + [ $item ]')
 
   idx1=$((idx1 + 1))
