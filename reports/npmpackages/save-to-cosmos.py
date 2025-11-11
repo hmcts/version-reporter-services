@@ -11,8 +11,6 @@ endpoint = os.environ.get("COSMOS_DB_URI", None)
 database = os.environ.get("COSMOS_DB_NAME", "reports")
 container_name = os.environ.get("COSMOS_DB_CONTAINER", "npmpackages")
 max_days_away = int(os.environ.get("MAX_DAYS_AWAY", 3))
-key = os.environ.get("COSMOS_DB_KEY", None)
-
 
 # Checks to determine if the chart has already been processed
 # If chart data has not changed i.e the chart name, namespace, latest version and cluster name, it will be the same
@@ -68,7 +66,7 @@ try:
     credential = DefaultAzureCredential()
     # Establish connection to cosmos db
     print("Connection to database...")
-    client = CosmosClient(endpoint, credential=key)
+    client = CosmosClient(endpoint, credential=credential)
     database = client.get_database_client(database)
     db_container = database.get_container_client(container_name)
 
