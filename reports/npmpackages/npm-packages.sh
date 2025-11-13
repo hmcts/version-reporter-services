@@ -39,7 +39,7 @@ get_date_value() {
 # for connecting and saving to cosmos.
 # ---------------------------------------------------------------------------
 store_documents() {
-  python3 ./save-to-cosmos.py "${1}"
+  echo "$documents" | python3 ./save-to-cosmos.py
   wait $!
 }
 
