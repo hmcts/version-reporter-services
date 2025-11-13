@@ -65,19 +65,25 @@ all_dependencies='[]'
 while [ "$idx1" -lt "$count1" ]
 do
   npm_repo=$(echo "$npm_repos" | jq -r ".[$idx1].repository.name")
+
   # Collect all paths for this repo (package.json or package-lock.json entries)
-  paths=$(echo "$npm_repos" | jq -r --arg repo "$npm_repo" '.[] | select(.repository.name == $repo) | .path')
+  mapfile -t filepaths < <(echo "$npm_repos" | jq -r --arg repo "$npm_repo" '.[] | select(.repository.name == $repo) | .path')
   echo "Processing $npm_repo"
+
   # Per-repo aggregators (distinct from global all_dependencies array)
   repo_dependencies='{}'
   repo_dev_dependencies='{}'
   repo_peer_dependencies='{}'
 
-  for path in $paths; do
+  for filepath in "${filepaths[@]}"; do
+    [[ -z "$filepath" ]] && continue
+    echo "    Processing filepath $filepath"
+    # URL-encode path (handles spaces or special characters)
+    encoded_filepath=$(jq -rn --arg p "$filepath" '$p|@uri')
     json_output=$(gh api \
       -H "Accept: application/vnd.github.object" \
       -H "X-GitHub-Api-Version: 2022-11-28" \
-      /repos/hmcts/${npm_repo}/contents/$path 2>/dev/null | jq -r '.content' | base64 -d 2>/dev/null || echo '')
+      /repos/hmcts/${npm_repo}/contents/${encoded_filepath} 2>/dev/null | jq -r '.content' | base64 -d 2>/dev/null || echo '')
 
     [[ -z "$json_output" ]] && continue
 
