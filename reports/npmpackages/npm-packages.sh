@@ -48,23 +48,45 @@ store_documents() {
 # ---------------------------------------------------------------------------
 echo "Fetching npm repos. Maximum of ${max_repos}"
 
-# Get PRs opened by renovate
-npm_repos=$(gh api \
-  -H "Accept: application/vnd.github+json" \
-  -H "X-GitHub-Api-Version: 2022-11-28" \
-  "/search/code?q=org:hmcts+filename:package.json+OR+filename:package-lock.json&per_page=$max_repos" | jq -r '[.items[]]')
+# Paginated search: gather all matching items (package.json OR package-lock.json) up to MAX_REPOS
+echo "Fetching code search results with pagination"
+per_page=100
+page=1
+collected='[]'
+remaining=$max_repos
+while true; do
+  [[ $remaining -le 0 ]] && break
+  page_size=$per_page
+  if [[ $remaining -lt $per_page ]]; then
+    page_size=$remaining
+  fi
+  response=$(gh api \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    "/search/code?q=org:hmcts+filename:package.json+OR+filename:package-lock.json&per_page=$page_size&page=$page" 2>/dev/null || echo '')
+  count=$(echo "$response" | jq -r '.items | length // 0')
+  [[ "$count" -eq 0 ]] && break
+  # Append items to collected
+  items=$(echo "$response" | jq -c '[.items[]]')
+  if [[ "$items" != "[]" && "$items" != "" ]]; then
+    collected=$(printf '%s\n%s\n' "$collected" "$items" | jq -s 'add')
+  fi
+  remaining=$((remaining - count))
+  echo "  Page $page: retrieved $count items (remaining allowance $remaining)"
+  [[ $count -lt $page_size ]] && break
+  page=$((page + 1))
+done
+
+npm_repos=$(echo "$collected" | jq -r '[.[]]')
 
 [[ "$npm_repos" == "" ]] && echo "Job process existed: Cannot get npm repositories." && exit 0
 
-echo "Getting dependencies"
-count1=$(echo "$npm_repos" | jq '. | length')
-idx1=0
-# Accumulator for all repositories' dependencies
+echo "Deriving unique repositories"
+unique_repos=$(echo "$npm_repos" | jq -r '.[].repository.name' | sort -u)
 all_dependencies='[]'
 
-while [ "$idx1" -lt "$count1" ]
-do
-  npm_repo=$(echo "$npm_repos" | jq -r ".[$idx1].repository.name")
+while IFS= read -r npm_repo; do
+  [[ -z "$npm_repo" ]] && continue
 
   # Collect all paths for this repo (package.json or package-lock.json entries)
   mapfile -t filepaths < <(echo "$npm_repos" | jq -r --arg repo "$npm_repo" '.[] | select(.repository.name == $repo) | .path')
@@ -91,10 +113,9 @@ do
     dev_dependencies=$(echo "$json_output" | jq '.devDependencies // {}')
     peer_dependencies=$(echo "$json_output" | jq '.peerDependencies // {}')
 
-    # Merge preserving first seen version (existing keys win): new + existing
-    repo_dependencies=$(jq -n --argjson new "$dependencies" --argjson existing "$repo_dependencies" '$new + $existing')
-    repo_dev_dependencies=$(jq -n --argjson new "$dev_dependencies" --argjson existing "$repo_dev_dependencies" '$new + $existing')
-    repo_peer_dependencies=$(jq -n --argjson new "$peer_dependencies" --argjson existing "$repo_peer_dependencies" '$new + $existing')
+  repo_dependencies=$(printf '%s\n%s\n' "$dependencies" "$repo_dependencies" | jq -s 'add')
+  repo_dev_dependencies=$(printf '%s\n%s\n' "$dev_dependencies" "$repo_dev_dependencies" | jq -s 'add')
+  repo_peer_dependencies=$(printf '%s\n%s\n' "$peer_dependencies" "$repo_peer_dependencies" | jq -s 'add')
   done
 
   repo_entry=$(jq -n \
@@ -104,10 +125,13 @@ do
     --argjson peerDependencies "$repo_peer_dependencies" \
     '{repository: $repo, dependencies: $dependencies, devDependencies: $devDependencies, peerDependencies: $peerDependencies}')
 
-  all_dependencies=$(jq -n --argjson arr "$all_dependencies" --argjson item "$repo_entry" '$arr + [ $item ]')
+  # Append repo_entry to all_dependencies without large argv expansion
+  if [[ -z "$all_dependencies" || "$all_dependencies" == "null" ]]; then
+    all_dependencies='[]'
+  fi
+  all_dependencies=$(printf '%s\n%s\n' "$all_dependencies" "$repo_entry" | jq -s '.[0] + [ .[1] ]')
 
-  idx1=$((idx1 + 1))
-done
+done <<< "$unique_repos"
 
   echo $all_dependencies | jq -r '.'
 
