@@ -146,9 +146,30 @@ documents=$(echo "$all_dependencies" | jq -c '
   map(
     ( .repository as $repo |
       (
-        ( .dependencies // {} | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "dependency"}) ) +
-        ( .devDependencies // {} | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "devDependency"}) ) +
-        ( .peerDependencies // {} | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "peerDependency"}) )
+        ( .dependencies // {} | to_entries | map(
+            ( .value as $val |
+              [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: (if (($val|type)=="object" and ($val.dev==true)) then "devDependency" else "dependency" end)} ]
+              + ( if (($val|type)=="object" and ($val.requires?!=null)) then
+                    ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: (if ($val.dev==true) then "transitiveDevDependency" else "transitiveDependency" end)}) )
+                  else [] end )
+            )
+          ) | add ) +
+        ( .devDependencies // {} | to_entries | map(
+            ( .value as $val |
+              [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "devDependency"} ]
+              + ( if (($val|type)=="object" and ($val.requires?!=null)) then
+                    ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitiveDevDependency"}) )
+                  else [] end )
+            )
+          ) | add ) +
+        ( .peerDependencies // {} | to_entries | map(
+            ( .value as $val |
+              [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "peerDependency"} ]
+              + ( if (($val|type)=="object" and ($val.requires?!=null)) then
+                    ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitivePeerDependency"}) )
+                  else [] end )
+            )
+          ) | add )
       )
     )
   ) | add
