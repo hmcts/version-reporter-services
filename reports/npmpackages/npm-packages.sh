@@ -147,22 +147,28 @@ documents=$(echo "$all_dependencies" | jq -c '
     ( .repository as $repo |
       (
         ( .dependencies // {} | to_entries | map(
-            [ {repository: $repo, package: .key, version: (if (.value | type)=="object" then .value.version else .value end), dependencyType: "dependency"} ]
-            + ( if ((.value|type)=="object" and (.value.requires?!=null)) then
-                  ( .value.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitiveDependency"}) )
-                else [] end )
+            ( .value as $val |
+              [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: (if (($val|type)=="object" and ($val.dev==true)) then "devDependency" else "dependency" end)} ]
+              + ( if (($val|type)=="object" and ($val.requires?!=null)) then
+                    ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: (if ($val.dev==true) then "transitiveDevDependency" else "transitiveDependency" end)}) )
+                  else [] end )
+            )
           ) | add ) +
         ( .devDependencies // {} | to_entries | map(
-            [ {repository: $repo, package: .key, version: (if (.value | type)=="object" then .value.version else .value end), dependencyType: "devDependency"} ]
-            + ( if ((.value|type)=="object" and (.value.requires?!=null)) then
-                  ( .value.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitiveDevDependency"}) )
-                else [] end )
+            ( .value as $val |
+              [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "devDependency"} ]
+              + ( if (($val|type)=="object" and ($val.requires?!=null)) then
+                    ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitiveDevDependency"}) )
+                  else [] end )
+            )
           ) | add ) +
         ( .peerDependencies // {} | to_entries | map(
-            [ {repository: $repo, package: .key, version: (if (.value | type)=="object" then .value.version else .value end), dependencyType: "peerDependency"} ]
-            + ( if ((.value|type)=="object" and (.value.requires?!=null)) then
-                  ( .value.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitivePeerDependency"}) )
-                else [] end )
+            ( .value as $val |
+              [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "peerDependency"} ]
+              + ( if (($val|type)=="object" and ($val.requires?!=null)) then
+                    ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitivePeerDependency"}) )
+                  else [] end )
+            )
           ) | add )
       )
     )
