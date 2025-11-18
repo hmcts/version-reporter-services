@@ -57,7 +57,7 @@ def get_formatted_datetime(strformat="%Y-%m-%d %H:%M:%S"):
 
 
 # Document passing in as arguments from bash script
-documents = json.loads(sys.argv[1])
+documents = json.load(sys.stdin)
 
 
 # Save documents to cosmos db
