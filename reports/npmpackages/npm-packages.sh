@@ -146,9 +146,24 @@ documents=$(echo "$all_dependencies" | jq -c '
   map(
     ( .repository as $repo |
       (
-        ( .dependencies // {} | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "dependency"}) ) +
-        ( .devDependencies // {} | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "devDependency"}) ) +
-        ( .peerDependencies // {} | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "peerDependency"}) )
+        ( .dependencies // {} | to_entries | map(
+            [ {repository: $repo, package: .key, version: (if (.value | type)=="object" then .value.version else .value end), dependencyType: "dependency"} ]
+            + ( if ((.value|type)=="object" and (.value.requires?!=null)) then
+                  ( .value.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitiveDependency"}) )
+                else [] end )
+          ) | add ) +
+        ( .devDependencies // {} | to_entries | map(
+            [ {repository: $repo, package: .key, version: (if (.value | type)=="object" then .value.version else .value end), dependencyType: "devDependency"} ]
+            + ( if ((.value|type)=="object" and (.value.requires?!=null)) then
+                  ( .value.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitiveDevDependency"}) )
+                else [] end )
+          ) | add ) +
+        ( .peerDependencies // {} | to_entries | map(
+            [ {repository: $repo, package: .key, version: (if (.value | type)=="object" then .value.version else .value end), dependencyType: "peerDependency"} ]
+            + ( if ((.value|type)=="object" and (.value.requires?!=null)) then
+                  ( .value.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitivePeerDependency"}) )
+                else [] end )
+          ) | add )
       )
     )
   ) | add

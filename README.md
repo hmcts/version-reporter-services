@@ -63,6 +63,7 @@ variable "containers_partitions" {
     renovate     = "/repository"
     docsoutdated = "/docTitle"
     netflow      = "/netflow"
+    npmpackages  = "/repository"
   }
 }
 ```
@@ -80,6 +81,7 @@ If you plan to add a new report please ensure that it includes a readme with usa
 - Hourly Usage: [Readme](reports/hourlyusage/README.md)
 - Palo Alto: [Readme](reports/paloalto/README.md)
 - Renovate: [Readme](reports/renovate/README.md)
+- NPM Packages: [Readme](reports/npmpackages/README.md)
 
 
 ## Container Images
