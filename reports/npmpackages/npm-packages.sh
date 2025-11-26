@@ -63,7 +63,7 @@ while true; do
   response=$(gh api \
     -H "Accept: application/vnd.github+json" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
-    "/search/code?q=org:hmcts+filename:package.json+OR+filename:package-lock.json&per_page=$page_size&page=$page" 2>/dev/null || echo '')
+    "/search/code?q=org:hmcts+filename:package.json+OR+filename:package-lock.json+OR+filename:yarn.lock&per_page=$page_size&page=$page" 2>/dev/null || echo '')
   count=$(echo "$response" | jq -r '.items | length // 0')
   [[ "$count" -eq 0 ]] && break
   # Append items to collected
@@ -96,6 +96,7 @@ while IFS= read -r npm_repo; do
   repo_dependencies='{}'
   repo_dev_dependencies='{}'
   repo_peer_dependencies='{}'
+  repo_resolutions='{}'
 
   for filepath in "${filepaths[@]}"; do
     [[ -z "$filepath" ]] && continue
@@ -112,10 +113,12 @@ while IFS= read -r npm_repo; do
     dependencies=$(echo "$json_output" | jq '.dependencies // {}')
     dev_dependencies=$(echo "$json_output" | jq '.devDependencies // {}')
     peer_dependencies=$(echo "$json_output" | jq '.peerDependencies // {}')
+    resolutions=$(echo "$json_output" | jq '.resolutions // {}')
 
   repo_dependencies=$(printf '%s\n%s\n' "$dependencies" "$repo_dependencies" | jq -s 'add')
   repo_dev_dependencies=$(printf '%s\n%s\n' "$dev_dependencies" "$repo_dev_dependencies" | jq -s 'add')
   repo_peer_dependencies=$(printf '%s\n%s\n' "$peer_dependencies" "$repo_peer_dependencies" | jq -s 'add')
+  repo_resolutions=$(printf '%s\n%s\n' "$resolutions" "$repo_resolutions" | jq -s 'add')
   done
 
   repo_entry=$(jq -n \
@@ -123,7 +126,8 @@ while IFS= read -r npm_repo; do
     --argjson dependencies "$repo_dependencies" \
     --argjson devDependencies "$repo_dev_dependencies" \
     --argjson peerDependencies "$repo_peer_dependencies" \
-    '{repository: $repo, dependencies: $dependencies, devDependencies: $devDependencies, peerDependencies: $peerDependencies}')
+    --argjson resolutions "$repo_resolutions" \
+    '{repository: $repo, dependencies: $dependencies, devDependencies: $devDependencies, peerDependencies: $peerDependencies, resolutions: $resolutions}')
 
   # Append repo_entry to all_dependencies without large argv expansion
   if [[ -z "$all_dependencies" || "$all_dependencies" == "null" ]]; then
@@ -167,6 +171,14 @@ documents=$(echo "$all_dependencies" | jq -c '
               [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "peerDependency"} ]
               + ( if (($val|type)=="object" and ($val.requires?!=null)) then
                     ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitivePeerDependency"}) )
+                  else [] end )
+            )
+          ) | add ) +
+        ( .resolutions // {} | to_entries | map(
+            ( .value as $val |
+              [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "resolution"} ]
+              + ( if (($val|type)=="object" and ($val.requires?!=null)) then
+                    ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitiveDevDependency"}) )
                   else [] end )
             )
           ) | add )
