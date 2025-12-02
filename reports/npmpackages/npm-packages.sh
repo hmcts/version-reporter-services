@@ -51,8 +51,7 @@ store_documents() {
 # Process npm repos
 # ---------------------------------------------------------------------------
 echo "Fetching npm repos"
-# npm_repos=$(gh repo list hmcts -L 3 --json name,defaultBranchRef | jq -c '.[]' | sort -u)
-npm_repos=$(gh repo list hmcts -L 3000 --json name,defaultBranchRef | jq -c '.[] | select(.name == "pcs-frontend" or .name == "cath-service" or .name == "ccpay-slack-help-bot")')
+npm_repos=$(gh repo list hmcts -L 3000 --json name,defaultBranchRef | jq -c '.[]' | sort -u)
 
 [[ "$npm_repos" == "" ]] && echo "Job process existed: Cannot get npm repositories." && exit 0
 
