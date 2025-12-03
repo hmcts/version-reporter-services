@@ -13,9 +13,9 @@
 #############################################################################
 
 # uncomment this for troubleshooting the script output
-# logfile=$$.log
-# exec > output.txt 2>&1
-# set -x
+logfile=$$.log
+exec > output.txt 2>&1
+set -x
 
 # Extracts a value from json object
 get_value() {
@@ -65,14 +65,23 @@ while IFS= read -r npm_repo; do
   
   echo "Processing $repo_name on branch $default_branch"
 
-  filepaths=$(gh api \
+  filepaths=$(curl -sS -H "Authorization: bearer $GH_TOKEN" \
     -H "X-GitHub-Api-Version: 2022-11-28" \
     -H "Accept: application/vnd.github+json" \
-    "repos/hmcts/${repo_name}/git/trees/$default_branch?recursive=true" \
-    | jq -r '.tree[].path | select(test("(^|/)package(-lock)?\\.json$"))')
+    -w "\n%{http_code}" \
+    "https://api.github.com/repos/hmcts/${repo_name}/git/trees/$default_branch?recursive=true") 
+    
+  status_code=$(printf '%s' "$filepaths" | tail -n1)
+  
+  if [[ "$status_code" != "200" ]]; then
+    echo "Skipping $repo_name: HTTP status $status_code"
+    continue
+  fi
+  
+  body=$(printf '%s' "$filepaths" | sed '$d' | jq -r '.tree[].path | select(test("(^|/)package(-lock)?\\.json$"))')
 
   # Convert filepaths to array
-  readarray -t filepaths_array <<< "$filepaths"
+  readarray -t filepaths_array <<< "$body"
   # Reset per-repo associative arrays and build maps of directories that contain package.json or package-lock.json
   unset has_lock has_pkg path_exists 2>/dev/null || true
   declare -A has_lock has_pkg path_exists
@@ -190,47 +199,47 @@ echo "Transforming to per-package documents"
 # Build one document per package per repo (dependencies + devDependencies + peerDependencies)
 documents=$(echo "$all_dependencies" | jq -c '
   map(
-    ( .repository as $repo |
+    ( .repository as $repo | .file as $file | .branch as $branch |
       (
-        ( .dependencies // {} | to_entries | map(
-            ( .value as $val |
-              [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: (if (($val|type)=="object" and ($val.dev==true)) then "devDependency" else "dependency" end)} ]
-              + ( if (($val|type)=="object" and ($val.requires?!=null)) then
-                    ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: (if ($val.dev==true) then "transitiveDevDependency" else "transitiveDependency" end)}) )
-                  else [] end )
-            )
-          ) | add ) +
-        ( .devDependencies // {} | to_entries | map(
-            ( .value as $val |
-              [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "devDependency"} ]
-              + ( if (($val|type)=="object" and ($val.requires?!=null)) then
-                    ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitiveDevDependency"}) )
-                  else [] end )
-            )
-          ) | add ) +
-        ( .peerDependencies // {} | to_entries | map(
-            ( .value as $val |
-              [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "peerDependency"} ]
-              + ( if (($val|type)=="object" and ($val.requires?!=null)) then
-                    ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitivePeerDependency"}) )
-                  else [] end )
-            )
-          ) | add ) +
-        ( .resolutions // {} | to_entries | map(
-            ( .value as $val |
-              [ {repository: $repo, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "resolution"} ]
-              + ( if (($val|type)=="object" and ($val.requires?!=null)) then
-                    ( $val.requires | to_entries | map({repository: $repo, package: .key, version: .value, dependencyType: "transitiveDevDependency"}) )
-                  else [] end )
-            )
-          ) | add )
+      ( .dependencies // {} | to_entries | map(
+      ( .value as $val |
+        [ {repository: $repo, file: $file, branch: $branch, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: (if (($val|type)=="object" and ($val.dev==true)) then "devDependency" else "dependency" end)} ]
+        + ( if (($val|type)=="object" and ($val.requires?!=null)) then
+        ( $val.requires | to_entries | map({repository: $repo, file: $file, branch: $branch, package: .key, version: .value, dependencyType: (if ($val.dev==true) then "transitiveDevDependency" else "transitiveDependency" end)}) )
+        else [] end )
+      )
+      ) | add ) +
+      ( .devDependencies // {} | to_entries | map(
+      ( .value as $val |
+        [ {repository: $repo, file: $file, branch: $branch, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "devDependency"} ]
+        + ( if (($val|type)=="object" and ($val.requires?!=null)) then
+        ( $val.requires | to_entries | map({repository: $repo, file: $file, branch: $branch, package: .key, version: .value, dependencyType: "transitiveDevDependency"}) )
+        else [] end )
+      )
+      ) | add ) +
+      ( .peerDependencies // {} | to_entries | map(
+      ( .value as $val |
+        [ {repository: $repo, file: $file, branch: $branch, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "peerDependency"} ]
+        + ( if (($val|type)=="object" and ($val.requires?!=null)) then
+        ( $val.requires | to_entries | map({repository: $repo, file: $file, branch: $branch, package: .key, version: .value, dependencyType: "transitivePeerDependency"}) )
+        else [] end )
+      )
+      ) | add ) +
+      ( .resolutions // {} | to_entries | map(
+      ( .value as $val |
+        [ {repository: $repo, file: $file, branch: $branch, package: .key, version: (if ($val | type)=="object" then $val.version else $val end), dependencyType: "resolution"} ]
+        + ( if (($val|type)=="object" and ($val.requires?!=null)) then
+        ( $val.requires | to_entries | map({repository: $repo, file: $file, branch: $branch, package: .key, version: .value, dependencyType: "transitiveDevDependency"}) )
+        else [] end )
+      )
+      ) | add )
       )
     )
-  ) | add
+  ) | add // []
 ')
 
-# Attach file URL and file path to each generated document
-documents=$(echo "$documents" | jq -c 'map(. + {file: (.repository as $r | .file), fileUrl: (.repository as $r | "https://github.com/" + .repository + "/blob/" + (.branch) + "/" + (.file))})')
+# Attach file URL and file path to each generated document, handle missing values safely
+documents=$(echo "${documents:-[]}" | jq -c '(. // []) | map( .file = (.file // "") | .branch = (.branch // "main") | .fileUrl = ("https://github.com/hmcts/" + .repository + "/blob/" + .branch + "/" + .file) )')
 
 # Add a UUID per item
 echo "Adding UUID to each item"
@@ -238,6 +247,7 @@ documents=$(echo "$documents" | jq -c '.[]' | while read -r item; do
   uuid=$(uuidgen)
   echo "$item" | jq --arg id "$uuid" '. + {id: $id}'
 done | jq -s '.')
+
 
 # ---------------------------------------------------------------------------
 # Store results to database
