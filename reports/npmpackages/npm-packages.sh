@@ -51,30 +51,7 @@ store_documents() {
 # Process npm repos
 # ---------------------------------------------------------------------------
 echo "Fetching npm repos"
-# Split the repo list into 10 separate requests to avoid rate limits
-total_repos=3000
-batch_size=300
-npm_repos=''
-
-for ((i=0; i<total_repos; i+=batch_size)); do
-  retries=0
-  max_retries=3
-  success=0
-  while [[ $retries -le $max_retries ]]; do
-    batch=$(gh repo list hmcts -L $batch_size --json name,defaultBranchRef --skip $i 2>/dev/null | jq -c '.[]')
-    if [[ -z "$batch" ]]; then
-      ((retries++))
-      echo "Received empty response (possible 502). Retrying ($retries/$max_retries)..."
-      sleep 5
-    else
-      npm_repos="${npm_repos}"$'\n'"${batch}"
-      success=1
-      break
-    fi
-  done
-  sleep 2
-done
-
+npm_repos=$(gh api -H "Accept: application/vnd.github+json" /orgs/hmcts/repos --paginate --jq '.[] | {name: .name, default_branch: .default_branch}' | jq -c '.' | sort -u)
 npm_repos=$(echo "$npm_repos" | sort -u)
 
 [[ "$npm_repos" == "" ]] && echo "Job process existed: Cannot get npm repositories." && exit 0
