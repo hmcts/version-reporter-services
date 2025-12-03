@@ -13,9 +13,9 @@
 #############################################################################
 
 # uncomment this for troubleshooting the script output
-logfile=$$.log
-exec > output.txt 2>&1
-set -x
+# logfile=$$.log
+# exec > output.txt 2>&1
+# set -x
 
 # Extracts a value from json object
 get_value() {
