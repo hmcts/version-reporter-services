@@ -61,7 +61,7 @@ all_dependencies='[]'
 while IFS= read -r npm_repo; do
   [[ -z "$npm_repo" ]] && continue
   repo_name=$(jq -r '.name' <<< "$npm_repo")
-  default_branch=$(jq -r '.defaultBranchRef.name' <<< "$npm_repo")
+  default_branch=$(jq -r '.default_branch' <<< "$npm_repo")
   
   echo "Processing $repo_name on branch $default_branch"
 
