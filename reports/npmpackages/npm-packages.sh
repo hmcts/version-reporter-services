@@ -78,7 +78,7 @@ while IFS= read -r npm_repo; do
     continue
   fi
   
-  body=$(printf '%s' "$filepaths" | sed '$d' | jq -r '.tree[].path | select(test("(^|/)package(-lock)?\\.json$"))')
+  body=$(printf '%s' "$filepaths" | sed '$d' | jq -r '.tree[].path | select(test("(^|/)package(-lock)?\\.json$") and (test("(^|/)node_modules(/|$)") | not))')
 
   # Convert filepaths to array
   readarray -t filepaths_array <<< "$body"
