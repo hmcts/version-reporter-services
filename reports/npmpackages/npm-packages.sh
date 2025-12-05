@@ -13,9 +13,9 @@
 #############################################################################
 
 # uncomment this for troubleshooting the script output
-logfile=$$.log
-exec > output/output.txt 2>&1
-set -x
+# logfile=$$.log
+# exec > output/output.txt 2>&1
+# set -x
 
 if [ -z $GH_TOKEN ]; then
   echo "No GitHub token set. Exiting..."
