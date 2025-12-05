@@ -14,7 +14,7 @@
 
 # uncomment this for troubleshooting the script output
 # logfile=$$.log
-# exec > output.txt 2>&1
+# exec > output/output.txt 2>&1
 # set -x
 
 # Extracts a value from json object
@@ -187,7 +187,12 @@ while IFS= read -r npm_repo; do
 
 done <<< "$npm_repos"
 
-all_dependencies=$(echo $all_dependencies | jq 'map(.dependencies? |= with_entries(select(.value != "workspace:*")) | .devDependencies? |= with_entries(select(.value != "workspace:*")) | .peerDependencies? |= with_entries(select(.value != "workspace:*")) | .resolutions? |= with_entries(select(.value != "workspace:*")) )')
+all_dependencies=$(echo "$all_dependencies" | jq 'map(
+  .dependencies = (.dependencies // {} | with_entries(select(.value != "workspace:*")))
+  | .devDependencies = (.devDependencies // {} | with_entries(select(.value != "workspace:*")))
+  | .peerDependencies = (.peerDependencies // {} | with_entries(select(.value != "workspace:*")))
+  | .resolutions = (.resolutions // {} | with_entries(select(.value != "workspace:*")))
+)')
 echo $all_dependencies
 
 # ---------------------------------------------------------------------------
