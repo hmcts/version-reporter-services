@@ -13,29 +13,14 @@
 #############################################################################
 
 # uncomment this for troubleshooting the script output
-# logfile=$$.log
-# exec > output/output.txt 2>&1
-# set -x
+logfile=$$.log
+exec > output/output.txt 2>&1
+set -x
 
-# Extracts a value from json object
-get_value() {
-  echo "${1}" | jq -r "${2}"
-}
-
-# Extracts a date value from a date array json format
-get_date_value() {
-  case "${2}" in
-  'year')
-    echo "${1}" | cut -d'-' -f 1 | tr -d '"' # year index
-    ;;
-  'month')
-    echo "${1}" | cut -d'-' -f 2 | tr -d '"' # month index
-    ;;
-  'day')
-    echo "${1}" | cut -d'-' -f 3 | tr -d '"' # day index
-    ;;
-  esac
-}
+if [ -z $GH_TOKEN ]; then
+  echo "No GitHub token set. Exiting..."
+  exit 1
+fi
 
 # ---------------------------------------------------------------------------
 # Make a REST call to cosmos
@@ -56,12 +41,19 @@ npm_repos=$(echo "$npm_repos" | sort -u)
 
 [[ "$npm_repos" == "" ]] && echo "Job process existed: Cannot get npm repositories." && exit 0
 
+# Parallelism settings: change PARALLELISM to tune concurrency
+PARALLELISM=${PARALLELISM:-4}
+tmpdir=$(mktemp -d)
+trap 'rm -rf "$tmpdir"' EXIT
+
 all_dependencies='[]'
 
-while IFS= read -r npm_repo; do
-  [[ -z "$npm_repo" ]] && continue
+process_repo() {
+  npm_repo="$1"
+  [[ -z "$npm_repo" ]] && return
   repo_name=$(jq -r '.name' <<< "$npm_repo")
   default_branch=$(jq -r '.default_branch' <<< "$npm_repo")
+  out_file="$tmpdir/${repo_name}.json"
   
   echo "Processing $repo_name on branch $default_branch"
 
@@ -75,7 +67,8 @@ while IFS= read -r npm_repo; do
   
   if [[ "$status_code" != "200" ]]; then
     echo "Skipping $repo_name: HTTP status $status_code"
-    continue
+    echo '[]' > "$out_file"
+    return
   fi
   
   body=$(printf '%s' "$filepaths" | sed '$d' | jq -r '.tree[].path | select(test("(^|/)package(-lock)?\\.json$") and (test("(^|/)node_modules(/|$)") | not))')
@@ -152,12 +145,15 @@ while IFS= read -r npm_repo; do
       --argjson resolutions "$resolutions" \
       '{repository: $repo, file: $file, fileType: $fileType, branch: $branch, dependencies: $dependencies, devDependencies: $devDependencies, peerDependencies: $peerDependencies, resolutions: $resolutions}')
 
-    if [[ -z "$all_dependencies" || "$all_dependencies" == "null" ]]; then
-      all_dependencies='[]'
+    if [[ -z "$per_repo_deps" || "$per_repo_deps" == "null" ]]; then
+      per_repo_deps='[]'
     fi
-    all_dependencies=$(printf '%s\n%s\n' "$all_dependencies" "$repo_file_entry" | jq -s '.[0] + [ .[1] ]')
+    per_repo_deps=$(printf '%s\n%s\n' "$per_repo_deps" "$repo_file_entry" | jq -s '.[0] + [ .[1] ]')
   }
 
+  # Initialize per-repo dependencies
+  per_repo_deps='[]'
+  
   # Process directories with lockfiles first (preferred)
   for d in "${!has_lock[@]}"; do
     if [[ "$d" == "." ]]; then
@@ -183,9 +179,29 @@ while IFS= read -r npm_repo; do
     process_file "$chosen"
   done
 
-  
+  # Write per-repo results to temp file
+  echo "$per_repo_deps" > "$out_file"
+}
 
+# Run repos in parallel with a semaphore
+sem() { local max=$1; shift; while (( $(jobs -rp | wc -l) >= max )); do sleep 0.1; done; }
+
+while IFS= read -r npm_repo; do
+  [[ -z "$npm_repo" ]] && continue
+  sem "$PARALLELISM"
+  ( process_repo "$npm_repo" ) &
 done <<< "$npm_repos"
+
+# Wait for all background jobs to finish
+wait
+
+# Aggregate per-repo files into all_dependencies
+all_dependencies='[]'
+for f in "$tmpdir"/*.json; do
+  [[ ! -f "$f" ]] && continue
+  repo_json=$(cat "$f")
+  all_dependencies=$(printf '%s\n%s\n' "$all_dependencies" "$repo_json" | jq -s '.[0] + .[1]')
+done
 
 all_dependencies=$(echo "$all_dependencies" | jq 'map(
   .dependencies = (.dependencies // {} | with_entries(select(.value != "workspace:*")))
@@ -243,15 +259,9 @@ documents=$(echo "$all_dependencies" | jq -c '
   ) | add // []
 ')
 
-# Attach file URL and file path to each generated document, handle missing values safely
-documents=$(echo "${documents:-[]}" | jq -c '(. // []) | map( .file = (.file // "") | .branch = (.branch // "main") | .fileUrl = ("https://github.com/hmcts/" + .repository + "/blob/" + .branch + "/" + .file) )')
-
-# Add a UUID per item
+# Add a UUID per item (parallelized)
 echo "Adding UUID to each item"
-documents=$(echo "$documents" | jq -c '.[]' | while read -r item; do
-  uuid=$(uuidgen)
-  echo "$item" | jq --arg id "$uuid" '. + {id: $id}'
-done | jq -s '.')
+documents=$(echo "${documents:-[]}" | jq -c '(. // []) | map( .file = (.file // "") | .branch = (.branch // "main") | .fileUrl = ("https://github.com/hmcts/" + .repository + "/blob/" + .branch + "/" + .file) )')
 
 
 # ---------------------------------------------------------------------------
