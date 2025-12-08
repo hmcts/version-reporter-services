@@ -259,10 +259,12 @@ documents=$(echo "$all_dependencies" | jq -c '
   ) | add // []
 ')
 
-# Add a UUID per item
-echo "Adding UUID to each item"
+# Add file URL to each package
 documents=$(echo "${documents:-[]}" | jq -c '(. // []) | map( .file = (.file // "") | .branch = (.branch // "main") | .fileUrl = ("https://github.com/hmcts/" + .repository + "/blob/" + .branch + "/" + .file) )')
 
+# Add a id per item
+echo "Adding id to each item"
+documents=$(echo "${documents:-[]}" | jq -c 'map(. + {id: (.repository + "-" + .package + "-" + (.version // "unknown") + "-" + (now | floor | tostring))})')
 
 # ---------------------------------------------------------------------------
 # Store results to database
