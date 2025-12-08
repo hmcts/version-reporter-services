@@ -264,7 +264,7 @@ documents=$(echo "${documents:-[]}" | jq -c '(. // []) | map( .file = (.file // 
 
 # Add a id per item
 echo "Adding id to each item"
-documents=$(echo "${documents:-[]}" | jq -c 'map(. + {id: (.repository + "-" + .package + "-" + (.version // "unknown") + "-" + (now | floor | tostring))})')
+documents=$(echo "${documents:-[]}" | jq -c 'to_entries | map(.value + {id: ((.key + 1 | tostring))})')
 
 # ---------------------------------------------------------------------------
 # Store results to database
