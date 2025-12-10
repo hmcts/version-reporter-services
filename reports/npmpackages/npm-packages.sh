@@ -299,6 +299,6 @@ documents=$(echo "${documents:-[]}" | jq -c 'to_entries | map(.value + {id: ((.k
 
 # Pass documents to python for database storage
 echo "Send documents for storage"
-# store_documents "$documents"
+store_documents "$documents"
 
 echo "Job process completed"
