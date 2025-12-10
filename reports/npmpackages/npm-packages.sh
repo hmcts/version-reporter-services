@@ -40,8 +40,7 @@ yarn_to_json() {
 # Process npm repos
 # ---------------------------------------------------------------------------
 echo "Fetching npm repos"
-npm_repos='{"default_branch":"master","name":"CCD-Functional-Tests-Central"}'
-# npm_repos=$(gh api -H "Accept: application/vnd.github+json" /orgs/hmcts/repos --paginate --jq '.[] | {name: .name, default_branch: .default_branch}' | jq -c '.' | sort -u)
+npm_repos=$(gh api -H "Accept: application/vnd.github+json" /orgs/hmcts/repos --paginate --jq '.[] | {name: .name, default_branch: .default_branch}' | jq -c '.' | sort -u)
 npm_repos=$(echo "$npm_repos" | sort -u)
 
 [[ "$npm_repos" == "" ]] && echo "Job process existed: Cannot get npm repositories." && exit 0
