@@ -32,6 +32,10 @@ store_documents() {
   wait $!
 }
 
+yarn_to_json() {
+  echo "$1" | python3 ./yarnlock-to-json.py
+}
+
 # ---------------------------------------------------------------------------
 # Process npm repos
 # ---------------------------------------------------------------------------
@@ -71,110 +75,133 @@ process_repo() {
     return
   fi
   
-  body=$(printf '%s' "$filepaths" | sed '$d' | jq -r '.tree[].path | select(test("(^|/)package(-lock)?\\.json$") and (test("(^|/)node_modules(/|$)") | not))')
+  body=$(printf '%s' "$filepaths" | sed '$d' | jq -r '.tree[].path | select(test("(^|/)(package(-lock)?\\.json|yarn\\.lock)$") and (test("(^|/)node_modules(/|$)") | not))')
 
   # Convert filepaths to array
   readarray -t filepaths_array <<< "$body"
-  # Reset per-repo associative arrays and build maps of directories that contain package.json or package-lock.json
-  unset has_lock has_pkg path_exists 2>/dev/null || true
-  declare -A has_lock has_pkg path_exists
+  # Reset per-repo associative arrays and build maps of directories that contain package.json, package-lock.json, or yarn.lock
+  unset has_lock has_yarn has_pkg path_exists 2>/dev/null || true
+  declare -A has_lock has_yarn has_pkg path_exists
   for f in "${filepaths_array[@]}"; do
     [[ -z "$f" ]] && continue
     path_exists["$f"]=1
     d=$(dirname "$f")
     case "$f" in
       */package-lock.json|package-lock.json) has_lock["$d"]=1 ;;
+      */yarn.lock|yarn.lock) has_yarn["$d"]=1 ;;
       */package.json|package.json) has_pkg["$d"]=1 ;;
     esac
   done
 
-  # Helper: process one chosen path (either package-lock.json or package.json)
+  # Helper: process one chosen path (either package-lock.json, yarn.lock, or package.json)
   process_file() {
     chosen_path="$1"
     if [[ "$chosen_path" == *"package-lock.json" ]]; then
       file_type="package-lock.json"
+    elif [[ "$chosen_path" == *"yarn.lock" ]]; then
+      file_type="yarn.lock"
     else
       file_type="package.json"
     fi
 
-    encoded_filepath=$(jq -rn --arg p "$chosen_path" '$p|@uri')
-    json_output=$(gh api \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
-      "/repos/hmcts/${repo_name}/contents/${encoded_filepath}" 2>/dev/null \
-      | jq -r '.content' | base64 --decode 2>/dev/null || echo '')
+  encoded_filepath=$(jq -rn --arg p "$chosen_path" '$p|@uri')
+  json_output=$(gh api \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    "/repos/hmcts/${repo_name}/contents/${encoded_filepath}" 2>/dev/null \
+    | jq -r '.content' | base64 --decode 2>/dev/null || echo '')
 
-    [[ -z "$json_output" ]] && return
+  if [[ "$file_type" == "yarn.lock" ]]; then
+    json_output=$(yarn_to_json "$json_output")
+  fi
 
-    current_file="$chosen_path"
+  [[ -z "$json_output" ]] && return
 
-    if [[ "$file_type" == "package.json" ]]; then
-      dependencies=$(echo "$json_output" | jq '.dependencies // {}')
-      dev_dependencies=$(echo "$json_output" | jq '.devDependencies // {}')
-      peer_dependencies=$(echo "$json_output" | jq '.peerDependencies // {}')
-      resolutions=$(echo "$json_output" | jq '.resolutions // {}')
-    else
-      lock_deps=$(echo "$json_output" | jq '.dependencies // {}')
-      packages=$(echo "$json_output" | jq '.packages // {}')
-      v3_deps=$(echo "$packages" | jq -c 'to_entries
-        | map(select(.key|startswith("node_modules/"))
-            | {name: (.key|sub("^node_modules/";"")),
-                version: (.value.version // .value.resolved // (if (.value|type)=="string" then .value else null end))}
-          )
-        | map(select(.version!=null))
-        | map({(.name): .version})
-        | add' 2>/dev/null || echo '{}')
-      lock_deps_simple=$(echo "$lock_deps" | jq -c 'to_entries
-        | map({(.key): (if (.value|type)=="object" then .value.version else .value end)})
-        | add' 2>/dev/null || echo '{}')
-      dependencies=$(jq -n --argjson a "$lock_deps_simple" --argjson b "$v3_deps" '$a + $b' 2>/dev/null || echo '{}')
-      dev_dependencies='{}'
-      peer_dependencies='{}'
-      resolutions='{}'
-    fi
+  current_file="$chosen_path"
 
-    # Build per-file entry and append
-    repo_file_entry=$(jq -n \
-      --arg repo "$repo_name" \
-      --arg file "$current_file" \
-      --arg fileType "$file_type" \
-      --arg branch "$default_branch" \
-      --argjson dependencies "$dependencies" \
-      --argjson devDependencies "$dev_dependencies" \
-      --argjson peerDependencies "$peer_dependencies" \
-      --argjson resolutions "$resolutions" \
-      '{repository: $repo, file: $file, fileType: $fileType, branch: $branch, dependencies: $dependencies, devDependencies: $devDependencies, peerDependencies: $peerDependencies, resolutions: $resolutions}')
+  if [[ "$file_type" == "package.json" ]]; then
+    dependencies=$(echo "$json_output" | jq '.dependencies // {}')
+    dev_dependencies=$(echo "$json_output" | jq '.devDependencies // {}')
+    peer_dependencies=$(echo "$json_output" | jq '.peerDependencies // {}')
+    resolutions=$(echo "$json_output" | jq '.resolutions // {}')
+  elif [[ "$file_type" == "yarn.lock" ]]; then
+    # Process yarn.lock converted to JSON
+    dependencies=$(echo "$json_output")
+    dev_dependencies='{}'
+    peer_dependencies='{}'
+    resolutions='{}'
+  else
+    lock_deps=$(echo "$json_output" | jq '.dependencies // {}')
+    packages=$(echo "$json_output" | jq '.packages // {}')
+    v3_deps=$(echo "$packages" | jq -c 'to_entries
+      | map(select(.key|startswith("node_modules/"))
+          | {name: (.key|sub("^node_modules/";"")),
+              version: (.value.version // .value.resolved // (if (.value|type)=="string" then .value else null end))}
+        )
+      | map(select(.version!=null))
+      | map({(.name): .version})
+      | add' 2>/dev/null || echo '{}')
+    lock_deps_simple=$(echo "$lock_deps" | jq -c 'to_entries
+      | map({(.key): (if (.value|type)=="object" then .value.version else .value end)})
+      | add' 2>/dev/null || echo '{}')
+    dependencies=$(jq -n --argjson a "$lock_deps_simple" --argjson b "$v3_deps" '$a + $b' 2>/dev/null || echo '{}')
+    dev_dependencies='{}'
+    peer_dependencies='{}'
+    resolutions='{}'
+  fi
 
-    if [[ -z "$per_repo_deps" || "$per_repo_deps" == "null" ]]; then
-      per_repo_deps='[]'
-    fi
-    per_repo_deps=$(printf '%s\n%s\n' "$per_repo_deps" "$repo_file_entry" | jq -s '.[0] + [ .[1] ]')
-  }
+  # Build per-file entry and append
+  repo_file_entry=$(jq -n \
+    --arg repo "$repo_name" \
+    --arg file "$current_file" \
+    --arg fileType "$file_type" \
+    --arg branch "$default_branch" \
+    --argjson dependencies "$dependencies" \
+    --argjson devDependencies "$dev_dependencies" \
+    --argjson peerDependencies "$peer_dependencies" \
+    --argjson resolutions "$resolutions" \
+    '{repository: $repo, file: $file, fileType: $fileType, branch: $branch, dependencies: $dependencies, devDependencies: $devDependencies, peerDependencies: $peerDependencies, resolutions: $resolutions}')
+
+  if [[ -z "$per_repo_deps" || "$per_repo_deps" == "null" ]]; then
+    per_repo_deps='[]'
+  fi
+  per_repo_deps=$(printf '%s\n%s\n' "$per_repo_deps" "$repo_file_entry" | jq -s '.[0] + [ .[1] ]')
+}
 
   # Initialize per-repo dependencies
   per_repo_deps='[]'
-  
-  # Process directories with lockfiles first (preferred)
+  # Process directories with yarn.lock first (highest precedence)
+  for d in "${!has_yarn[@]}"; do
+    if [[ "$d" == "." ]]; then
+      chosen="yarn.lock"
+    else
+      chosen="${d}/yarn.lock"
+    fi
+    [[ -n "${path_exists[$chosen]}" ]] || continue
+    process_file "$chosen"
+  done
+
+  # Then process package-lock.json for directories that don't have a yarn.lock
   for d in "${!has_lock[@]}"; do
+    [[ -n "${has_yarn[$d]}" ]] && continue
     if [[ "$d" == "." ]]; then
       chosen="package-lock.json"
     else
       chosen="${d}/package-lock.json"
     fi
-    # Skip if this path does not actually exist in this repo's tree
     [[ -n "${path_exists[$chosen]}" ]] || continue
     process_file "$chosen"
   done
 
-  # Then process package.json files for directories that don't have a lockfile
+  # Finally process package.json for directories that have neither yarn.lock nor package-lock.json
   for d in "${!has_pkg[@]}"; do
+    [[ -n "${has_yarn[$d]}" ]] && continue
     [[ -n "${has_lock[$d]}" ]] && continue
     if [[ "$d" == "." ]]; then
       chosen="package.json"
     else
       chosen="${d}/package.json"
     fi
-    # Skip if this path does not actually exist in this repo's tree
     [[ -n "${path_exists[$chosen]}" ]] || continue
     process_file "$chosen"
   done
