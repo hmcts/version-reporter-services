@@ -30,6 +30,7 @@ fi
 store_documents() {
   echo "$documents" | python3 ./save-to-cosmos.py
   wait $!
+}
 
 yarn_to_json() {
   echo "$1" | python3 ./yarnlock-to-json.py
@@ -39,7 +40,8 @@ yarn_to_json() {
 # Process npm repos
 # ---------------------------------------------------------------------------
 echo "Fetching npm repos"
-npm_repos=$(gh api -H "Accept: application/vnd.github+json" /orgs/hmcts/repos --paginate --jq '.[] | {name: .name, default_branch: .default_branch}' | jq -c '.' | sort -u)
+npm_repos='{"default_branch":"master","name":"sds-toffee-frontend"}'
+# npm_repos=$(gh api -H "Accept: application/vnd.github+json" /orgs/hmcts/repos --paginate --jq '.[] | {name: .name, default_branch: .default_branch}' | jq -c '.' | sort -u)
 npm_repos=$(echo "$npm_repos" | sort -u)
 
 [[ "$npm_repos" == "" ]] && echo "Job process existed: Cannot get npm repositories." && exit 0
@@ -102,7 +104,6 @@ process_repo() {
     else
       file_type="package.json"
     fi
-  }
 
   encoded_filepath=$(jq -rn --arg p "$chosen_path" '$p|@uri')
   json_output=$(gh api \
