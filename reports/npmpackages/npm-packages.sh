@@ -13,9 +13,9 @@
 #############################################################################
 
 # uncomment this for troubleshooting the script output
-logfile=$$.log
-exec > output/output.txt 2>&1
-set -x
+# logfile=$$.log
+# exec > output/output.txt 2>&1
+# set -x
 
 if [ -z $GH_TOKEN ]; then
   echo "No GitHub token set. Exiting..."
@@ -40,7 +40,7 @@ yarn_to_json() {
 # Process npm repos
 # ---------------------------------------------------------------------------
 echo "Fetching npm repos"
-npm_repos='{"default_branch":"master","name":"sds-toffee-frontend"}'
+npm_repos='{"default_branch":"master","name":"CCD-Functional-Tests-Central"}'
 # npm_repos=$(gh api -H "Accept: application/vnd.github+json" /orgs/hmcts/repos --paginate --jq '.[] | {name: .name, default_branch: .default_branch}' | jq -c '.' | sort -u)
 npm_repos=$(echo "$npm_repos" | sort -u)
 
@@ -76,7 +76,7 @@ process_repo() {
     return
   fi
   
-  body=$(printf '%s' "$filepaths" | sed '$d' | jq -r '.tree[].path | select(test("(^|/)package(-lock)?\\.json$") and (test("(^|/)node_modules(/|$)") | not))')
+  body=$(printf '%s' "$filepaths" | sed '$d' | jq -r '.tree[].path | select(test("(^|/)(package(-lock)?\\.json|yarn\\.lock)$") and (test("(^|/)node_modules(/|$)") | not))')
 
   # Convert filepaths to array
   readarray -t filepaths_array <<< "$body"
@@ -125,6 +125,12 @@ process_repo() {
     dev_dependencies=$(echo "$json_output" | jq '.devDependencies // {}')
     peer_dependencies=$(echo "$json_output" | jq '.peerDependencies // {}')
     resolutions=$(echo "$json_output" | jq '.resolutions // {}')
+  elif [[ "$file_type" == "yarn.lock" ]]; then
+    # Process yarn.lock converted to JSON
+    dependencies=$(echo "$json_output")
+    dev_dependencies='{}'
+    peer_dependencies='{}'
+    resolutions='{}'
   else
     lock_deps=$(echo "$json_output" | jq '.dependencies // {}')
     packages=$(echo "$json_output" | jq '.packages // {}')
@@ -165,28 +171,38 @@ process_repo() {
 
   # Initialize per-repo dependencies
   per_repo_deps='[]'
-  
-  # Process directories with lockfiles first (preferred)
+  # Process directories with yarn.lock first (highest precedence)
+  for d in "${!has_yarn[@]}"; do
+    if [[ "$d" == "." ]]; then
+      chosen="yarn.lock"
+    else
+      chosen="${d}/yarn.lock"
+    fi
+    [[ -n "${path_exists[$chosen]}" ]] || continue
+    process_file "$chosen"
+  done
+
+  # Then process package-lock.json for directories that don't have a yarn.lock
   for d in "${!has_lock[@]}"; do
+    [[ -n "${has_yarn[$d]}" ]] && continue
     if [[ "$d" == "." ]]; then
       chosen="package-lock.json"
     else
       chosen="${d}/package-lock.json"
     fi
-    # Skip if this path does not actually exist in this repo's tree
     [[ -n "${path_exists[$chosen]}" ]] || continue
     process_file "$chosen"
   done
 
-  # Then process package.json files for directories that don't have a lockfile
+  # Finally process package.json for directories that have neither yarn.lock nor package-lock.json
   for d in "${!has_pkg[@]}"; do
+    [[ -n "${has_yarn[$d]}" ]] && continue
     [[ -n "${has_lock[$d]}" ]] && continue
     if [[ "$d" == "." ]]; then
       chosen="package.json"
     else
       chosen="${d}/package.json"
     fi
-    # Skip if this path does not actually exist in this repo's tree
     [[ -n "${path_exists[$chosen]}" ]] || continue
     process_file "$chosen"
   done

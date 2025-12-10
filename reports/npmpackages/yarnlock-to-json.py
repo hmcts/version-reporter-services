@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 """Convert a Yarn v1 `yarn.lock` file into JSON.
 
-Usage: yarnlock_to_json.py input-yarn-lock
+Usage: yarnlock_to_json.py [--debug] [input-yarn-lock]
+If no file is provided, reads from stdin.
+--debug: Enable debug output to stderr
 """
 import sys
 import json
 from pathlib import Path
+
+
+def clean_key(key):
+    """Remove escaped quotes and other unnecessary escaping from keys"""
+    return key.replace('\\"', '"').replace('\\\\', '\\')
 
 
 def parse_yarn_lock(lines):
@@ -19,7 +26,9 @@ def parse_yarn_lock(lines):
         if not current_keys or current is None:
             return
         for k in current_keys:
-            result[k] = current
+            # Clean up escaped quotes in keys before storing
+            clean_k = clean_key(k)
+            result[clean_k] = current
 
     i = 0
     while i < len(lines):
@@ -37,7 +46,7 @@ def parse_yarn_lock(lines):
             header = line.strip()
             if header.endswith(':'):
                 header = header[:-1]
-            keys = [h.strip() for h in header.split(',')]
+            keys = [clean_key(h.strip()) for h in header.split(',')]
             current_keys = keys
             current = {}
             current_section = None
@@ -86,21 +95,80 @@ def parse_yarn_lock(lines):
 
 
 def main(argv):
-    if len(argv) != 2:
-        print("Usage: yarnlock_to_json.py input-yarn-lock", file=sys.stderr)
-        return 2
+    # Parse arguments for debug flag and input file
+    debug = False
+    input_file = None
+    
+    for arg in argv[1:]:
+        if arg == '--debug':
+            debug = True
+        elif not input_file:
+            input_file = arg
+        else:
+            print("Usage: yarnlock_to_json.py [--debug] [input-yarn-lock]", file=sys.stderr)
+            print("If no file is provided, reads from stdin.", file=sys.stderr)
+            return 2
 
-    infile = Path(argv[1])
+    if input_file:
+        # Read from file
+        infile = Path(input_file)
+        if not infile.is_file():
+            print(f"Error: input file '{infile}' not found.", file=sys.stderr)
+            return 3
+        text = infile.read_text(encoding='utf-8').splitlines(True)
+    else:
+        # Read from stdin
+        text = sys.stdin.read().splitlines(True)
 
-    if not infile.is_file():
-        print(f"Error: input file '{infile}' not found.", file=sys.stderr)
-        return 3
+    # Handle empty input
+    if not text or not any(line.strip() for line in text):
+        print("{}")
+        return 0
 
-    text = infile.read_text(encoding='utf-8').splitlines(True)
     parsed = parse_yarn_lock(text)
     
-    # Print JSON to stdout so it can be captured by bash
-    print(json.dumps(parsed, indent=2, sort_keys=True))
+    # Debug: Print parsed data info to stderr (only if debug flag is set)
+    if debug:
+        print(f"DEBUG: Parsed {len(parsed)} entries", file=sys.stderr)
+        if parsed:
+            sample_key = list(parsed.keys())[0]
+            sample_value = parsed[sample_key]
+            print(f"DEBUG: Sample key: {sample_key}", file=sys.stderr)
+            print(f"DEBUG: Sample value: {sample_value}", file=sys.stderr)
+            print(f"DEBUG: Value type: {type(sample_value)}", file=sys.stderr)
+    
+    # Extract only package name and version to reduce data size
+    simplified = {}
+    for key, value in parsed.items():
+        # Extract package name (everything before the first @)
+        package_name = key.split('@')[0] if '@' in key else key
+        # Remove leading/trailing quotes and backslashes from package name
+        package_name = package_name.strip(' "\'\\')
+        
+        # Skip the _metadata package
+        if package_name == '_metadata':
+            continue
+            
+        # Extract version from the value object (try both 'version' and 'version:' keys)
+        if isinstance(value, dict):
+            version = value.get('version', '') or value.get('version:', '')
+        else:
+            version = str(value)
+        
+        # Debug: Print extraction info for first few entries (only if debug flag is set)
+        if debug and len(simplified) < 3:
+            print(f"DEBUG: Processing key='{key}' -> name='{package_name}', version='{version}'", file=sys.stderr)
+        
+        # Only include if we have both name and version
+        if package_name and version:
+            simplified[package_name] = version
+    
+    # Debug: Print final count (only if debug flag is set)
+    if debug:
+        print(f"DEBUG: Simplified to {len(simplified)} entries", file=sys.stderr)
+    
+    # Print simplified JSON to stdout
+    print(json.dumps(simplified, indent=2, sort_keys=True))
     return 0
 
 if __name__ == '__main__':
