@@ -30,12 +30,16 @@ fi
 store_documents() {
   echo "$documents" | python3 ./save-to-cosmos.py
   wait $!
+
+yarn_to_json() {
+  echo "$1" | python3 ./yarnlock-to-json.py
 }
 
 # ---------------------------------------------------------------------------
 # Process npm repos
 # ---------------------------------------------------------------------------
 echo "Fetching npm repos"
+echo $npm_repos
 npm_repos=$(gh api -H "Accept: application/vnd.github+json" /orgs/hmcts/repos --paginate --jq '.[] | {name: .name, default_branch: .default_branch}' | jq -c '.' | sort -u)
 npm_repos=$(echo "$npm_repos" | sort -u)
 
@@ -75,81 +79,89 @@ process_repo() {
 
   # Convert filepaths to array
   readarray -t filepaths_array <<< "$body"
-  # Reset per-repo associative arrays and build maps of directories that contain package.json or package-lock.json
-  unset has_lock has_pkg path_exists 2>/dev/null || true
-  declare -A has_lock has_pkg path_exists
+  # Reset per-repo associative arrays and build maps of directories that contain package.json, package-lock.json, or yarn.lock
+  unset has_lock has_yarn has_pkg path_exists 2>/dev/null || true
+  declare -A has_lock has_yarn has_pkg path_exists
   for f in "${filepaths_array[@]}"; do
     [[ -z "$f" ]] && continue
     path_exists["$f"]=1
     d=$(dirname "$f")
     case "$f" in
       */package-lock.json|package-lock.json) has_lock["$d"]=1 ;;
+      */yarn.lock|yarn.lock) has_yarn["$d"]=1 ;;
       */package.json|package.json) has_pkg["$d"]=1 ;;
     esac
   done
 
-  # Helper: process one chosen path (either package-lock.json or package.json)
+  # Helper: process one chosen path (either package-lock.json, yarn.lock, or package.json)
   process_file() {
     chosen_path="$1"
     if [[ "$chosen_path" == *"package-lock.json" ]]; then
       file_type="package-lock.json"
+    elif [[ "$chosen_path" == *"yarn.lock" ]]; then
+      file_type="yarn.lock"
     else
       file_type="package.json"
     fi
-
-    encoded_filepath=$(jq -rn --arg p "$chosen_path" '$p|@uri')
-    json_output=$(gh api \
-      -H "Accept: application/vnd.github+json" \
-      -H "X-GitHub-Api-Version: 2022-11-28" \
-      "/repos/hmcts/${repo_name}/contents/${encoded_filepath}" 2>/dev/null \
-      | jq -r '.content' | base64 --decode 2>/dev/null || echo '')
-
-    [[ -z "$json_output" ]] && return
-
-    current_file="$chosen_path"
-
-    if [[ "$file_type" == "package.json" ]]; then
-      dependencies=$(echo "$json_output" | jq '.dependencies // {}')
-      dev_dependencies=$(echo "$json_output" | jq '.devDependencies // {}')
-      peer_dependencies=$(echo "$json_output" | jq '.peerDependencies // {}')
-      resolutions=$(echo "$json_output" | jq '.resolutions // {}')
-    else
-      lock_deps=$(echo "$json_output" | jq '.dependencies // {}')
-      packages=$(echo "$json_output" | jq '.packages // {}')
-      v3_deps=$(echo "$packages" | jq -c 'to_entries
-        | map(select(.key|startswith("node_modules/"))
-            | {name: (.key|sub("^node_modules/";"")),
-                version: (.value.version // .value.resolved // (if (.value|type)=="string" then .value else null end))}
-          )
-        | map(select(.version!=null))
-        | map({(.name): .version})
-        | add' 2>/dev/null || echo '{}')
-      lock_deps_simple=$(echo "$lock_deps" | jq -c 'to_entries
-        | map({(.key): (if (.value|type)=="object" then .value.version else .value end)})
-        | add' 2>/dev/null || echo '{}')
-      dependencies=$(jq -n --argjson a "$lock_deps_simple" --argjson b "$v3_deps" '$a + $b' 2>/dev/null || echo '{}')
-      dev_dependencies='{}'
-      peer_dependencies='{}'
-      resolutions='{}'
-    fi
-
-    # Build per-file entry and append
-    repo_file_entry=$(jq -n \
-      --arg repo "$repo_name" \
-      --arg file "$current_file" \
-      --arg fileType "$file_type" \
-      --arg branch "$default_branch" \
-      --argjson dependencies "$dependencies" \
-      --argjson devDependencies "$dev_dependencies" \
-      --argjson peerDependencies "$peer_dependencies" \
-      --argjson resolutions "$resolutions" \
-      '{repository: $repo, file: $file, fileType: $fileType, branch: $branch, dependencies: $dependencies, devDependencies: $devDependencies, peerDependencies: $peerDependencies, resolutions: $resolutions}')
-
-    if [[ -z "$per_repo_deps" || "$per_repo_deps" == "null" ]]; then
-      per_repo_deps='[]'
-    fi
-    per_repo_deps=$(printf '%s\n%s\n' "$per_repo_deps" "$repo_file_entry" | jq -s '.[0] + [ .[1] ]')
   }
+
+  encoded_filepath=$(jq -rn --arg p "$chosen_path" '$p|@uri')
+  json_output=$(gh api \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    "/repos/hmcts/${repo_name}/contents/${encoded_filepath}" 2>/dev/null \
+    | jq -r '.content' | base64 --decode 2>/dev/null || echo '')
+
+  if [[ "$file_type" == "yarn.lock" ]]; then
+    json_output=$(yarn_to_json "$json_output")
+  fi
+
+  [[ -z "$json_output" ]] && return
+
+  current_file="$chosen_path"
+
+  if [[ "$file_type" == "package.json" ]]; then
+    dependencies=$(echo "$json_output" | jq '.dependencies // {}')
+    dev_dependencies=$(echo "$json_output" | jq '.devDependencies // {}')
+    peer_dependencies=$(echo "$json_output" | jq '.peerDependencies // {}')
+    resolutions=$(echo "$json_output" | jq '.resolutions // {}')
+  else
+    lock_deps=$(echo "$json_output" | jq '.dependencies // {}')
+    packages=$(echo "$json_output" | jq '.packages // {}')
+    v3_deps=$(echo "$packages" | jq -c 'to_entries
+      | map(select(.key|startswith("node_modules/"))
+          | {name: (.key|sub("^node_modules/";"")),
+              version: (.value.version // .value.resolved // (if (.value|type)=="string" then .value else null end))}
+        )
+      | map(select(.version!=null))
+      | map({(.name): .version})
+      | add' 2>/dev/null || echo '{}')
+    lock_deps_simple=$(echo "$lock_deps" | jq -c 'to_entries
+      | map({(.key): (if (.value|type)=="object" then .value.version else .value end)})
+      | add' 2>/dev/null || echo '{}')
+    dependencies=$(jq -n --argjson a "$lock_deps_simple" --argjson b "$v3_deps" '$a + $b' 2>/dev/null || echo '{}')
+    dev_dependencies='{}'
+    peer_dependencies='{}'
+    resolutions='{}'
+  fi
+
+  # Build per-file entry and append
+  repo_file_entry=$(jq -n \
+    --arg repo "$repo_name" \
+    --arg file "$current_file" \
+    --arg fileType "$file_type" \
+    --arg branch "$default_branch" \
+    --argjson dependencies "$dependencies" \
+    --argjson devDependencies "$dev_dependencies" \
+    --argjson peerDependencies "$peer_dependencies" \
+    --argjson resolutions "$resolutions" \
+    '{repository: $repo, file: $file, fileType: $fileType, branch: $branch, dependencies: $dependencies, devDependencies: $devDependencies, peerDependencies: $peerDependencies, resolutions: $resolutions}')
+
+  if [[ -z "$per_repo_deps" || "$per_repo_deps" == "null" ]]; then
+    per_repo_deps='[]'
+  fi
+  per_repo_deps=$(printf '%s\n%s\n' "$per_repo_deps" "$repo_file_entry" | jq -s '.[0] + [ .[1] ]')
+}
 
   # Initialize per-repo dependencies
   per_repo_deps='[]'
@@ -272,6 +284,6 @@ documents=$(echo "${documents:-[]}" | jq -c 'to_entries | map(.value + {id: ((.k
 
 # Pass documents to python for database storage
 echo "Send documents for storage"
-store_documents "$documents"
+# store_documents "$documents"
 
 echo "Job process completed"
