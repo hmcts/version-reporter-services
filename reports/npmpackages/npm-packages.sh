@@ -13,9 +13,9 @@
 #############################################################################
 
 # uncomment this for troubleshooting the script output
-# logfile=$$.log
-# exec > output/output.txt 2>&1
-# set -x
+logfile=$$.log
+exec > output/output.txt 2>&1
+set -x
 
 if [ -z $GH_TOKEN ]; then
   echo "No GitHub token set. Exiting..."
@@ -39,7 +39,6 @@ yarn_to_json() {
 # Process npm repos
 # ---------------------------------------------------------------------------
 echo "Fetching npm repos"
-echo $npm_repos
 npm_repos=$(gh api -H "Accept: application/vnd.github+json" /orgs/hmcts/repos --paginate --jq '.[] | {name: .name, default_branch: .default_branch}' | jq -c '.' | sort -u)
 npm_repos=$(echo "$npm_repos" | sort -u)
 
