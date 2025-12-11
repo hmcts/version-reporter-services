@@ -36,7 +36,7 @@ variables:
   - name: acrResourceGroup
     value: "rpe-acr-prod-rg"
   - name: acrName
-    value: "hmctspublic"
+    value: "hmctsprod"
   - name: acrServiceConnection
     value: "DCD-CNP-Prod"
   - name: acrRepository
