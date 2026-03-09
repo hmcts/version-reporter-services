@@ -183,9 +183,9 @@ stages:
               component: "versionreporting"
               terraformInitSubscription: ${{ variables.terraformInitSubscription }}
               tfVarsFile: NULL
-              initCommandOptions: >
+              initCommandOptions: >-
                 -reconfigure
-              planCommandOptions: >
+              planCommandOptions: >-
                 -compact-warnings
                 -lock-timeout=30s
   
@@ -211,9 +211,9 @@ stages:
                 component: "managedidentity"
                 terraformInitSubscription: ${{ variables.terraformInitSubscription }}
                 tfVarsFile: NULL
-                initCommandOptions: >
+                initCommandOptions: >-
                   -reconfigure
-                planCommandOptions: >
+                planCommandOptions: >-
                   -compact-warnings
                   -lock-timeout=30s
 
