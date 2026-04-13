@@ -1,6 +1,7 @@
 import os
 import datetime
 from azure.storage.blob import BlobServiceClient
+from azure.identity import DefaultAzureCredential
 from utility import get_headers_file
 
 
@@ -13,9 +14,8 @@ class Storage:
     def __init__(self):
         self.account_url = os.getenv("AZURE_STORAGE_URL")
         self.container_name = os.getenv("AZURE_STORAGE_CONTAINER")
-        self.shared_access_key = os.getenv("AZURE_STORAGE_ACCESS_KEY")
-        self.blob_service_client = BlobServiceClient(self.account_url, credential=self.shared_access_key)
-        print("Authentication with access key successful")
+        self.blob_service_client = BlobServiceClient(self.account_url, credential=DefaultAzureCredential())
+        print("Authentication with workload identity successful")
 
     def get_blob_service_client(self):
         return self.blob_service_client
