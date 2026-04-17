@@ -10,7 +10,6 @@ from azure.identity.aio import DefaultAzureCredential
 
 # Environment variables passed in via sds flux configuration
 endpoint = os.getenv("COSMOS_DB_URI")
-key = os.getenv("COSMOS_KEY")
 database_name = os.getenv("COSMOS_DB_NAME", "reports")
 container_name = os.getenv("COSMOS_DB_CONTAINER", "cveinfo")
 
