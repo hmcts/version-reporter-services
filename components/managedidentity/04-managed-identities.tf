@@ -43,11 +43,11 @@ data "azurerm_cosmosdb_account" "version_reporter" {
 
 resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
   provider            = azurerm.ptl
-  resource_group_name = data.azurerm_cosmosdb_account.version_reporter[0].resource_group_name
-  account_name        = data.azurerm_cosmosdb_account.version_reporter[0].name
-  role_definition_id  = "${data.azurerm_cosmosdb_account.version_reporter[0].id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
+  resource_group_name = data.azurerm_cosmosdb_account.version_reporter.resource_group_name
+  account_name        = data.azurerm_cosmosdb_account.version_reporter.name
+  role_definition_id  = "${data.azurerm_cosmosdb_account.version_reporter.id}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002"
   principal_id        = azurerm_user_assigned_identity.managed_identity.principal_id
-  scope               = data.azurerm_cosmosdb_account.version_reporter[0].id
+  scope               = data.azurerm_cosmosdb_account.version_reporter.id
 }
 
 data "azurerm_cosmosdb_account" "pipeline_metrics" {
