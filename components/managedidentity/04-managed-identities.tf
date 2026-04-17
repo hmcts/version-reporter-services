@@ -75,7 +75,7 @@ data "azurerm_storage_account" "finops" {
 resource "azurerm_role_assignment" "version_reporter_storage" {
   count               = var.env == "ptl" ? 1 : 0
   provider             = azurerm.ptl
-  scope                = data.azurerm_storage_account.finops.id
+  scope                = data.azurerm_storage_account.finops[0].id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
 }
