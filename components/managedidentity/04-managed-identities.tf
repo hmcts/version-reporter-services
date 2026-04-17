@@ -66,16 +66,18 @@ resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
 }
 
 data "azurerm_storage_account" "finops" {
- provider            = azurerm.ptl
- name                = "finopsdataptlsa"
- resource_group_name = "finopsdataptlrg"
+  count               = var.env == "ptl" ? 1 : 0
+  provider            = azurerm.ptl
+  name                = "finopsdataptlsa"
+  resource_group_name = "finopsdataptlrg"
 }
 
 resource "azurerm_role_assignment" "version_reporter_storage" {
- provider             = azurerm.ptl
- scope                = data.azurerm_storage_account.finops.id
- role_definition_name = "Storage Blob Data Contributor"
- principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
+  count               = var.env == "ptl" ? 1 : 0
+  provider             = azurerm.ptl
+  scope                = data.azurerm_storage_account.finops.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_user_assigned_identity.managed_identity.principal_id
 }
 
 
