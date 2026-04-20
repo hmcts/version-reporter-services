@@ -129,7 +129,7 @@ parameters:
         serviceConnection: "DCD-CFTAPPS-STG"
       - env: "sdsptl"
         dependsOn: "ptlsbox"
-        serviceConnection: "DTS-SHAREDSERVICESPTL"
+        serviceConnection: "OPS-APPROVAL-GATE-PTL-ENVS"
       - env: "ptl"
         dependsOn: "sdsptl"
         serviceConnection: "DTS-CFTPTL-INTSVC"
