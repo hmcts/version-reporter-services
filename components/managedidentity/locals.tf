@@ -4,6 +4,10 @@ locals {
   # Resolves to the key used for subscription ID lookup in mi_cft.
   mi_subscription_key = var.env == "sdsptl" ? "sdsptl-intsvc" : local.mi_environment
 
+  # Resolves to a valid environment value for the common-tags module.
+  # sdsptl is not a known environment in the module's maps, so map it to ptl.
+  ctags_environment = var.env == "sdsptl" ? "ptl" : var.env
+
   cosmosdb_name = var.sbox_metrics_cosmosdb ? "sandbox-pipeline-metrics" : "pipeline-metrics"
   cosmosdb_rg   = var.sbox_metrics_cosmosdb ? "pipelinemetrics-database-sandbox" : "pipelinemetrics-database-prod"
   cosmosdb_env  = var.sbox_metrics_cosmosdb ? "sandbox" : "prod"
