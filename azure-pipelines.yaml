@@ -41,6 +41,8 @@ variables:
     value: "DCD-CNP-Prod"
   - name: acrRepository
     value: "version-reporter-service"
+  - name: sds_ptl_mi_principal_id
+    value: ""
 
 resources:
   repositories:
@@ -125,8 +127,11 @@ parameters:
       - env: "stg"
         dependsOn: "sbox"
         serviceConnection: "DCD-CFTAPPS-STG"
-      - env: "ptl"
+      - env: "sdsptl"
         dependsOn: "ptlsbox"
+        serviceConnection: "DTS-SHAREDSERVICESPTL"
+      - env: "ptl"
+        dependsOn: "sdsptl"
         serviceConnection: "DTS-CFTPTL-INTSVC"
       - env: "prod"
         dependsOn: "stg"
@@ -198,6 +203,10 @@ stages:
           : - Managed_Identity_Infrastructure_${{ object.dependsOn }}
         - ${{ else }}:
           - Core_Infrastructure
+      ${{ if eq(object.env, 'ptl') }}:
+        variables:
+          - name: sds_ptl_mi_principal_id
+            value: $[ stageDependencies.Managed_Identity_Infrastructure_sdsptl.PlanAndApply.outputs['GetSDSMIPrincipalId.sds_ptl_mi_principal_id'] ]
       jobs:
         - job: PlanAndApply
           steps:
@@ -216,6 +225,23 @@ stages:
                 planCommandOptions: >-
                   -compact-warnings
                   -lock-timeout=30s
+                  -var "sds_ptl_mi_principal_id=$(sds_ptl_mi_principal_id)"
+            - ${{ if eq(object.env, 'sdsptl') }}:
+              - task: AzureCLI@2
+                name: GetSDSMIPrincipalId
+                displayName: 'Export SDS PTL MI principal ID'
+                condition: succeeded()
+                inputs:
+                  azureSubscription: ${{ object.serviceConnection }}
+                  scriptType: bash
+                  scriptLocation: inlineScript
+                  inlineScript: |
+                    principal_id=$(az identity show \
+                      --name monitoring-ptl-mi \
+                      --resource-group managed-identities-ptl-rg \
+                      --query principalId \
+                      --output tsv 2>/dev/null || echo "")
+                    echo "##vso[task.setvariable variable=sds_ptl_mi_principal_id;isOutput=true]$principal_id"
 
   - stage: "Reports"
     displayName: "Reports"
