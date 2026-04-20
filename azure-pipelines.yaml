@@ -130,6 +130,7 @@ parameters:
       - env: "sdsptl"
         dependsOn: "ptlsbox"
         serviceConnection: "OPS-APPROVAL-GATE-PTL-ENVS"
+        backendResourceGroupName: "azure-control-ptl-rg"
       - env: "ptl"
         dependsOn: "sdsptl"
         serviceConnection: "DTS-CFTPTL-INTSVC"
@@ -219,6 +220,7 @@ stages:
                 environment:  ${{ object.env }}
                 component: "managedidentity"
                 terraformInitSubscription: ${{ variables.terraformInitSubscription }}
+                backendResourceGroupName: ${{ object.backendResourceGroupName }}
                 tfVarsFile: NULL
                 initCommandOptions: >-
                   -reconfigure
