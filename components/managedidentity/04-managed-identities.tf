@@ -1,3 +1,19 @@
+# Handles state rename from no-count to count to avoid destroy/recreate churn on existing CFT environments
+moved {
+  from = azurerm_key_vault_access_policy.managed_identity_access_policy
+  to   = azurerm_key_vault_access_policy.managed_identity_access_policy[0]
+}
+
+moved {
+  from = azurerm_cosmosdb_sql_role_assignment.identity_contributor
+  to   = azurerm_cosmosdb_sql_role_assignment.identity_contributor[0]
+}
+
+moved {
+  from = azurerm_cosmosdb_sql_role_assignment.monitoring_mi_assignment
+  to   = azurerm_cosmosdb_sql_role_assignment.monitoring_mi_assignment[0]
+}
+
 data "azurerm_resource_group" "managed_identities" {
   provider = azurerm.managed_identity_infra_subs
   name     = "managed-identities-${local.mi_environment}-rg"
@@ -14,6 +30,7 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
 }
 
 resource "azurerm_key_vault_access_policy" "managed_identity_access_policy" {
+  count        = var.env != "sdsptl" ? 1 : 0
   provider     = azurerm.ptl
   key_vault_id = data.azurerm_key_vault.ptl.id
   object_id    = azurerm_user_assigned_identity.managed_identity.principal_id
@@ -42,6 +59,7 @@ data "azurerm_cosmosdb_account" "version_reporter" {
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "identity_contributor" {
+  count               = var.env != "sdsptl" ? 1 : 0
   provider            = azurerm.ptl
   resource_group_name = data.azurerm_cosmosdb_account.version_reporter.resource_group_name
   account_name        = data.azurerm_cosmosdb_account.version_reporter.name
@@ -57,6 +75,7 @@ data "azurerm_cosmosdb_account" "pipeline_metrics" {
 }
 
 resource "azurerm_cosmosdb_sql_role_assignment" "monitoring_mi_assignment" {
+  count               = var.env != "sdsptl" ? 1 : 0
   provider            = azurerm.pipeline-metrics
   resource_group_name = data.azurerm_cosmosdb_account.pipeline_metrics.resource_group_name
   account_name        = data.azurerm_cosmosdb_account.pipeline_metrics.name
