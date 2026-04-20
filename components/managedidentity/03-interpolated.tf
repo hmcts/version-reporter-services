@@ -10,7 +10,7 @@ locals {
 module "ctags" {
   source       = "github.com/hmcts/terraform-module-common-tags"
   builtFrom    = var.builtFrom
-  environment  = var.env
+  environment  = local.ctags_environment
   product      = var.product
   expiresAfter = var.expiresAfter
 }

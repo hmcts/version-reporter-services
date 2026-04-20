@@ -1,8 +1,16 @@
 locals {
-  mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env
-  cosmosdb_name  = var.sbox_metrics_cosmosdb ? "sandbox-pipeline-metrics" : "pipeline-metrics"
-  cosmosdb_rg    = var.sbox_metrics_cosmosdb ? "pipelinemetrics-database-sandbox" : "pipelinemetrics-database-prod"
-  cosmosdb_env   = var.sbox_metrics_cosmosdb ? "sandbox" : "prod"
+  # Resolves to the suffix used in resource group and MI names.
+  mi_environment = var.env == "ptlsbox" ? "cftsbox-intsvc" : var.env == "ptl" ? "cftptl-intsvc" : var.env == "sbox" ? "sandbox" : var.env == "stg" ? "aat" : var.env == "dev" ? "preview" : var.env == "test" ? "perftest" : var.env == "sdsptl" ? "ptl" : var.env
+  # Resolves to the key used for subscription ID lookup in mi_cft.
+  mi_subscription_key = var.env == "sdsptl" ? "sdsptl-intsvc" : local.mi_environment
+
+  # Resolves to a valid environment value for the common-tags module.
+  # sdsptl is not a known environment in the module's maps, so map it to ptl.
+  ctags_environment = var.env == "sdsptl" ? "ptl" : var.env
+
+  cosmosdb_name = var.sbox_metrics_cosmosdb ? "sandbox-pipeline-metrics" : "pipeline-metrics"
+  cosmosdb_rg   = var.sbox_metrics_cosmosdb ? "pipelinemetrics-database-sandbox" : "pipelinemetrics-database-prod"
+  cosmosdb_env  = var.sbox_metrics_cosmosdb ? "sandbox" : "prod"
 
   cosmos_account = {
     sandbox = {
@@ -47,6 +55,10 @@ locals {
     # DTS-CFTPTL-INTSVC
     cftptl-intsvc = {
       subscription_id = "1baf5470-1c3e-40d3-a6f7-74bfbce4b348"
+    }
+    # DTS-SHAREDSERVICESPTL
+    sdsptl-intsvc = {
+      subscription_id = "6c4d2513-a873-41b4-afdd-b05a33206631"
     }
   }
 }
