@@ -4,9 +4,9 @@ locals {
   # Resolves to the key used for subscription ID lookup in mi_cft.
   mi_subscription_key = var.env == "sdsptl" ? "sdsptl-intsvc" : local.mi_environment
 
-  cosmosdb_name  = var.sbox_metrics_cosmosdb ? "sandbox-pipeline-metrics" : "pipeline-metrics"
-  cosmosdb_rg    = var.sbox_metrics_cosmosdb ? "pipelinemetrics-database-sandbox" : "pipelinemetrics-database-prod"
-  cosmosdb_env   = var.sbox_metrics_cosmosdb ? "sandbox" : "prod"
+  cosmosdb_name = var.sbox_metrics_cosmosdb ? "sandbox-pipeline-metrics" : "pipeline-metrics"
+  cosmosdb_rg   = var.sbox_metrics_cosmosdb ? "pipelinemetrics-database-sandbox" : "pipelinemetrics-database-prod"
+  cosmosdb_env  = var.sbox_metrics_cosmosdb ? "sandbox" : "prod"
 
   cosmos_account = {
     sandbox = {
