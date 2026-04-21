@@ -4,7 +4,7 @@ from json import loads, dumps
 import azure.mgmt.resourcegraph as arg
 import pandas as pd
 from azure.identity import DefaultAzureCredential
-from azure.mgmt.resource import SubscriptionClient
+from azure.mgmt.resource.subscriptions import SubscriptionClient
 from msgraph.generated.models.o_data_errors.o_data_error import ODataError
 
 from utility import remove_moj_subscriptions, get_query
