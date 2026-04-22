@@ -1,19 +1,3 @@
-# Handles state rename from no-count to count to avoid destroy/recreate churn on existing CFT environments
-moved {
-  from = azurerm_key_vault_access_policy.managed_identity_access_policy
-  to   = azurerm_key_vault_access_policy.managed_identity_access_policy[0]
-}
-
-moved {
-  from = azurerm_cosmosdb_sql_role_assignment.identity_contributor
-  to   = azurerm_cosmosdb_sql_role_assignment.identity_contributor[0]
-}
-
-moved {
-  from = azurerm_cosmosdb_sql_role_assignment.monitoring_mi_assignment
-  to   = azurerm_cosmosdb_sql_role_assignment.monitoring_mi_assignment[0]
-}
-
 data "azurerm_resource_group" "managed_identities" {
   provider = azurerm.managed_identity_infra_subs
   name     = "managed-identities-${local.mi_environment}-rg"
