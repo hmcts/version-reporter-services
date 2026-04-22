@@ -9,7 +9,6 @@ from datetime import date
 from datetime import datetime
 from urllib.parse import urljoin
 from azure.cosmos import CosmosClient, exceptions
-from azure.identity import DefaultAzureCredential
 
 # Environment variables passed in via sds flux configuration
 endpoint = os.environ.get("COSMOS_DB_URI", None)

@@ -6,7 +6,6 @@ import logging
 
 from azure.cosmos import exceptions
 from azure.cosmos.aio import CosmosClient
-from azure.identity.aio import DefaultAzureCredential
 
 # Environment variables passed in via sds flux configuration
 endpoint = os.getenv("COSMOS_DB_URI")
@@ -25,7 +24,7 @@ def get_formatted_time():
 
 async def add_batch(batch):
     try:
-        async with CosmosClient(url=endpoint, credential=DefaultAzureCredential()) as client:
+        async with CosmosClient(url=endpoint, credential=key) as client:
             database = client.get_database_client(database_name)
             container = database.get_container_client(container_name)
 
