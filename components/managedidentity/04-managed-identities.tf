@@ -1,18 +1,3 @@
-moved {
-  from = azurerm_key_vault_access_policy.managed_identity_access_policy[0]
-  to   = azurerm_key_vault_access_policy.managed_identity_access_policy
-}
-
-moved {
-  from = azurerm_cosmosdb_sql_role_assignment.identity_contributor[0]
-  to   = azurerm_cosmosdb_sql_role_assignment.identity_contributor
-}
-
-moved {
-  from = azurerm_cosmosdb_sql_role_assignment.monitoring_mi_assignment[0]
-  to   = azurerm_cosmosdb_sql_role_assignment.monitoring_mi_assignment
-}
-
 data "azurerm_resource_group" "managed_identities" {
   provider = azurerm.managed_identity_infra_subs
   name     = "managed-identities-${local.mi_environment}-rg"
