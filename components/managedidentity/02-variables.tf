@@ -37,9 +37,3 @@ variable "sbox_metrics_cosmosdb" {
   type        = bool
   default     = false
 }
-
-variable "sds_ptl_mi_principal_id" {
-  description = "Principal ID of the SDS PTL managed identity. Set by the pipeline from the sdsptl stage output. When non-empty, role assignments for the SDS MI are created in this (ptl) run."
-  type        = string
-  default     = ""
-}
