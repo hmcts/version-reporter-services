@@ -90,6 +90,10 @@ def flux_latest_version():
     response = requests.get(url)
     data = response.json()
 
+    if not isinstance(data, list):
+        logging.error("Unexpected response from the FluxCD tags API: %s", data)
+        return None
+
     # Filter out alpha versions and get the latest version
     latest_non_alpha_versions = [item for item in data if 'alpha' not in item['name'].lower()]
     if latest_non_alpha_versions:

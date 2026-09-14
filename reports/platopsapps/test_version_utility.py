@@ -1,5 +1,6 @@
 import pytest
 import re
+from unittest.mock import Mock, patch
 from version_utility import flux_latest_version, camunda_latest_version, docmosis_latest_version, compare_versions, get_semvar, get_major_version, get_minor_version, get_patch_version
 
 def test_get_semvar():
@@ -38,11 +39,17 @@ def test_compare_versions_fail(caplog):
     # Check the error message
     assert "One of current_version or latest_version is not a semantic version number" in caplog.text
 
-def test_flux_latest_version():
+@patch("version_utility.requests.get")
+def test_flux_latest_version(mock_get):
     semver_regex = r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$"
+    mock_get.return_value = Mock(json=Mock(return_value=[
+        {"name": "v2.3.4-alpha.1"},
+        {"name": "v2.3.3"},
+    ]))
+
     latest_version = flux_latest_version()
 
-    assert latest_version is not None
+    assert latest_version == "2.3.3"
     assert re.match(semver_regex, latest_version), "Returned value does not match semantic version regex"
 
 def test_camunda_latest_version():
