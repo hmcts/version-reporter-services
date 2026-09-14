@@ -1,5 +1,5 @@
 module "version_reporter_key_vault" {
-  source = "github.com/hmcts/cnp-module-key-vault?ref=master"
+  source = "github.com/hmcts/cnp-module-key-vault?ref=DTSPO-31965/remove-jenkins-ptl-access"
 
   product                 = var.service_name
   env                     = var.env
