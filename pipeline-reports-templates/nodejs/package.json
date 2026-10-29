@@ -21,7 +21,7 @@
     "@testdeck/mocha": "^0.3.3",
     "@types/jest": "^30.0.0",
     "@types/redis-mock": "^0.17.0",
-    "@types/supertest": "^6.0.0",
+    "@types/supertest": "^7.0.0",
     "chai": "^5.0.0",
     "jest": "^30.0.0",
     "mocha": "^11.0.0",
